@@ -1433,7 +1433,7 @@ let CUR='home';
 const EMBED=new URLSearchParams(location.search).has('embed');
 if(EMBED)document.body.classList.add('embed');
 let OWNER=null;
-function parseHash(){const h=decodeURIComponent(location.hash.slice(1));if(!h)return null;const [v,arg]=h.split(':');const o={};if(arg){if(v==='fac')o.id=arg;else if(v==='map'){if(arg.includes(','))o.ll=arg.split(',').map(Number);else o.zone=arg}else if(v==='water')o.cetp=arg;else if(v==='river')o.river=arg;else if(v==='ngt')o.case=arg;else if(v==='lab')o.id=arg}return{v,o}}
+function parseHash(){const h=decodeURIComponent(location.hash.slice(1));if(!h)return null;const [v,arg]=h.split(':');const o={};if(arg){if(v==='fac')o.id=arg;else if(v==='map'){if(arg.includes(','))o.ll=arg.split(',').map(Number);else o.zone=arg}else if(v==='water')o.cetp=arg;else if(v==='river')o.river=arg;else if(v==='ngt')o.case=arg;else if(v==='lab')o.id=arg;else if(v==='waste'&&/^(bmw|msw)$/.test(arg))window.WASTE_PICK=arg}return{v,o}}
 function go(v,opts){
   if(EMBED&&OWNER&&v!==OWNER){if(opts&&opts.ll)opts={...opts,llStr:opts.ll.join(',')};try{parent.postMessage({eip:1,view:v,opts:opts||{}},'*')}catch(e){}return}
   goLocal(v,opts);
@@ -1858,7 +1858,8 @@ function renderWaste(){
   const flagged=HCF.filter(h=>h.flag);const div=HCF.filter(h=>h.flag.startsWith('Collected'));const missKg=div.reduce((t,h)=>t+(h.rep-h.col),0);
   const vehIss=VEH.filter(v=>v.miss||v.un);
   const totGen=ULBS.reduce((t,u)=>t+u.gen,0),totProc=ULBS.reduce((t,u)=>t+u.gen*u.proc,0);
-  const tabs=`<div class="seg" style="margin-bottom:14px"><button class="${wasteTab==='bmw'?'on':''}" onclick="wasteTab='bmw';renderWaste()">Biomedical waste</button><button class="${wasteTab==='msw'?'on':''}" onclick="wasteTab='msw';renderWaste()">Municipal solid waste</button></div>`;
+  if(window.WASTE_PICK)wasteTab=window.WASTE_PICK;
+  const tabs=window.WASTE_PICK?'':`<div class="seg" style="margin-bottom:14px"><button class="${wasteTab==='bmw'?'on':''}" onclick="wasteTab='bmw';renderWaste()">Biomedical waste</button><button class="${wasteTab==='msw'?'on':''}" onclick="wasteTab='msw';renderWaste()">Municipal solid waste</button></div>`;
   let body='';
   if(wasteTab==='bmw'){
     body=`<div class="grid g5">${kpiRow([['Healthcare facilities tracked',HCF.length,'reporting monthly'],['Facilities flagged',flagged.length,'reporting or collection mismatch','var(--red)'],['Waste unaccounted for',(missKg/1000).toFixed(1)+' t','per month, reported but not collected'],['Collection vehicles',VEH.length,'GPS-tracked'],['Route exceptions',vehIss.length,'missed or unauthorised stops this week']])}</div>
@@ -1875,7 +1876,7 @@ function renderWaste(){
      <div class="callout mt">The three largest cities account for <b>${Math.round(ULBS.slice(0,3).reduce((t,u)=>t+u.gap,0)/ULBS.reduce((t,u)=>t+u.gap,0)*100)}%</b> of the state's unprocessed waste. New processing capacity there closes most of the gap.</div><div class="src">Source: urban local body monthly returns under the Solid Waste Management Rules · illustrative</div></div>
     <div class="card"><div class="card-h"><h2>City scorecard</h2></div><table><thead><tr><th>City</th><th class="num">Collected</th><th class="num">Segregated</th><th class="num">Processed</th><th class="num">Dumpsite cleared</th></tr></thead><tbody>${ULBS.map(u=>{const c=v=>v>=.8?'var(--g700)':v>=.5?'var(--amber)':'var(--red)';return `<tr><td><b>${u.n}</b></td><td class="num" style="color:${c(u.col)}">${Math.round(u.col*100)}%</td><td class="num" style="color:${c(u.seg)}">${Math.round(u.seg*100)}%</td><td class="num" style="color:${c(u.proc)}">${Math.round(u.proc*100)}%</td><td class="num" style="color:${c(u.rem/100)}">${u.rem}%</td></tr>`}).join('')}</tbody></table></div></div>`;
   }
-  $('#wasteBody').innerHTML=`<h1>Waste &amp; BMW tracking</h1><p class="sub">Follow waste from where it is generated to where it is treated, and find where it goes missing.</p>${tabs}${body}`;
+  $('#wasteBody').innerHTML=`<h1>${window.WASTE_PICK==='bmw'?'Bio-medical waste movement tracking':window.WASTE_PICK==='msw'?'Municipal solid waste tracking':'Waste &amp; BMW tracking'}</h1><p class="sub">${window.WASTE_PICK==='bmw'?'Match what each health facility reports against what the CBWTF actually collects, and check collection vehicle routes.':'Follow waste from where it is generated to where it is treated, and find where it goes missing.'}</p>${tabs}${body}`;
 }
 
 /* ============ GRIEVANCES ============ */

@@ -220,7 +220,7 @@ function render(){const k=st.stream,s=S[k];const box=$('#wh-body');if(!box)retur
   const lvl=s.lvl||'ulb';const ulbOk=k==='all'||lvl==='ulb';
   $('#wh-ulb').disabled=!st.dist||!ulbOk;$('#wh-ulb-note').textContent=!ulbOk?`${s.short} is tracked facility-wise, so it is filtered by district`:(!st.dist?'Pick a district to filter by ULB':'');
   document.querySelectorAll('#wastehub .wh-tab').forEach(b=>b.classList.toggle('on',b.dataset.t===st.tab));
-  const tr=$('#wh-tab-tr');tr.style.display=k==='bmw'||k==='haz'?'':'none';if(st.tab==='tr'&&!(k==='bmw'||k==='haz'))st.tab='cc';
+  const tr=$('#wh-tab-tr');tr.style.display=k==='bmw'?'':'none';if(st.tab==='tr'&&k!=='bmw')st.tab='cc';
   $('#wh-title').innerHTML=`<i class="fas ${s.ic}" style="color:${s.c}"></i> ${s.name}`;$('#wh-scope').textContent=where();
   $('#wh-frame').style.display=st.tab==='tr'?'':'none';box.style.display=st.tab==='tr'?'none':'';
   if(st.tab==='tr'){const f=$('#wh-frame iframe');if(!f.getAttribute('src'))f.setAttribute('src',f.dataset.src);charts.forEach(c=>c.destroy());charts=[];return}
@@ -235,7 +235,7 @@ window.WH=WH;
 function init(){const box=document.getElementById('wastehub');if(!box)return;
   $('#wh-stream').innerHTML=['all',...STREAMS].map(k=>`<option value="${k}">${S[k].name}</option>`).join('');
   $('#wh-dist').innerHTML='<option value="">All districts (Rajasthan)</option>'+DIST.map(d=>`<option>${d}</option>`).join('');
-  $('#wh-count').textContent=`${DIST.length} districts · ${U.length} ULBs`;
+  
   $('#wh-stream').onchange=e=>WH.set({stream:e.target.value});$('#wh-dist').onchange=e=>WH.set({dist:e.target.value});$('#wh-ulb').onchange=e=>WH.set({ulb:e.target.value});
   document.querySelectorAll('#wastehub .wh-tab').forEach(b=>b.onclick=()=>WH.set({tab:b.dataset.t}));fillUlb();render()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
