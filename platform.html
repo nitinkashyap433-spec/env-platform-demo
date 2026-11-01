@@ -927,7 +927,7 @@ html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
 .rvcard:hover{border-color:#9cc9ae}.rvcard.on{border:2px solid var(--g700);background:var(--g50);padding:11px 13px}
 .rvn{font-weight:700;font-size:16px}.rvs{font-size:11.5px;color:var(--muted)}.rvb{font-size:12.5px;display:flex;align-items:center;gap:6px;margin-top:4px}.rvb i{width:10px;height:10px;border-radius:3px;display:inline-block}.rvm{font-size:12px;color:var(--muted)}
 .rvbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px}
-.rvtime{display:flex;align-items:center;gap:8px}.rvtime input{width:220px;accent-color:var(--g700)}
+.rvtime{display:flex;align-items:center;gap:8px;margin-left:auto;flex:none}.rvtime .rvtl{display:inline-block;min-width:118px;white-space:nowrap}.rvtime input{width:220px;accent-color:var(--g700)}
 .livepill{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--g700);background:var(--g100);padding:5px 12px;border-radius:20px;margin-bottom:12px}
 .livepill i{width:8px;height:8px;border-radius:50%;background:#2f8f5b;animation:rvpulse 1.6s infinite}
 .livepill.paused{color:var(--amber);background:var(--amber-bg)}.livepill.paused i{background:#e69500;animation:none}
@@ -2326,7 +2326,7 @@ function renderRiver(keepScroll){
  const sel=rv.assets.find(a=>a.id===RV.sel);
  const cards=Object.values(RIVERS2).map(r=>{const s=rvSummary(r,RH-1);const c=pcls(s.worst.b);return `<button class="rvcard ${RV.view!=='state'&&r.id===RV.river?'on':''}" onclick="rvPick('${r.id}')"><span class="rvn">${r.name}</span><span class="rvs">${r.sys}</span><span class="rvb"><i style="background:${c[2]}"></i>${c[1]} at ${esc(s.worst.n)}</span><span class="rvm">${s.failing} plant${s.failing===1?'':'s'} failing · ${r.ngt.length} NGT case${r.ngt.length===1?'':'s'}</span></button>`}).join('');
  const hrLbl=t===RH-1?'Now':new Date(TODAY.getTime()-(RH-1-t)*3600e3).toLocaleString('en-IN',{weekday:'short',hour:'2-digit',minute:'2-digit'});
- const timebar=`<span class="rvtime"><span class="small muted">Last 48 h</span><input type="range" min="0" max="${RH-1}" value="${t}" oninput="rvSetT(this.value)"><b>${hrLbl}</b>${RV.live?'':`<button class="btn sm" onclick="rvSetT(${RH-1})">Back to live</button>`}</span>`;
+ const timebar=`<span class="rvtime"><span class="small muted">Last 48 h</span><input type="range" min="0" max="${RH-1}" value="${t}" oninput="rvSetT(this.value)"><b class="rvtl">${hrLbl}</b><button class="btn sm" style="visibility:${RV.live?'hidden':'visible'}" onclick="rvSetT(${RH-1})">Back to live</button></span>`;
  const caution=`<div class="rvcaution">Schematic map. State outline and river courses are approximate and not to scale. Monitored stretches, plants and readings are illustrative. Official river geometry and station coordinates would replace these at implementation.</div>`;
  const head=`<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><h1>River monitor</h1><p class="sub" style="margin-bottom:12px">${RV.view==='state'?'Click a river on the map, or pick one below, to follow it past every plant and drain.':'Every plant and drain along the river, the water quality at each station, and where the river goes bad.'}</p></div><span class="livepill ${RV.live?'':'paused'}"><i></i>${RV.live?'Live · updated just now':'Replaying '+hrLbl}</span></div><div class="rvcards">${cards}</div>`;
  if(RV.view==='state'){
