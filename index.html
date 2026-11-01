@@ -891,6 +891,42 @@
 .table thead th{background:#f3f7f5!important;color:var(--eip-muted)!important;font-size:12px!important;font-weight:600!important;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--eip-line)!important}
 .eip-frame{background:transparent!important}
 </style>
+<style id="mobile-fix">
+@media (max-width: 992px){
+  .sidebar{position:fixed!important;top:0!important;left:-300px!important;width:282px!important;height:100vh!important;max-height:100vh!important;z-index:1200!important;transition:left .25s ease;box-shadow:6px 0 24px rgba(0,0,0,.18)!important;overflow-y:auto}
+  .sidebar.show{left:0!important}
+  .sb-dim{position:fixed;inset:0;background:rgba(10,30,20,.35);z-index:1150;display:none}
+  .sidebar.show~.sb-dim,.sb-dim.on{display:block}
+  .main-content{flex:0 0 100%!important;max-width:100%!important;width:100%!important;padding:14px 12px!important;margin:0!important}
+  .navbar>.container-fluid{flex-wrap:nowrap!important;gap:8px;padding:0 10px!important}
+  .navbar .time-display{display:none!important}
+  .navbar .logo img{max-height:46px;width:auto}
+  .header-controls{gap:8px!important}
+  .mobile-menu-btn{display:block!important;font-size:1.6rem}
+  .dashboard-title h2{font-size:22px!important}
+  .kpi-value{font-size:24px!important}
+  .eip-tabs{overflow-x:auto;flex-wrap:nowrap!important;white-space:nowrap}
+  .eip-tabs button{flex:none}
+  .wh-tabs{overflow-x:auto;flex-wrap:nowrap}.wh-tab{flex:none;padding:10px 12px}
+  .wh-rulebar a{margin-left:0}
+  .chart-header{flex-wrap:wrap;gap:6px}
+  .data-table{font-size:13px}
+  .pfoot-bar{padding:10px 14px!important}
+  table{max-width:100%}
+  .chart-container,.ranking-card,.kpi-card{overflow-x:auto}
+}
+@media (max-width: 576px){
+  .navbar-brand .header-title{display:none!important}
+  .wh-meters{grid-template-columns:1fr!important}
+  .pf-l span{font-size:12px}
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementById('sidebar');if(!sb)return;const dim=document.createElement('div');dim.className='sb-dim';document.body.appendChild(dim);
+  const sync=()=>dim.classList.toggle('on',sb.classList.contains('show')&&innerWidth<=992);new MutationObserver(sync).observe(sb,{attributes:true,attributeFilter:['class']});
+  dim.addEventListener('click',()=>sb.classList.remove('show'));
+  sb.addEventListener('click',e=>{if(e.target.closest('.nav-link')&&innerWidth<=992)sb.classList.remove('show')})});
+</script>
 </head>
 
 <body>
