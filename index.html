@@ -892,6 +892,13 @@
 .eip-frame{background:transparent!important}
 </style>
 <style id="mobile-fix">
+@media (max-width:600px){
+ .accessibility-toolbar{width:100vw!important;max-width:100vw!important;max-height:100vh;overflow-y:auto;border-radius:0!important;border-width:0!important}
+ .accessibility-controls{display:grid!important;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px!important;box-sizing:border-box}
+ .accessibility-controls .access-btn{width:auto!important;margin:0!important;padding:12px 4px!important;font-size:.95em!important}
+ .accessibility-controls span{font-size:12px!important}
+}
+
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 @media (max-width: 992px){
   .sidebar{position:fixed!important;top:0!important;left:-300px!important;width:282px!important;height:100vh!important;max-height:100vh!important;z-index:1200!important;transition:left .25s ease;box-shadow:6px 0 24px rgba(0,0,0,.18)!important;overflow-y:auto}
