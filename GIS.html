@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RSPCB — Rajasthan GIS: Pollution Hotspots & Industry Zones</title>
+
+    <!-- Bootstrap (layout) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- (Optional) MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+    <style>
+        body {
+            background: #f6f8fa;
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(14, 37, 63, 0.06);
+        }
+
+        #map {
+            height: 700px;
+            border-radius: 8px;
+        }
+
+        .legend {
+            background: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 6px 18px rgba(14, 37, 63, 0.06);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .legend i {
+            width: 14px;
+            height: 14px;
+            display: inline-block;
+            margin-right: 8px;
+            opacity: 0.9;
+        }
+
+        .topbar {
+            padding: 18px;
+        }
+    </style>
+<script>if(window.self!==window.top)document.documentElement.classList.add('in-frame');</script>
+<style>
+.in-frame body{background:transparent!important}</style>
+<script>if(window.self!==window.top){let last=0;const send=()=>{const h=Math.ceil(document.documentElement.scrollHeight);if(Math.abs(h-last)>4){last=h;parent.postMessage({eipH:h},'*')}};window.addEventListener('load',()=>{send();new ResizeObserver(send).observe(document.body)});setInterval(send,1000)}</script>
+<style>.in-frame,.in-frame body{overflow:hidden!important}</style>
+<script>/* shared accessibility engine (parent page + every embedded frame) */
+(function(){
+  const CSS=`
+html.a11y-spacing body *{letter-spacing:.08em!important;word-spacing:.16em!important}
+html.a11y-lines body *{line-height:1.9!important}
+html.a11y-links a,html.a11y-links button,html.a11y-links [onclick],html.a11y-links .nav-link,html.a11y-links [data-go]{outline:2px solid #f2c200!important;outline-offset:1px;background-color:#fff8d6!important;color:#1c2a23!important}
+html.a11y-dys body,html.a11y-dys body *{font-family:Verdana,"Comic Sans MS",Tahoma,sans-serif!important;letter-spacing:.04em}
+html.a11y-cursor,html.a11y-cursor *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l15 10-7 1 4 8-3 1-4-8-5 5z' fill='%23000' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E") 4 2,auto!important}
+html.a11y-contrast body{filter:contrast(1.35) saturate(1.25)}
+html.a11y-gray body{filter:grayscale(1)}
+html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
+`;
+  function ensureStyle(){if(document.getElementById('a11y-css'))return;const s=document.createElement('style');s.id='a11y-css';s.textContent=CSS;(document.head||document.documentElement).appendChild(s)}
+  let state={scale:1,spacing:0,lines:0,links:0,dys:0,cursor:0,contrast:0,gray:0,tts:0};
+  function apply(st){state=Object.assign({},state,st);ensureStyle();const h=document.documentElement;
+    if(window.self===window.top)h.style.zoom=state.scale===1?'':String(state.scale);
+    [['spacing','a11y-spacing'],['lines','a11y-lines'],['links','a11y-links'],['dys','a11y-dys'],['cursor','a11y-cursor'],['contrast','a11y-contrast'],['gray','a11y-gray']].forEach(([k,c])=>h.classList.toggle(c,!!state[k]));
+    if(!state.tts&&window.speechSynthesis)speechSynthesis.cancel();}
+  function speak(t){if(!state.tts||!window.speechSynthesis||!t)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.slice(0,600));u.lang='en-IN';u.rate=1;speechSynthesis.speak(u)}
+  document.addEventListener('mouseup',()=>{if(!state.tts)return;const sel=String(window.getSelection()||'').trim();if(sel)speak(sel)});
+  document.addEventListener('click',e=>{if(!state.tts)return;if(String(window.getSelection()||'').trim())return;const el=e.target.closest('h1,h2,h3,h4,p,li,td,th,button,a,.pt,.pd,.kpi,.alert');if(el)speak(el.innerText)});
+  window.addEventListener('message',e=>{if(e.data&&e.data.a11y)apply(e.data.a11y)});
+  window.EIP_A11Y={apply,get:()=>state};
+})();
+</script>
+<style id="eip-type">/* ===== EIP shared type system: one heading → subheading → card → KPI pattern on every screen ===== */
+:root{--eip-font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;--eip-head:#1f2d27;--eip-muted:#5d6b63;--eip-accent:#0b6b3a;--eip-line:#e3ebe6;--eip-shadow:0 2px 10px rgba(16,60,38,.06)}
+/* T1 page title · T2 subtitle · T3 card title · K1 KPI label · K2 KPI value · K3 KPI note · TH table header */
+</style>
+</head>
+
+<body>
+    <div class="container py-4">
+        <div class="topbar d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0 text-success">Rajasthan State Pollution Control Board</h4>
+                <small class="text-muted">GIS — Pollution Hotspots & Industry Zones (District view)</small>
+            </div>
+            <div class="text-end small text-muted">
+                Demo — sample data. Replace with live API/GeoJSON for production.
+            </div>
+        </div>
+
+        <div class="card p-3">
+            <div class="mb-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Map: District Hotspots & Industry Zones</strong><br>
+                    <small class="text-muted">Click a marker or polygon to see details. Toggle layers on/off.</small>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="showAllAQI">
+                        <label class="form-check-label small" for="showAllAQI">Show All District AQI</label>
+                    </div>
+                    <button id="btn-refresh" class="btn btn-sm btn-outline-primary">Refresh (sample)</button>
+                </div>
+            </div>
+
+            <div id="map"></div>
+
+            <div class="mt-3">
+                <small class="text-muted">Tip: Use the layer control (top-right) to toggle Hotspots / Industries.
+                    Integrate your API by replacing the sample GeoJSON arrays in the script.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+    <script>
+        /************************************************************************
+         * Rajasthan GIS — Pollution Hotspots (district-level) + Industry Zones
+         ************************************************************************/
+
+        // 1) Initialize map centered on Rajasthan
+        const map = L.map('map', { zoomControl: true }).setView([26.8, 73.8], 6);
+
+        // 2) Base layers
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
+        });
+
+        const baseMaps = { "OpenStreetMap": osm, "Satellite (Esri)": esriSat };
+
+        // 3) AQI color & status
+        function aqiColor(aqi) {
+            if (aqi > 300) return '#800026';
+            if (aqi > 200) return '#dc3545';
+            if (aqi > 150) return '#fd7e14';
+            if (aqi > 100) return '#ffc107';
+            if (aqi > 50) return '#20c997';
+            return '#198754';
+        }
+
+        function aqiStatus(aqi) {
+            if (aqi > 300) return 'Hazardous';
+            if (aqi > 200) return 'Very Poor';
+            if (aqi > 150) return 'Poor';
+            if (aqi > 100) return 'Moderate';
+            if (aqi > 50) return 'Satisfactory';
+            return 'Good';
+        }
+
+        // 4) District data (sample)
+        const districts = [
+    { name: "Jaipur", coords: [26.9124, 75.7873], aqi: 165 },
+    { name: "Jodhpur", coords: [26.2389, 73.0243], aqi: 150 },
+    { name: "Udaipur", coords: [24.5854, 73.7125], aqi: 95 },
+    { name: "Kota", coords: [25.2138, 75.8648], aqi: 145 },
+    { name: "Ajmer", coords: [26.4499, 74.6399], aqi: 120 },
+    { name: "Bikaner", coords: [28.0229, 73.3119], aqi: 155 },
+    { name: "Alwar", coords: [27.5530, 76.6346], aqi: 160 },
+    { name: "Bhilwara", coords: [25.3463, 74.6364], aqi: 110 },
+    { name: "Sikar", coords: [27.6094, 75.1399], aqi: 135 },
+    { name: "Pali", coords: [25.7711, 73.3234], aqi: 125 },
+    { name: "Bharatpur", coords: [27.2152, 77.5030], aqi: 140 },
+    { name: "Chittorgarh", coords: [24.8887, 74.6269], aqi: 100 },
+    { name: "Sri Ganganagar", coords: [29.9038, 73.8772], aqi: 180 },
+    { name: "Hanumangarh", coords: [29.5815, 74.3294], aqi: 155 },
+    { name: "Barmer", coords: [25.7521, 71.3967], aqi: 90 },
+    { name: "Jaisalmer", coords: [26.9157, 70.9083], aqi: 85 },
+    { name: "Tonk", coords: [26.1664, 75.7885], aqi: 105 },
+    { name: "Sawai Madhopur", coords: [26.0173, 76.5026], aqi: 115 },
+    { name: "Bundi", coords: [25.4305, 75.6499], aqi: 95 },
+    { name: "Jhalawar", coords: [24.5973, 76.1600], aqi: 105 },
+    { name: "Nagaur", coords: [27.2020, 73.7339], aqi: 130 },
+    { name: "Dausa", coords: [26.8932, 76.3375], aqi: 125 }
+];
+
+        // 5) Create hotspot markers
+        const markerClusterGroup = L.markerClusterGroup();
+        const hotspotLayer = L.layerGroup();
+
+        districts.forEach(d => {
+            const r = Math.min(30, Math.max(6, Math.round(d.aqi / 8)));
+            const circle = L.circleMarker(d.coords, {
+                radius: r,
+                fillColor: aqiColor(d.aqi),
+                color: '#ffffff',
+                weight: 1,
+                fillOpacity: 0.95
+            });
+
+            const popupHtml = `
+        <div style="min-width:160px">
+          <strong>${d.name}</strong><br/>
+          AQI: <strong style="color:${aqiColor(d.aqi)}">${d.aqi}</strong><br/>
+          Status: <strong>${aqiStatus(d.aqi)}</strong><br/>
+          <small class="text-muted">Last updated: ${new Date().toLocaleString()}</small>
+        </div>
+      `;
+            circle.bindPopup(popupHtml);
+
+            // Tooltip (AQI label)
+            circle.bindTooltip(`${d.name}: ${d.aqi}`, { permanent: false, direction: 'top', offset: [0, -6] });
+
+            markerClusterGroup.addLayer(circle);
+            hotspotLayer.addLayer(circle);
+        });
+
+        markerClusterGroup.addTo(map);
+
+        // 6) Industry zones (sample)
+        const industryZones = {
+            "type": "FeatureCollection",
+            "features": [
+                { "type": "Feature", "properties": { "name": "Sitapura Industrial Area, Jaipur", "units": 32 }, "geometry": { "type": "Polygon", "coordinates": [[[75.8700, 26.7600], [75.9300, 26.7600], [75.9300, 26.8200], [75.8700, 26.8200], [75.8700, 26.7600]]] } },
+                { "type": "Feature", "properties": { "name": "Bhiwadi Industrial Area, Alwar", "units": 20 }, "geometry": { "type": "Polygon", "coordinates": [[[76.8200, 28.1800], [76.8900, 28.1800], [76.8900, 28.2400], [76.8200, 28.2400], [76.8200, 28.1800]]] } }
+            ]
+        };
+
+        const industryLayer = L.geoJSON(industryZones, {
+            style: f => ({ color: '#0d6efd', weight: 1.6, fillColor: 'rgba(13,110,253,0.08)', fillOpacity: 0.6 }),
+            onEachFeature: (feature, layer) => {
+                const p = feature.properties || {};
+                layer.bindPopup(`<strong>${p.name || 'Industry Zone'}</strong><br/>Units: ${p.units || 'N/A'}`);
+            }
+        });
+        industryLayer.addTo(map);
+
+        // 7) Layer control
+        const overlays = {
+            "Hotspot (cluster)": markerClusterGroup,
+            "Hotspot (markers)": hotspotLayer,
+            "Industry Zones": industryLayer
+        };
+        L.control.layers(baseMaps, overlays, { collapsed: false }).addTo(map);
+
+        // 8) Legend
+        const legend = L.control({ position: 'bottomright' });
+        legend.onAdd = function () {
+            const div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `<strong>Air Quality (AQI)</strong><br/>
+        <i style="background:#198754"></i> Good (&le;50)<br/>
+        <i style="background:#20c997"></i> Satisfactory (51–100)<br/>
+        <i style="background:#ffc107"></i> Moderate (101–150)<br/>
+        <i style="background:#fd7e14"></i> Poor (151–200)<br/>
+        <i style="background:#dc3545"></i> Very Poor (201–300)<br/>
+        <i style="background:#800026"></i> Hazardous (&gt;300)<br/>`;
+            return div;
+        };
+        legend.addTo(map);
+
+        // 9) Fit bounds
+        const group = L.featureGroup([industryLayer, hotspotLayer]);
+        if (group.getBounds().isValid()) map.fitBounds(group.getBounds(), { padding: [40, 40] });
+
+        // 10) Show/Hide all AQI labels (checkbox)
+        document.getElementById('showAllAQI').addEventListener('change', function () {
+            const show = this.checked;
+            hotspotLayer.eachLayer(layer => {
+                if (show) layer.openTooltip();
+                else layer.closeTooltip();
+            });
+        });
+
+        // 11) Refresh button (demo)
+        document.getElementById('btn-refresh').addEventListener('click', async () => {
+            const idx = Math.floor(Math.random() * districts.length);
+            districts[idx].aqi = Math.min(400, districts[idx].aqi + Math.floor(Math.random() * 40 - 10));
+
+            markerClusterGroup.clearLayers();
+            hotspotLayer.clearLayers();
+
+            districts.forEach(d => {
+                const r = Math.min(30, Math.max(6, Math.round(d.aqi / 8)));
+                const circle = L.circleMarker(d.coords, {
+                    radius: r,
+                    fillColor: aqiColor(d.aqi),
+                    color: '#fff', weight: 1, fillOpacity: 0.95
+                });
+                circle.bindPopup(`<strong>${d.name}</strong><br/>AQI: <strong style="color:${aqiColor(d.aqi)}">${d.aqi}</strong><br/>Status: <strong>${aqiStatus(d.aqi)}</strong>`);
+                circle.bindTooltip(`${d.name}: ${d.aqi}`, { permanent: false, direction: 'top', offset: [0, -6] });
+                markerClusterGroup.addLayer(circle);
+                hotspotLayer.addLayer(circle);
+            });
+
+            if (!map.hasLayer(markerClusterGroup)) markerClusterGroup.addTo(map);
+            console.info('Hotspots refreshed (demo).');
+        });
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,3333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rajasthan State Pollution Control Board - Environmental Intelligence Hub</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #0b6b3a;
+            --secondary: #0b6b3a;
+            --accent: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #7f8c8d;
+            --water: #3498db;
+            --waste: #8e44ad;
+            --ewaste: #16a085;
+            --biomedical: #c0392b;
+            --groundwater: #2980b9;
+            --grievance: #d35400;
+        }
+
+        body {
+            background: #0b6b3a15;
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /**********topheader************/
+
+        .top-header {
+            background: #103c26;
+            color: white;
+            padding: 8px 0;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .top-header .container-fluid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gov-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .indian-flag {
+            width: 30px;
+            height: 20px;
+            background: linear-gradient(to bottom, #FF9933 33%, white 33%, white 66%, #138808 66%);
+            border: 1px solid #ccc;
+        }
+
+        .blink {
+            animation: blink-animation 2.5s steps(2, start) infinite;
+            color: #e74c3c;
+            /* optional: highlight with color */
+            font-size: 13px;
+
+        }
+
+        @keyframes blink-animation {
+            to {
+                visibility: hidden;
+            }
+        }
+
+        .blink a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .accessibility-links a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            font-size: 13px;
+        }
+
+        .top-right-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .language-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            min-width: 220px;
+            display: none;
+        }
+
+        .language-selector:hover .language-dropdown {
+            display: block;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0;
+            padding: 10px;
+        }
+
+        .language-option {
+            padding: 4px 12px;
+            cursor: pointer;
+            color: #333;
+            font-size: 12px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            margin: 2px;
+        }
+
+        .language-option:hover {
+            background-color: #f0f8f0;
+        }
+
+        .language-option.active {
+            background-color: #e8f5e8;
+            font-weight: 600;
+        }
+
+        .language-option.one {
+            background-color: #FFE7E2;
+            color: #D96852;
+        }
+
+        .language-option.two {
+            background-color: #DAEBFF;
+            color: #1594EE;
+        }
+
+        .language-option.three {
+            background-color: #FFC3C3;
+            color: #FF4A4A;
+        }
+
+        .language-option.four {
+            background-color: #DED4F4;
+            color: #6D2CFA;
+        }
+
+        .language-option.five {
+            background-color: #D2EDCF;
+            color: #5C9855;
+        }
+
+        .language-option.six {
+            background-color: #FEFBDF;
+            color: #B6A936;
+        }
+
+        .language-option.seven {
+            background-color: #ECDFFE;
+            color: #7F57B5;
+        }
+
+        .language-option.eight {
+            background-color: #DFEDFE;
+            color: #327AD2;
+        }
+
+        .language-option.nine {
+            background-color: #FEF4DB;
+            color: #FF8A00;
+        }
+
+        .language-option.ten {
+            background-color: #FEDFF7;
+            color: #BA389C;
+        }
+
+        .language-option.eleven {
+            background-color: #E3FEDF;
+            color: #429436;
+        }
+
+        .language-option.twelve {
+            background-color: #FFE7E2;
+            color: #A25E50;
+        }
+
+        .accessibility-icons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 72px;
+            height: 32px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+
+        /* Header Styles */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white !important;
+            font-weight: 600;
+        }
+
+        .logo {
+            width: 45px;
+            height: 45px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .time-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 16px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: white;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            background-color: white;
+            height: calc(100vh - 76px);
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-link:hover {
+            background-color: #f8f9fa;
+        }
+
+        .nav-link.active {
+            background-color: #e8f4fc;
+            font-weight: 600;
+            border-left-color: var(--primary);
+        }
+
+        .nav-link[data-tab="air"]:hover,
+        .nav-link[data-tab="air"].active {
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .nav-link[data-tab="water"]:hover,
+        .nav-link[data-tab="water"].active {
+            color: var(--water);
+            border-left-color: var(--water);
+        }
+
+        .nav-link[data-tab="waste"]:hover,
+        .nav-link[data-tab="waste"].active {
+            color: var(--waste);
+            border-left-color: var(--waste);
+        }
+
+        .nav-link[data-tab="ewaste"]:hover,
+        .nav-link[data-tab="ewaste"].active {
+            color: var(--ewaste);
+            border-left-color: var(--ewaste);
+        }
+
+        .nav-link[data-tab="biomedical"]:hover,
+        .nav-link[data-tab="biomedical"].active {
+            color: var(--biomedical);
+            border-left-color: var(--biomedical);
+        }
+
+        .nav-link[data-tab="groundwater"]:hover,
+        .nav-link[data-tab="groundwater"].active {
+            color: var(--groundwater);
+            border-left-color: var(--groundwater);
+        }
+
+        .nav-link[data-tab="grievance"]:hover,
+        .nav-link[data-tab="grievance"].active {
+            color: var(--grievance);
+            border-left-color: var(--grievance);
+        }
+
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 25px;
+            background-color: #0b6b3a00;
+            height: calc(100vh - 76px);
+            overflow-y: auto;
+        }
+
+        .dashboard-title {
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            height: 100%;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .kpi-title {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .kpi-trend {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .trend-up {
+            color: var(--accent);
+        }
+
+        .trend-down {
+            color: var(--danger);
+        }
+
+        /* Charts and Visualizations */
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chart-btn {
+            background: #f8f9fa;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .chart-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .chart-wrapper {
+            height: 300px;
+            position: relative;
+        }
+
+        /* District Ranking */
+        .ranking-card {
+            background: white;
+            border-radius: 10px;
+            padding: 8px 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            height: 100%;
+        }
+
+        .ranking-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .ranking-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .ranking-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            background: var(--gray);
+        }
+
+        .rank-1 {
+            background: #f1c40f;
+        }
+
+        .rank-2 {
+            background: #95a5a6;
+        }
+
+        .rank-3 {
+            background: #cd7f32;
+        }
+
+        .district-name {
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .district-score {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        /* Data Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .data-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .data-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-good {
+            background-color: #e8f6f3;
+            color: var(--accent);
+        }
+
+        .status-moderate {
+            background-color: #fef9e7;
+            color: var(--warning);
+        }
+
+        .status-poor {
+            background-color: #fdedec;
+            color: var(--danger);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Mobile Sidebar */
+        @media (max-width: 992px) {
+            .sidebar {
+                position: fixed;
+                top: 76px;
+                left: -100%;
+                width: 250px;
+                z-index: 1000;
+                transition: left 0.3s;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .header-title {
+                display: none;
+            }
+        }
+
+        .feature-card {
+            position: relative;
+            background: linear-gradient(135deg, #ffffff, #f7fdf9);
+            border-radius: 20px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
+            text-align: center;
+            padding: 40px 20px;
+            height: 180px;
+            overflow: hidden;
+            border: 1px solid rgba(11, 107, 58, 0.1);
+            cursor: pointer;
+        }
+
+        .feature-card.one {
+            background: linear-gradient(135deg, #0b6b3a, #00c9a7, #7fffd4);
+        }
+
+        .feature-card.two {
+            background: linear-gradient(135deg, #ff4b2b, #ff9068);
+        }
+
+        .feature-card.three {
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+        }
+
+        .feature-card.four {
+            background: linear-gradient(135deg, #845ec2, #d65db1, #ff9671);
+        }
+
+        /* Unique gradient overlays for each card */
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #0b6b3a, #13a159);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+        }
+
+        .feature-card:nth-child(1)::before {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+        }
+
+        .feature-card:nth-child(2)::before {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+        }
+
+        .feature-card:nth-child(3)::before {
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+        }
+
+        .feature-card:nth-child(4)::before {
+            background: linear-gradient(135deg, #56ab2f, #a8e063);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 30px rgba(11, 107, 58, 0.25);
+        }
+
+        .feature-icon {
+            font-size: 50px;
+            color: #fff;
+            margin-bottom: 20px;
+            z-index: 1;
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            color: #fff;
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: #fff;
+            font-size: 22px;
+            z-index: 1;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .feature-card:hover .feature-title {
+            color: #fff;
+        }
+
+        .card-link {
+            text-decoration: none;
+        }
+
+        @media (max-width: 767px) {
+            .feature-card {
+                margin-bottom: 20px;
+                height: auto;
+            }
+        }
+
+        button.bhashini-dropdown-btn {
+            position: fixed;
+            bottom: 0;
+        }
+
+        .bhashini-dropdown-content {
+
+            max-height: 29.5rem !important;
+
+
+        }
+
+
+        .top-header{display:none!important}
+        .a11y-open{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:8px 14px;border-radius:20px;font-size:.9rem;display:flex;align-items:center;gap:8px;cursor:pointer}
+        .a11y-open:hover{background:rgba(255,255,255,.3)}
+        .a11y-note{color:#0b6b3a;font-size:13px;padding:0 20px 14px}
+        /* single page scroll: sidebar sticks, content grows */
+        .sidebar{height:auto!important;max-height:100vh;position:sticky;top:0;align-self:flex-start;overflow-y:auto}
+        .main-content{height:auto!important;overflow:visible!important;min-height:calc(100vh - 160px)}
+        .nav-link{cursor:pointer;padding:9px 20px!important}
+        .eip-frame{height:auto;min-height:300px;overflow:hidden}
+        /* portal footer */
+        .pfoot{background:#fff;border-top:1px solid #e2e8e4;margin-top:0;width:100%;position:relative;z-index:5;font-family:"Segoe UI",system-ui,sans-serif}
+        .pfoot-in{display:grid;grid-template-columns:1.2fr 1.5fr 1.1fr 1.5fr;gap:32px;padding:30px 36px 26px;max-width:1500px;margin:0 auto}
+        .pfoot h4{font-size:13px;margin:0 0 10px;color:#0d3b24;font-weight:600;padding-bottom:6px;border-bottom:2px solid #e7f3ec;display:inline-block}
+        .pfoot a{display:block;color:#1c2a23;text-decoration:none;font-size:13px;padding:3px 0;cursor:pointer}
+        .pfoot a:hover{color:#0b6b3a}
+        .pf-brand{display:flex;gap:14px;align-items:flex-start}.pf-brand img{width:64px;height:64px;border-radius:50%}
+        .pf-brand b{display:block;font-size:14.5px;color:#0d3b24}.pf-brand span{display:block;font-size:12.5px;color:#5d6b63;margin-top:2px}
+        .pf-ds{font-size:13px;padding:3px 0;display:flex;align-items:center;gap:8px}.pf-ds i{width:7px;height:7px;border-radius:50%;background:#2f8f5b}
+        .pf-about p{font-size:12.5px;color:#5d6b63;margin:0 0 8px;line-height:1.5}.pf-about b{color:#1c2a23}
+        .pfoot-bar{background:#0d3b24;color:#dfeee5;font-size:12.5px;padding:11px 290px 11px 36px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+        @media(max-width:1000px){.pfoot-in{grid-template-columns:1fr 1fr}}
+        /* ---- merged platform: section tabs + embedded frames ---- */
+        .nav-sec{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#7f8c8d;padding:14px 20px 4px}
+        .eip-tabs{display:flex;gap:4px;border-bottom:2px solid #e3ebe6;margin:-5px 0 16px;flex-wrap:wrap}
+        .eip-tabs button{border:none;background:none;padding:9px 16px;font-size:14.5px;font-weight:600;color:#5d6b63;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer}
+        .eip-tabs button.on{color:#0b6b3a;border-bottom-color:#0b6b3a}
+        .eip-tabs button small{font-weight:500;color:#9aa8a0;margin-left:6px;font-size:11.5px}
+        .eip-pane{display:none}.eip-pane.on{display:block}
+        .eip-frame{width:100%;height:calc(100vh - 175px);min-height:560px;border:none;border-radius:10px;background:#f4f6f4;display:block}
+    </style>
+<style id="eip-type">/* ===== EIP shared type system: one heading → subheading → card → KPI pattern on every screen ===== */
+:root{--eip-font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;--eip-head:#1f2d27;--eip-muted:#5d6b63;--eip-accent:#0b6b3a;--eip-line:#e3ebe6;--eip-shadow:0 2px 10px rgba(16,60,38,.06)}
+/* T1 page title · T2 subtitle · T3 card title · K1 KPI label · K2 KPI value · K3 KPI note · TH table header */
+.dashboard-title h2{font-size:28px!important;font-weight:600!important;color:var(--eip-head)!important;letter-spacing:-.2px;margin:0 0 4px}
+.dashboard-title p,.dashboard-title .text-muted{font-size:15px!important;color:var(--eip-muted)!important;margin:0}
+.dashboard-title{margin-bottom:20px}
+.chart-title,.ranking-title{font-size:18px!important;font-weight:600!important;color:var(--eip-head)!important}
+.kpi-title{font-size:12.5px!important;font-weight:600!important;text-transform:uppercase;letter-spacing:.05em;color:var(--eip-muted)!important}
+.kpi-value{font-size:28px!important;font-weight:700!important;color:var(--eip-head)}
+.kpi-trend{font-size:13px!important}
+.kpi-card,.chart-container,.ranking-card{border-radius:12px!important;border:1px solid var(--eip-line)!important;box-shadow:var(--eip-shadow)!important}
+.kpi-card:hover{box-shadow:0 8px 20px rgba(11,60,35,.09)!important}
+.table thead th{background:#f3f7f5!important;color:var(--eip-muted)!important;font-size:12px!important;font-weight:600!important;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--eip-line)!important}
+.eip-frame{background:transparent!important}
+</style>
+</head>
+
+<body>
+
+    <header class="top-header">
+        <div class="container-fluid px-4">
+            <div class="gov-brand">
+
+                <span>Rajasthan State Pollution Control Board</span>
+            </div>
+            <div>
+
+            </div>
+            <div class="top-right-controls">
+                <li style="list-style: none;">
+                    <a style="text-decoration: none; color: #fff;" href="javascript:void(0)" id="accessibilityBtn">
+                        <span><i class="fa-solid fa-universal-access"></i></span> Accessibility Option
+                    </a>
+                </li>
+                <div class="bhashini-plugin-container mx-3"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <button class="mobile-menu-btn me-2" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a class="navbar-brand" href="#">
+                <div class="logo">
+                    <img src="./images/logo.png" class="img-fluid" />
+                </div>
+                <div class="header-title">
+                    <div>राजस्थान राज्य प्रदूषण नियंत्रण मंडल</div>
+                    <small class="d-none d-md-block"> Rajasthan State Pollution Control Board</small>
+                </div>
+            </a>
+            <div class="header-controls ms-auto">
+                <button class="a11y-open" title="Accessibility options"><i class="fa-solid fa-universal-access"></i><span class="d-none d-md-inline">Accessibility</span></button>
+                <div class="time-display">
+                    <span id="current-time">Loading...</span>
+                </div>
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <span class="d-none d-md-inline">Admin User</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 col-md-3 sidebar" id="sidebar">
+                <div class="sidebar-title"></div>
+                <div class="nav flex-column">
+<div class="nav-sec">Decide &amp; act</div>
+                    <a role="button" tabindex="0" class="nav-link active" data-tab="home">
+                        <i class="fas fa-home nav-icon"></i>
+                        <span>Command centre</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="map">
+                        <i class="fas fa-map-location-dot nav-icon"></i>
+                        <span>Map &amp; priority zones</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="plan">
+                        <i class="fas fa-clipboard-check nav-icon"></i>
+                        <span>Inspection planner</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="consent">
+                        <i class="fas fa-file-signature nav-icon"></i>
+                        <span>Consent management</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="fac">
+                        <i class="fas fa-industry nav-icon"></i>
+                        <span>Facility 360</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="lab">
+                        <i class="fas fa-flask nav-icon"></i>
+                        <span>Laboratory &amp; samples</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="programme">
+                        <i class="fas fa-chart-line nav-icon"></i>
+                        <span>Programme tracker</span>
+                    </a>
+<div class="nav-sec">Environment</div>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="air">
+                        <i class="fas fa-wind nav-icon"></i>
+                        <span>Air Quality Level</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="water">
+                        <i class="fas fa-tint nav-icon"></i>
+                        <span>Water Quality &amp; CETPs</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="river">
+                        <i class="fas fa-bridge-water nav-icon"></i>
+                        <span>River monitor</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="waste">
+                        <i class="fas fa-trash nav-icon"></i>
+                        <span>Waste Management Level</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="ewaste">
+                        <i class="fas fa-laptop nav-icon"></i>
+                        <span>E-Waste Level</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="biomedical">
+                        <i class="fas fa-syringe nav-icon"></i>
+                        <span>Biomedical Waste Level</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="groundwater">
+                        <i class="fas fa-water nav-icon"></i>
+                        <span>Groundwater Level</span>
+                    </a>
+<div class="nav-sec">Public &amp; rules</div>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="grievance">
+                        <i class="fas fa-comments nav-icon"></i>
+                        <span>Grievance Management</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="ngt">
+                        <i class="fas fa-scale-balanced nav-icon"></i>
+                        <span>NGT &amp; legal cases</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="knowledge">
+                        <i class="fas fa-robot nav-icon"></i>
+                        <span>Regulatory Knowledge Assistant</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9 col-md-9 main-content">
+                <!-- Home Dashboard -->
+                <div id="home" class="tab-content active">
+                    <div class="dashboard-title">
+                        <div class="text-center">
+                            <h2>Welcome to Rajasthan State Pollution Control Board</h2>
+                            <p class="text-muted">Environmental Intelligence Hub - Monitor and Manage Pollution Across
+                                Rajasthan</p>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Consent Management -->
+                        <div class="col-md-6 col-lg-6">
+                            <a href="Consent-Management.html" target="_blank" class="card-link">
+                                <div class="feature-card one">
+                                    <i class="fa-solid fa-file-signature feature-icon"></i>
+                                    <div class="feature-title">Consent Management</div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Project Monitoring -->
+                        <div class="col-md-6 col-lg-6">
+                            <a href="project-moniter.html" target="_blank" class="card-link">
+                                <div class="feature-card two">
+                                    <i class="fa-solid fa-chart-line feature-icon"></i>
+                                    <div class="feature-title">Environmental Monitoring</div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- GIS Hotspot -->
+                        <div class="col-md-6 col-lg-6">
+                            <a href="GIS.html" target="_blank" class="card-link">
+                                <div class="feature-card three">
+                                    <i class="fa-solid fa-map-location-dot feature-icon"></i>
+                                    <div class="feature-title">GIS Hotspot</div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- All District AQI -->
+                        <div class="col-md-6 col-lg-6">
+                            <a href="district-wise.html" target="_blank" class="card-link">
+                                <div class="feature-card four">
+                                    <i class="fa-solid fa-wind feature-icon"></i>
+                                    <div class="feature-title">All District Wise AQI</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div id="map" class="tab-content"></div>
+                <div id="plan" class="tab-content"></div>
+                <div id="consent" class="tab-content"></div>
+                <div id="fac" class="tab-content"></div>
+                <div id="programme" class="tab-content"></div>
+                <div id="river" class="tab-content"></div>
+                <div id="ngt" class="tab-content"></div>
+                <div id="lab" class="tab-content"></div>
+                <!-- Air Quality Dashboard -->
+                <div id="air" class="tab-content">
+                    <div class="dashboard-title d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2>Air Quality Monitoring</h2>
+                            <p class="text-muted">Real-time air pollution data and analysis across Rajasthan</p>
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="chart-container mb-4">
+                        <div class="chart-header">
+                            <div class="chart-title">Air Quality Index (AQI) Trends</div>
+                            <div class="chart-actions">
+                                <button class="chart-btn active">7 Days</button>
+                                <button class="chart-btn">1 Month</button>
+                                <button class="chart-btn">6 Months</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="aqiChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">Top 5 Performing Districts</div>
+                                <ul class="ranking-list">
+                                    <li class="ranking-item">
+                                        <div class="rank rank-1">1</div>
+                                        <div class="district-name">Bikaner</div>
+                                        <div class="district-score">AQI: 45</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-2">2</div>
+                                        <div class="district-name">Pali</div>
+                                        <div class="district-score">AQI: 52</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-3">3</div>
+                                        <div class="district-name">Udaipur</div>
+                                        <div class="district-score">AQI: 58</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">4</div>
+                                        <div class="district-name">Ajmer</div>
+                                        <div class="district-score">AQI: 63</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">5</div>
+                                        <div class="district-name">Sikar</div>
+                                        <div class="district-score">AQI: 67</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">Bottom 5 Performing Districts</div>
+                                <ul class="ranking-list">
+                                    <li class="ranking-item">
+                                        <div class="rank">1</div>
+                                        <div class="district-name">Jaipur</div>
+                                        <div class="district-score">AQI: 245</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">2</div>
+                                        <div class="district-name">Kota</div>
+                                        <div class="district-score">AQI: 218</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">3</div>
+                                        <div class="district-name">Jodhpur</div>
+                                        <div class="district-score">AQI: 195</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">4</div>
+                                        <div class="district-name">Alwar</div>
+                                        <div class="district-score">AQI: 182</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">5</div>
+                                        <div class="district-name">Bhilwara</div>
+                                        <div class="district-score">AQI: 174</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Water Quality Dashboard -->
+                <div id="water" class="tab-content">
+                    <div class="dashboard-title">
+                        <h2>Water Quality Monitoring</h2>
+                        <p class="text-muted">Surface and groundwater quality tracking across Rajasthan</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">POLLUTED RIVER STRETCHES</div>
+                                    <div class="kpi-icon" style="background-color: var(--water);">
+                                        <i class="fas fa-water"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">42</div>
+                                <div class="kpi-trend trend-down">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>8% from last quarter</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">BOD LEVEL (mg/L)</div>
+                                    <div class="kpi-icon" style="background-color: var(--danger);">
+                                        <i class="fas fa-vial"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">5.8</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>12% from last month</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">WATER TREATMENT PLANTS</div>
+                                    <div class="kpi-icon" style="background-color: var(--accent);">
+                                        <i class="fas fa-recycle"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">78</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>3 new this year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">COMPLIANCE RATE</div>
+                                    <div class="kpi-icon" style="background-color: var(--warning);">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">72%</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>5% from last quarter</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-4">
+                        <div class="chart-header">
+                            <div class="chart-title">Water Quality Parameters</div>
+                            <div class="chart-actions">
+                                <button class="chart-btn active">Rivers</button>
+                                <button class="chart-btn">Lakes</button>
+                                <button class="chart-btn">Groundwater</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="waterChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">Best Water Quality Districts</div>
+                                <ul class="ranking-list">
+                                    <li class="ranking-item">
+                                        <div class="rank rank-1">1</div>
+                                        <div class="district-name">Pali</div>
+                                        <div class="district-score">WQI: 88</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-2">2</div>
+                                        <div class="district-name">Bikaner</div>
+                                        <div class="district-score">WQI: 85</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-3">3</div>
+                                        <div class="district-name">Udaipur</div>
+                                        <div class="district-score">WQI: 82</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">4</div>
+                                        <div class="district-name">Ajmer</div>
+                                        <div class="district-score">WQI: 79</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">5</div>
+                                        <div class="district-name">Barmer</div>
+                                        <div class="district-score">WQI: 76</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">Critical Water Quality Districts</div>
+                                <ul class="ranking-list">
+                                    <li class="ranking-item">
+                                        <div class="rank">1</div>
+                                        <div class="district-name">Jaipur</div>
+                                        <div class="district-score">WQI: 32</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">2</div>
+                                        <div class="district-name">Kota</div>
+                                        <div class="district-score">WQI: 38</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">3</div>
+                                        <div class="district-name">Jodhpur</div>
+                                        <div class="district-score">WQI: 41</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">4</div>
+                                        <div class="district-name">Alwar</div>
+                                        <div class="district-score">WQI: 45</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">5</div>
+                                        <div class="district-name">Bhilwara</div>
+                                        <div class="district-score">WQI: 48</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Waste Management Dashboard -->
+                <div id="waste" class="tab-content">
+                    <div class="dashboard-title">
+                        <h2>Waste Management</h2>
+                        <p class="text-muted">Municipal solid waste tracking and management across Rajasthan</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">WASTE GENERATED (TPD)</div>
+                                    <div class="kpi-icon" style="background-color: var(--waste);">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">4,850</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>5% from last year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">WASTE PROCESSED</div>
+                                    <div class="kpi-icon" style="background-color: var(--accent);">
+                                        <i class="fas fa-recycle"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">68%</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>12% from last year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">LANDFILL SITES</div>
+                                    <div class="kpi-icon" style="background-color: var(--warning);">
+                                        <i class="fas fa-landmark"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">42</div>
+                                <div class="kpi-trend trend-down">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>3 closed this year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">COMPOST PLANTS</div>
+                                    <div class="kpi-icon" style="background-color: var(--accent);">
+                                        <i class="fas fa-leaf"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">28</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>2 new this quarter</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-4">
+                        <div class="chart-header">
+                            <div class="chart-title">Waste Composition Analysis</div>
+                            <div class="chart-actions">
+                                <button class="chart-btn active">Urban</button>
+                                <button class="chart-btn">Rural</button>
+                                <button class="chart-btn">All</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="wasteChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">Top Waste Management Districts</div>
+                                <ul class="ranking-list">
+                                    <li class="ranking-item">
+                                        <div class="rank rank-1">1</div>
+                                        <div class="district-name">Udaipur</div>
+                                        <div class="district-score">86% Processed</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-2">2</div>
+                                        <div class="district-name">Jodhpur</div>
+                                        <div class="district-score">79% Processed</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-3">3</div>
+                                        <div class="district-name">Jaipur</div>
+                                        <div class="district-score">75% Processed</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">4</div>
+                                        <div class="district-name">Kota</div>
+                                        <div class="district-score">72% Processed</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">5</div>
+                                        <div class="district-name">Bhilwara</div>
+                                        <div class="district-score">68% Processed</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">Waste Management Compliance</div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>District</th>
+                                            <th>Segregation</th>
+                                            <th>Processing</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Udaipur</td>
+                                            <td>92%</td>
+                                            <td>86%</td>
+                                            <td><span class="status-badge status-good">Excellent</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jodhpur</td>
+                                            <td>85%</td>
+                                            <td>79%</td>
+                                            <td><span class="status-badge status-good">Good</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Chittorgarh</td>
+                                            <td>52%</td>
+                                            <td>48%</td>
+                                            <td><span class="status-badge status-moderate">Moderate</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jaisalmer</td>
+                                            <td>38%</td>
+                                            <td>32%</td>
+                                            <td><span class="status-badge status-poor">Poor</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jhunjhunu</td>
+                                            <td>42%</td>
+                                            <td>35%</td>
+                                            <td><span class="status-badge status-poor">Poor</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- E-Waste Dashboard -->
+                <div id="ewaste" class="tab-content">
+                    <div class="dashboard-title">
+                        <h2>E-Waste Management</h2>
+                        <p class="text-muted">Electronic waste collection, recycling and disposal tracking</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">E-WASTE GENERATED (TPA)</div>
+                                    <div class="kpi-icon" style="background-color: var(--ewaste);">
+                                        <i class="fas fa-laptop"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">18,450</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>15% from last year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">E-WASTE COLLECTED</div>
+                                    <div class="kpi-icon" style="background-color: var(--accent);">
+                                        <i class="fas fa-truck-loading"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">42%</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>8% from last year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">AUTHORIZED RECYCLERS</div>
+                                    <div class="kpi-icon" style="background-color: var(--primary);">
+                                        <i class="fas fa-industry"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">28</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>4 new this year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">FORMAL RECYCLING</div>
+                                    <div class="kpi-icon" style="background-color: var(--warning);">
+                                        <i class="fas fa-recycle"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">35%</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>7% from last year</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-4">
+                        <div class="chart-header">
+                            <div class="chart-title">E-Waste Generation by Category</div>
+                            <div class="chart-actions">
+                                <button class="chart-btn active">Current</button>
+                                <button class="chart-btn">Projected</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="ewasteChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">Top E-Waste Collection Districts</div>
+                                <ul class="ranking-list">
+                                    <li class="ranking-item">
+                                        <div class="rank rank-1">1</div>
+                                        <div class="district-name">Jaipur</div>
+                                        <div class="district-score">58% Collected</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-2">2</div>
+                                        <div class="district-name">Jodhpur</div>
+                                        <div class="district-score">52% Collected</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-3">3</div>
+                                        <div class="district-name">Kota</div>
+                                        <div class="district-score">49% Collected</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">4</div>
+                                        <div class="district-name">Bhilwara</div>
+                                        <div class="district-score">45% Collected</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">5</div>
+                                        <div class="district-name">Alwar</div>
+                                        <div class="district-score">41% Collected</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">E-Waste Collection Targets</div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>District</th>
+                                            <th>Target (TPA)</th>
+                                            <th>Achieved</th>
+                                            <th>Progress</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Jaipur</td>
+                                            <td>2,850</td>
+                                            <td>1,653</td>
+                                            <td><span class="status-badge status-good">58%</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jodhpur</td>
+                                            <td>2,150</td>
+                                            <td>1,118</td>
+                                            <td><span class="status-badge status-good">52%</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Kota</td>
+                                            <td>1,980</td>
+                                            <td>970</td>
+                                            <td><span class="status-badge status-moderate">49%</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Chittorgarh</td>
+                                            <td>1,250</td>
+                                            <td>450</td>
+                                            <td><span class="status-badge status-poor">36%</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jaisalmer</td>
+                                            <td>850</td>
+                                            <td>255</td>
+                                            <td><span class="status-badge status-poor">30%</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biomedical Waste Dashboard -->
+                <div id="biomedical" class="tab-content">
+                    <div class="dashboard-title">
+                        <h2>Biomedical Waste Management</h2>
+                        <p class="text-muted">Tracking and monitoring of biomedical waste from healthcare facilities</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">BMW GENERATED (Kg/day)</div>
+                                    <div class="kpi-icon" style="background-color: var(--biomedical);">
+                                        <i class="fas fa-syringe"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">14,280</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>8% from last year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">BMW TREATED</div>
+                                    <div class="kpi-icon" style="background-color: var(--accent);">
+                                        <i class="fas fa-biohazard"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">82%</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>5% from last quarter</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">CBWTFs</div>
+                                    <div class="kpi-icon" style="background-color: var(--primary);">
+                                        <i class="fas fa-clinic-medical"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">12</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>1 new this year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">COMPLIANCE RATE</div>
+                                    <div class="kpi-icon" style="background-color: var(--warning);">
+                                        <i class="fas fa-check-double"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">76%</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>4% from last quarter</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-4">
+                        <div class="chart-header">
+                            <div class="chart-title">Biomedical Waste Treatment</div>
+                            <div class="chart-actions">
+                                <button class="chart-btn active">Incinerated</button>
+                                <button class="chart-btn">Autoclaved</button>
+                                <button class="chart-btn">Other</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="biomedicalChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">BMW Management Compliance</div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>District</th>
+                                            <th>Healthcare Facilities</th>
+                                            <th>Compliant</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Jaipur</td>
+                                            <td>285</td>
+                                            <td>92%</td>
+                                            <td><span class="status-badge status-good">Excellent</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jodhpur</td>
+                                            <td>198</td>
+                                            <td>88%</td>
+                                            <td><span class="status-badge status-good">Good</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Kota</td>
+                                            <td>175</td>
+                                            <td>82%</td>
+                                            <td><span class="status-badge status-good">Good</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Chittorgarh</td>
+                                            <td>95</td>
+                                            <td>65%</td>
+                                            <td><span class="status-badge status-moderate">Moderate</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jaisalmer</td>
+                                            <td>62</td>
+                                            <td>52%</td>
+                                            <td><span class="status-badge status-poor">Poor</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">CBWTF Utilization</div>
+                                <ul class="ranking-list">
+                                    <li class="ranking-item">
+                                        <div class="rank rank-1">1</div>
+                                        <div class="district-name">JaipurCBWTF</div>
+                                        <div class="district-score">94% Capacity</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-2">2</div>
+                                        <div class="district-name">Jodhpur CBWTF</div>
+                                        <div class="district-score">88% Capacity</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-3">3</div>
+                                        <div class="district-name">KotaCBWTF</div>
+                                        <div class="district-score">85% Capacity</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">4</div>
+                                        <div class="district-name">BhilwaraCBWTF</div>
+                                        <div class="district-score">79% Capacity</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">5</div>
+                                        <div class="district-name">AlwarCBWTF</div>
+                                        <div class="district-score">72% Capacity</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Groundwater Dashboard -->
+                <div id="groundwater" class="tab-content">
+                    <div class="dashboard-title">
+                        <h2>Groundwater Management</h2>
+                        <p class="text-muted">Monitoring groundwater levels and quality across Rajasthan</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">OVER-EXPLOITED BLOCKS</div>
+                                    <div class="kpi-icon" style="background-color: var(--groundwater);">
+                                        <i class="fas fa-tint"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">82</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>4 from last year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">CRITICAL BLOCKS</div>
+                                    <div class="kpi-icon" style="background-color: var(--warning);">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">35</div>
+                                <div class="kpi-trend trend-down">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>2 from last year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">AVG. DEPLETION RATE (m/yr)</div>
+                                    <div class="kpi-icon" style="background-color: var(--danger);">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">0.52</div>
+                                <div class="kpi-trend trend-down">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>0.08 from last year</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">SAFE BLOCKS</div>
+                                    <div class="kpi-icon" style="background-color: var(--accent);">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">22</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>3 from last year</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-4">
+                        <div class="chart-header">
+                            <div class="chart-title">Groundwater Level Trends</div>
+                            <div class="chart-actions">
+                                <button class="chart-btn active">Pre-Monsoon</button>
+                                <button class="chart-btn">Post-Monsoon</button>
+                                <button class="chart-btn">Annual</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="groundwaterChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">Most Critical Districts (Groundwater)</div>
+                                <ul class="ranking-list">
+                                    <li class="ranking-item">
+                                        <div class="rank">1</div>
+                                        <div class="district-name">Bhilwara</div>
+                                        <div class="district-score">18 Critical Blocks</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">2</div>
+                                        <div class="district-name">Nagaur</div>
+                                        <div class="district-score">16 Critical Blocks</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">3</div>
+                                        <div class="district-name">Jhunjhunu</div>
+                                        <div class="district-score">12 Critical Blocks</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">4</div>
+                                        <div class="district-name">Jaisalmer</div>
+                                        <div class="district-score">10 Critical Blocks</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">5</div>
+                                        <div class="district-name">Alwar</div>
+                                        <div class="district-score">9 Critical Blocks</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">Groundwater Quality Status</div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>District</th>
+                                            <th>Fluoride</th>
+                                            <th>Nitrate</th>
+                                            <th>Arsenic</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Pali</td>
+                                            <td>0.8 mg/L</td>
+                                            <td>12 mg/L</td>
+                                            <td>0.01 mg/L</td>
+                                            <td><span class="status-badge status-good">Safe</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Bikaner</td>
+                                            <td>1.0 mg/L</td>
+                                            <td>18 mg/L</td>
+                                            <td>0.02 mg/L</td>
+                                            <td><span class="status-badge status-good">Safe</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jaisalmer</td>
+                                            <td>2.8 mg/L</td>
+                                            <td>85 mg/L</td>
+                                            <td>0.05 mg/L</td>
+                                            <td><span class="status-badge status-poor">Critical</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jalore</td>
+                                            <td>2.2 mg/L</td>
+                                            <td>65 mg/L</td>
+                                            <td>0.04 mg/L</td>
+                                            <td><span class="status-badge status-moderate">Moderate</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Nagaur</td>
+                                            <td>2.5 mg/L</td>
+                                            <td>72 mg/L</td>
+                                            <td>0.06 mg/L</td>
+                                            <td><span class="status-badge status-poor">Critical</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+<!-- Regulatory Knowledge Assistant -->
+<div id="knowledge" class="tab-content">
+    <div class="dashboard-title">
+        <h2>RSPCB Regulatory Knowledge Assistant</h2>
+        <p class="text-muted">
+            Search environmental rules, regulations, guidelines and notifications
+        </p>
+    </div>
+
+   <!-- Knowledge Assistant Chat Interface -->
+<div class="card mt-4">
+    <div class="card-body p-4">
+
+        <!-- Welcome Message -->
+        <div class="mb-4">
+            <h4>
+                <i class="fas fa-robot me-2"></i>
+                Welcome to the RSPCB Knowledge Assistant
+            </h4>
+
+            <p class="text-muted mb-3">
+                Ask questions related to environmental regulations
+            </p>
+
+            <!-- Suggested Queries -->
+            <div class="mb-3">
+                <strong>Suggested queries:</strong>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <button
+    class="btn btn-outline-success btn-sm"
+    onclick="setKnowledgeQuery('What are the requirements for registration of a plastic waste recycler?')"
+>
+    PWM Rules
+</button>
+               <button
+    class="btn btn-outline-success btn-sm"
+    onclick="setKnowledgeQuery('What are the duties of a waste generator?')"
+>
+    SWM Rules
+</button>
+
+<button
+    class="btn btn-outline-success btn-sm"
+    onclick="setKnowledgeQuery('How is the price of an E-Waste EPR certificate determined?')"
+>
+    E-Waste Rules
+</button>
+
+<button
+    class="btn btn-outline-success btn-sm"
+    onclick="setKnowledgeQuery('How long can biomedical waste be stored?')"
+>
+    BMW Rules
+</button>
+
+<button
+    class="btn btn-outline-success btn-sm"
+    onclick="setKnowledgeQuery('What are the packaging and labelling requirements for hazardous waste?')"
+>
+    Hazardous Waste Rules
+</button>
+        <hr>
+
+        <!-- Chat Area -->
+        <div id="chat-messages" class="mb-4">
+            <p class="text-muted">
+                Ask a question to begin.
+            </p>
+        </div>
+
+        <!-- Question Input -->
+        <div class="input-group">
+            <input
+                type="text"
+                id="knowledge-question"
+                class="form-control"
+                placeholder="Ask your question about environmental regulations..."
+            >
+
+            <button
+                class="btn btn-success"
+                type="button"
+                id="knowledge-send"
+                onclick="askKnowledgeAssistant()"
+            >
+                <i class="fas fa-paper-plane me-1"></i>
+                Ask
+            </button>
+        </div>
+
+    </div>
+</div>
+                <!-- Grievance Redressal Dashboard -->
+                <div id="grievance" class="tab-content">
+                    <div class="dashboard-title">
+                        <h2>Grievance Response System</h2>
+                        <p class="text-muted">Tracking and resolution of public complaints and grievances</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">TOTAL GRIEVANCES</div>
+                                    <div class="kpi-icon" style="background-color: var(--grievance);">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">2,845</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>18% from last month</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">RESOLVED</div>
+                                    <div class="kpi-icon" style="background-color: var(--accent);">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">2,318</div>
+                                <div class="kpi-trend trend-up">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>12% from last month</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">PENDING</div>
+                                    <div class="kpi-icon" style="background-color: var(--warning);">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">527</div>
+                                <div class="kpi-trend trend-down">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>8% from last month</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-3">
+                            <div class="kpi-card">
+                                <div class="kpi-header">
+                                    <div class="kpi-title">AVG. RESOLUTION TIME</div>
+                                    <div class="kpi-icon" style="background-color: var(--primary);">
+                                        <i class="fas fa-stopwatch"></i>
+                                    </div>
+                                </div>
+                                <div class="kpi-value">4.2 days</div>
+                                <div class="kpi-trend trend-down">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span>0.8 days from last month</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-4">
+                        <div class="chart-header">
+                            <div class="chart-title">Grievances by Category</div>
+                            <div class="chart-actions">
+                                <button class="chart-btn active">Current Month</button>
+                                <button class="chart-btn">Last 3 Months</button>
+                                <button class="chart-btn">YTD</button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="grievanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">Grievances by District</div>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>District</th>
+                                            <th>Total</th>
+                                            <th>Resolved</th>
+                                            <th>Pending</th>
+                                            <th>Resolution %</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Jaipur</td>
+                                            <td>485</td>
+                                            <td>425</td>
+                                            <td>60</td>
+                                            <td><span class="status-badge status-good">88%</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jodhpur</td>
+                                            <td>392</td>
+                                            <td>345</td>
+                                            <td>47</td>
+                                            <td><span class="status-badge status-good">88%</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Kota</td>
+                                            <td>318</td>
+                                            <td>265</td>
+                                            <td>53</td>
+                                            <td><span class="status-badge status-good">83%</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Bhilwara</td>
+                                            <td>285</td>
+                                            <td>225</td>
+                                            <td>60</td>
+                                            <td><span class="status-badge status-moderate">79%</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Alwar</td>
+                                            <td>198</td>
+                                            <td>152</td>
+                                            <td>46</td>
+                                            <td><span class="status-badge status-moderate">77%</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="ranking-card">
+                                <div class="ranking-title">Grievance Resolution Performance</div>
+                                <ul class="ranking-list">
+                                    <li class="ranking-item">
+                                        <div class="rank rank-1">1</div>
+                                        <div class="district-name">Udaipur</div>
+                                        <div class="district-score">94% Resolution</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-2">2</div>
+                                        <div class="district-name">Pali</div>
+                                        <div class="district-score">92% Resolution</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank rank-3">3</div>
+                                        <div class="district-name">Bikaner</div>
+                                        <div class="district-score">90% Resolution</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">4</div>
+                                        <div class="district-name">Ajmer</div>
+                                        <div class="district-score">88% Resolution</div>
+                                    </li>
+                                    <li class="ranking-item">
+                                        <div class="rank">5</div>
+                                        <div class="district-name">Sikar</div>
+                                        <div class="district-score">87% Resolution</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+// ========================================
+// RSPCB DEMO REGULATORY KNOWLEDGE BASE
+// ========================================
+
+const regulatoryKnowledge = [
+
+    // Plastic Waste Management
+    {
+        id: "pwm_recycler_registration",
+        category: "PWM",
+        keywords: [
+            "pwm recycler",
+            "plastic waste recycler",
+            "plastic recycler",
+            "recycler registration",
+            "registration of recycler",
+            "criteria for recycler",
+            "criteria for pwm recycler"
+        ],
+        question: "What are the requirements for registration of a plastic waste recycler?",
+        answer: `
+            <strong>Plastic Waste Recycler - Registration Requirements</strong><br><br>
+
+            A person recycling or processing plastic waste must apply to the
+            concerned State Pollution Control Board / Pollution Control Committee
+            for registration or renewal in <strong>Form II</strong>.<br><br>
+
+            The Rules also link registration/renewal with valid consent under the
+            <strong>Water (Prevention and Control of Pollution) Act, 1974</strong>
+            and the <strong>Air (Prevention and Control of Pollution) Act, 1981</strong>,
+            along with the registration specified under the applicable government
+            framework.<br><br>
+
+            The Board may grant registration after satisfying itself that the
+            applicant possesses appropriate facilities, technical capabilities
+            and equipment for safe handling of plastic waste.<br><br>
+
+            <strong>Source:</strong> Plastic Waste Management Rules, 2016 -
+            Rule 13(3), Rule 13(5) and Rule 13(7).
+        `
+    }
+
+,
+
+    // =====================================================
+    // SOLID WASTE MANAGEMENT
+    // =====================================================
+
+    {
+        id: "swm_waste_generator_duties",
+        category: "SWM",
+        keywords: [
+            "duties of waste generator",
+            "responsibility of waste generator",
+            "waste generator duties",
+            "solid waste segregation",
+            "segregation under swm",
+            "swm waste generator",
+            "how should solid waste be segregated",
+            "four waste streams",
+            "4 waste streams"
+        ],
+        question: "What are the duties of a waste generator under the SWM Rules?",
+        answer: `
+            <strong>Duties of a Waste Generator</strong><br><br>
+
+            Every waste generator must take measures to prevent or reduce
+            environmental pollution caused by solid waste.<br><br>
+
+            Waste must be segregated and stored at source in four separate
+            streams:<br>
+            1. Wet waste<br>
+            2. Dry waste<br>
+            3. Sanitary waste<br>
+            4. Special care waste<br><br>
+
+            The segregated waste must be handed over to authorised waste
+            pickers or waste collectors. Waste generators must not throw,
+            burn or bury solid waste on streets or in open public spaces,
+            drains or water bodies.<br><br>
+
+            Used sanitary waste must be securely wrapped and placed separately.
+            Construction and demolition waste and horticulture waste must also
+            be stored separately and managed according to the applicable
+            requirements.<br><br>
+
+            <strong>Source:</strong> Solid Waste Management Rules, 2026 -
+            Rule 5.
+        `
+    },
+
+    {
+        id: "swm_bulk_waste_generator",
+        category: "SWM",
+        keywords: [
+            "bulk waste generator",
+            "duties of bulk waste generator",
+            "responsibility of bulk waste generator",
+            "bulk generator registration",
+            "bulk waste annual return",
+            "bulk waste processing",
+            "extended bulk waste generator responsibility",
+            "ebwgr",
+            "swm bulk generator"
+        ],
+        question: "What are the responsibilities of a bulk waste generator?",
+        answer: `
+            <strong>Responsibilities of a Bulk Waste Generator</strong><br><br>
+
+            A bulk waste generator must register with the concerned local body
+            through the centralised online portal.<br><br>
+
+            Arrangements must be made for collection and handing over of dry
+            waste, sanitary waste and special care waste to the local body or
+            its authorised agency. Wet waste and horticulture waste must be
+            collected and processed in a decentralised manner through
+            composting, biomethanation or another approved technology.<br><br>
+
+            New bulk waste generators must set up and operate adequate wet-waste
+            processing facilities. Existing bulk waste generators unable to do
+            so must obtain exemption from the local body and procure the
+            applicable Extended Bulk Waste Generator Responsibility
+            certificates.<br><br>
+
+            Annual returns must be submitted by <strong>30 June</strong> every
+            year through the centralised online portal.<br><br>
+
+            <strong>Source:</strong> Solid Waste Management Rules, 2026 -
+            Rule 6.
+        `
+    },
+
+    // =====================================================
+    // E-WASTE MANAGEMENT
+    // =====================================================
+
+    {
+        id: "ewaste_return_relaxation",
+        category: "E-Waste",
+        keywords: [
+            "e-waste return deadline",
+            "e waste return deadline",
+            "extension for e-waste return",
+            "extension of return filing",
+            "relaxation of return filing",
+            "return filing timeline",
+            "nine months extension",
+            "9 months extension",
+            "rule 9a",
+            "e-waste report deadline"
+        ],
+        question: "Can the timeline for filing an E-Waste return be extended?",
+        answer: `
+            <strong>Relaxation of E-Waste Return-Filing Timeline</strong><br><br>
+
+            Yes. The Central Government may, by order, relax the period within
+            which a return or report must be filed under the E-Waste Management
+            Rules.<br><br>
+
+            Such relaxation may be provided where the Central Government is
+            satisfied that it is necessary in the public interest or for the
+            effective implementation of the Rules.<br><br>
+
+            The additional period cannot exceed <strong>nine months</strong>.
+            This provision applies to manufacturers, producers, refurbishers
+            and recyclers of electrical and electronic equipment and associated
+            components, consumables, parts or spares.<br><br>
+
+            <strong>Source:</strong> E-Waste (Management) Amendment Rules,
+            2024 - Rule 9A.
+        `
+    },
+
+    {
+        id: "ewaste_epr_certificate_price",
+        category: "E-Waste",
+        keywords: [
+            "epr certificate price",
+            "e-waste epr certificate price",
+            "e waste certificate price",
+            "epr certificate exchange",
+            "maximum epr price",
+            "minimum epr price",
+            "highest and lowest price",
+            "epr trading platform",
+            "exchange of epr certificates"
+        ],
+        question: "How is the price of an E-Waste EPR certificate determined?",
+        answer: `
+            <strong>E-Waste EPR Certificate Exchange Price</strong><br><br>
+
+            The Central Pollution Control Board is required to fix the highest
+            and lowest prices for exchange of Extended Producer Responsibility
+            certificates.<br><br>
+
+            The highest price is equal to <strong>100 percent</strong> of the
+            environmental compensation for non-fulfilment of the EPR obligation,
+            while the lowest price is equal to <strong>30 percent</strong> of
+            that environmental compensation.<br><br>
+
+            The exchange price between registered entities through the portal
+            must remain between these highest and lowest prices.<br><br>
+
+            <strong>Source:</strong> E-Waste (Management) Amendment Rules,
+            2024 - Rule 15(9) and Rule 15(10).
+        `
+    },
+
+    // =====================================================
+    // BIO-MEDICAL WASTE MANAGEMENT
+    // =====================================================
+
+    {
+        id: "bmw_occupier_duties",
+        category: "BMW",
+        keywords: [
+            "duties of occupier under bmw",
+            "biomedical waste occupier duties",
+            "bio-medical waste occupier",
+            "responsibility of hospital",
+            "responsibility of healthcare facility",
+            "hospital biomedical waste duties",
+            "bmw occupier responsibilities",
+            "biomedical waste storage"
+        ],
+        question: "What are the principal duties of an occupier under the BMW Rules?",
+        answer: `
+            <strong>Principal Duties of a Bio-Medical Waste Occupier</strong><br><br>
+
+            Every occupier must ensure that bio-medical waste is handled without
+            adversely affecting human health or the environment.<br><br>
+
+            The occupier must provide a safe, ventilated and secured location
+            within the premises for storing segregated bio-medical waste in the
+            prescribed coloured bags or containers.<br><br>
+
+            Laboratory waste, microbiological waste, blood samples and blood
+            bags must be pre-treated on-site through disinfection or
+            sterilisation before being sent to the common bio-medical waste
+            treatment facility.<br><br>
+
+            The occupier must also train relevant workers, provide appropriate
+            immunisation, maintain the bio-medical waste management register
+            and implement the prescribed bar-code system for bags or containers
+            sent outside the premises.<br><br>
+
+            <strong>Source:</strong> Bio-Medical Waste Management Rules, 2016 -
+            Rule 4.
+        `
+    },
+
+    {
+        id: "bmw_storage_duration",
+        category: "BMW",
+        keywords: [
+            "biomedical waste storage limit",
+            "bio-medical waste storage period",
+            "how long can biomedical waste be stored",
+            "48 hours biomedical waste",
+            "forty eight hours biomedical waste",
+            "untreated biomedical waste storage",
+            "bmw storage timeline"
+        ],
+        question: "How long can untreated bio-medical waste be stored?",
+        answer: `
+            <strong>Storage Period for Untreated Bio-Medical Waste</strong><br><br>
+
+            Untreated human anatomical waste, animal anatomical waste, soiled
+            waste and biotechnology waste must not ordinarily be stored beyond
+            <strong>48 hours</strong>.<br><br>
+
+            If storage beyond 48 hours becomes necessary, the occupier must
+            take appropriate measures to ensure that the waste does not
+            adversely affect human health or the environment. The prescribed
+            authority must also be informed, together with the reasons for the
+            extended storage.<br><br>
+
+            Bio-medical waste must be segregated into the prescribed containers
+            or bags at the point of generation before storage, transportation,
+            treatment and disposal.<br><br>
+
+            <strong>Source:</strong> Bio-Medical Waste Management Rules, 2016 -
+            Rule 8(2) and Rule 8(7).
+        `
+    },
+
+    // =====================================================
+    // HAZARDOUS AND OTHER WASTES
+    // =====================================================
+
+    {
+        id: "hazardous_packaging_labelling",
+        category: "Hazardous Waste",
+        keywords: [
+            "hazardous waste packaging",
+            "hazardous waste labelling",
+            "hazardous waste label",
+            "form 8 hazardous waste",
+            "packaging of hazardous waste",
+            "label hazardous waste container",
+            "weather proof label hazardous waste"
+        ],
+        question: "What are the packaging and labelling requirements for hazardous waste?",
+        answer: `
+            <strong>Packaging and Labelling of Hazardous Waste</strong><br><br>
+
+            An occupier handling hazardous or other waste, and the operator of
+            a treatment, storage and disposal facility, must ensure that the
+            waste is packaged suitably for safe handling, storage and
+            transportation.<br><br>
+
+            Packaging must follow the guidelines issued by the Central
+            Pollution Control Board from time to time. Labelling must be done
+            according to <strong>Form 8</strong>.<br><br>
+
+            The label must be made of non-washable material, be weather-proof
+            and be easily visible.<br><br>
+
+            <strong>Source:</strong> Hazardous and Other Wastes (Management and
+            Transboundary Movement) Rules, 2016 - Rule 17.
+        `
+    },
+
+    {
+        id: "hazardous_interstate_transport",
+        category: "Hazardous Waste",
+        keywords: [
+            "interstate transport hazardous waste",
+            "inter-state transport hazardous waste",
+            "hazardous waste noc",
+            "noc from both spcb",
+            "transport hazardous waste to another state",
+            "hazardous waste recycling transport",
+            "hazardous waste form 9",
+            "hazardous waste transporter information"
+        ],
+        question: "What is required for interstate transportation of hazardous waste?",
+        answer: `
+            <strong>Interstate Transportation of Hazardous Waste</strong><br><br>
+
+            Transportation must comply with the Hazardous and Other Wastes Rules,
+            the applicable rules under the Motor Vehicles Act, 1988, and
+            guidelines issued by the Central Pollution Control Board.<br><br>
+
+            The occupier must provide the transporter with information in
+            <strong>Form 9</strong> regarding the hazardous nature of the waste
+            and the measures to be taken during an emergency. Containers must
+            be labelled according to <strong>Form 8</strong>.<br><br>
+
+            Where hazardous or other waste is transported for final disposal
+            to a facility in another State, the sender must obtain a
+            <strong>No Objection Certificate from the State Pollution Control
+            Boards of both States</strong>.<br><br>
+
+            For interstate transportation for recycling, utilisation or
+            co-processing, the sender must intimate both State Pollution
+            Control Boards before handing over the waste to the transporter.<br><br>
+
+            <strong>Source:</strong> Hazardous and Other Wastes (Management and
+            Transboundary Movement) Rules, 2016 - Rule 18.
+        `
+    }
+
+];
+        // Knowledge Assistant suggested query
+function setKnowledgeQuery(question) {
+    const input = document.getElementById('knowledge-question');
+
+    if (input) {
+        input.value = question;
+        input.focus();
+    }
+}
+// Knowledge Assistant chat interaction
+function askKnowledgeAssistant() {
+
+    const input = document.getElementById('knowledge-question');
+    const chat = document.getElementById('chat-messages');
+
+    const question = input.value.trim();
+
+    if (!question) {
+        return;
+    }
+
+// Normalize text for flexible matching
+function normalizeText(text) {
+    return text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+const normalizedQuestion = normalizeText(question);
+
+let bestMatch = null;
+let bestScore = 0;
+
+// Search regulatory knowledge repository
+regulatoryKnowledge.forEach(item => {
+
+    let score = 0;
+
+    item.keywords.forEach(keyword => {
+
+        const normalizedKeyword = normalizeText(keyword);
+
+        // Strong match: complete keyword phrase appears
+        if (normalizedQuestion.includes(normalizedKeyword)) {
+            score += 10;
+        }
+
+        // Flexible match: count common meaningful words
+        const keywordWords = normalizedKeyword
+            .split(' ')
+            .filter(word => word.length > 3);
+
+        keywordWords.forEach(word => {
+            if (normalizedQuestion.includes(word)) {
+                score += 1;
+            }
+        });
+    });
+
+    if (score > bestScore) {
+        bestScore = score;
+        bestMatch = item;
+    }
+});
+
+// Prevent weak accidental matches
+if (bestScore < 3) {
+    bestMatch = null;
+}
+
+
+    // User message
+    let responseHTML = `
+        <div class="mb-3 text-end">
+            <div class="d-inline-block bg-success text-white rounded-3 px-3 py-2"
+                 style="max-width: 75%; text-align: left;">
+                ${escapeHtml(question)}
+            </div>
+        </div>
+    `;
+
+
+    // If a matching answer is found
+    if (bestMatch) {
+
+        responseHTML += `
+            <div class="mb-3">
+                <div class="d-inline-block bg-light border rounded-3 px-3 py-3"
+                     style="max-width: 90%; text-align: left;">
+
+                    <div class="mb-2">
+                        <i class="fas fa-robot me-2 text-success"></i>
+                        <strong>RSPCB Knowledge Assistant</strong>
+                    </div>
+
+                    ${bestMatch.answer}
+
+                </div>
+            </div>
+        `;
+
+    } else {
+
+        // No answer available in demo repository
+        responseHTML += `
+            <div class="mb-3">
+                <div class="d-inline-block bg-light border rounded-3 px-3 py-3"
+                     style="max-width: 90%; text-align: left;">
+
+                    <div class="mb-2">
+                        <i class="fas fa-robot me-2 text-success"></i>
+                        <strong>RSPCB Knowledge Assistant</strong>
+                    </div>
+
+                    I could not find a matching answer in the
+                    <strong>demo regulatory knowledge repository</strong>.
+                    <br><br>
+
+                    Please try a question relating to Plastic Waste,
+                    Solid Waste, E-Waste, Bio-Medical Waste or
+                    Hazardous Waste Management Rules.
+
+                </div>
+            </div>
+        `;
+    }
+
+
+    // Display the conversation
+    chat.innerHTML = responseHTML;
+
+    // Clear the input
+    input.value = '';
+}
+
+
+// Prevent user-entered HTML from being rendered
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('en-IN', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        // Update time immediately and then every second
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('show');
+        });
+
+        // Tab switching functionality
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Remove active class from all links and tab contents
+                document.querySelectorAll('.nav-link').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // Add active class to clicked link
+                this.classList.add('active');
+
+                // Show corresponding tab content
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+
+                // Close mobile sidebar after selection
+                if (window.innerWidth < 992) {
+                    document.getElementById('sidebar').classList.remove('show');
+                }
+            });
+        });
+
+        // Helper function to switch tabs (used for Quick Access links on Home)
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-link').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-tab') === tabId) {
+                    item.classList.add('active');
+                }
+            });
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+
+            // Close mobile sidebar after selection
+            if (window.innerWidth < 992) {
+                document.getElementById('sidebar').classList.remove('show');
+            }
+        }
+
+        // Initialize Charts
+        // Air Quality Chart
+        const aqiCtx = document.getElementById('aqiChart').getContext('2d');
+        const aqiChart = new Chart(aqiCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Average AQI',
+                    data: [145, 162, 138, 156, 172, 158, 142],
+                    borderColor: '#2980b9',
+                    backgroundColor: 'rgba(41, 128, 185, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'PM2.5 Level',
+                    data: [92, 105, 88, 98, 112, 96, 90],
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Pollution Level'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Water Quality Chart
+        const waterCtx = document.getElementById('waterChart').getContext('2d');
+        const waterChart = new Chart(waterCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Chambal', 'Banas', 'Luni', 'Mahi', 'Sabarmati'],
+                datasets: [{
+                    label: 'BOD (mg/L)',
+                    data: [4.2, 2.8, 5.6, 7.2, 6.4],
+                    backgroundColor: '#3498db',
+                    borderColor: '#2980b9',
+                    borderWidth: 1,
+                    borderRadius: 8 // ← adds rounded corners to bars
+                }, {
+                    label: 'COD (mg/L)',
+                    data: [18, 12, 24, 32, 28],
+                    backgroundColor: '#e74c3c',
+                    borderColor: '#c0392b',
+                    borderWidth: 1,
+                    borderRadius: 8 // ← adds rounded corners to bars
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Concentration (mg/L)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Waste Management Chart
+        const wasteCtx = document.getElementById('wasteChart').getContext('2d');
+        const wasteChart = new Chart(wasteCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Biodegradable', 'Recyclable', 'Inert', 'Hazardous', 'Others'],
+                datasets: [{
+                    data: [55, 15, 18, 5, 7],
+                    backgroundColor: [
+                        '#27ae60',
+                        '#3498db',
+                        '#95a5a6',
+                        '#e74c3c',
+                        '#f39c12'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+
+        // E-Waste Chart
+        const ewasteCtx = document.getElementById('ewasteChart').getContext('2d');
+        const ewasteChart = new Chart(ewasteCtx, {
+            type: 'bar',
+            data: {
+                labels: ['IT Equipment', 'Consumer Electronics', 'Large Household', 'Small Household', 'Lighting', 'Toys'],
+                datasets: [{
+                    label: 'E-Waste Generated (TPA)',
+                    data: [4850, 3250, 2850, 2150, 980, 420],
+                    backgroundColor: '#16a085',
+                    borderColor: '#1abc9c',
+                    borderWidth: 1,
+                    borderRadius: 8 // ← adds rounded corners to bars
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Tons Per Annum'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Biomedical Waste Chart
+        const biomedicalCtx = document.getElementById('biomedicalChart').getContext('2d');
+        const biomedicalChart = new Chart(biomedicalCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Incinerated', 'Autoclaved', 'Chemical', 'Other Methods'],
+                datasets: [{
+                    data: [65, 20, 10, 5],
+                    backgroundColor: [
+                        '#c0392b',
+                        '#3498db',
+                        '#f39c12',
+                        '#7f8c8d'
+                    ],
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+
+        // Groundwater Chart
+        const groundwaterCtx = document.getElementById('groundwaterChart').getContext('2d');
+        const groundwaterChart = new Chart(groundwaterCtx, {
+            type: 'line',
+            data: {
+                labels: ['2018', '2019', '2020', '2021', '2022', '2023'],
+                datasets: [{
+                    label: 'Average Groundwater Level (m)',
+                    data: [18.5, 17.8, 16.9, 16.2, 15.6, 14.9],
+                    borderColor: '#2980b9',
+                    backgroundColor: 'rgba(41, 128, 185, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        reverse: true,
+                        title: {
+                            display: true,
+                            text: 'Depth to Water Level (m)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Grievance Chart
+        const grievanceCtx = document.getElementById('grievanceChart').getContext('2d');
+        const grievanceChart = new Chart(grievanceCtx, {
+            type: 'polarArea',
+            data: {
+                labels: ['Air Pollution', 'Water Pollution', 'Noise Pollution', 'Solid Waste', 'Biomedical Waste', 'Others'],
+                datasets: [{
+                    data: [35, 25, 15, 12, 8, 5],
+                    backgroundColor: [
+                        '#2980b9',
+                        '#3498db',
+                        '#f39c12',
+                        '#8e44ad',
+                        '#c0392b',
+                        '#7f8c8d'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+
+        // Chart period switching for Air Quality
+        document.querySelectorAll('#air .chart-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('#air .chart-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+
+                // In a real app, this would fetch new data based on the selected period
+                // For demo, we'll just update the chart with random data
+                const days = this.textContent === '7 Days' ? 7 :
+                    this.textContent === '1 Month' ? 30 : 180;
+
+                // Generate random data for the selected period
+                const labels = [];
+                const aqiData = [];
+                const pmData = [];
+
+                for (let i = 0; i < days; i++) {
+                    labels.push(`Day ${i + 1}`);
+                    aqiData.push(Math.floor(Math.random() * 100) + 50);
+                    pmData.push(Math.floor(Math.random() * 80) + 30);
+                }
+
+                aqiChart.data.labels = labels;
+                aqiChart.data.datasets[0].data = aqiData;
+                aqiChart.data.datasets[1].data = pmData;
+                aqiChart.update();
+            });
+        });
+    </script>
+    <!-- Accessibility Toolbar -->
+    <div id="accessibilityToolbar" class="accessibility-toolbar" style="display:none;">
+        <div class="accessibility-toolbar-inner">
+            <span class="accessibility-title">Accessibility Options</span>
+            <button class="accessibility-close" id="accessibilityCloseBtn" title="Close">&times;</button>
+            <div class="accessibility-controls">
+                <button class="access-btn" data-a="bigger"><b style="font-size:30px">A+</b><span>Bigger Text</span></button>
+                <button class="access-btn" data-a="smaller"><b style="font-size:30px">A-</b><span>Smaller Text</span></button>
+                <button class="access-btn" data-a="spacing"><img src="images/text-spacing.svg" style="width:30px;height:30px"><span>Text Spacing</span></button>
+                <button class="access-btn" data-a="lines"><img src="images/line-height.svg" style="width:30px;height:30px"><span>Line Height</span></button>
+                <button class="access-btn" data-a="links"><img src="images/link-icon.svg" style="width:30px;height:30px"><span>Highlight Links</span></button>
+                <button class="access-btn" data-a="dys"><img src="images/df-icon.svg" style="width:30px;height:30px"><span>Dyslexia Friendly</span></button>
+                <button class="access-btn" data-a="cursor"><img src="images/cursor.svg" style="width:30px;height:30px"><span>Big Cursor</span></button>
+                <button class="access-btn" data-a="contrast"><b style="font-size:30px">&#9681;</b><span>High Contrast</span></button>
+                <button class="access-btn" data-a="gray"><b style="font-size:30px">&#9724;</b><span>Grayscale</span></button>
+                <button class="access-btn" data-a="tts"><img src="images/speech.svg" style="width:30px;height:30px"><span>Text to Speech</span></button>
+                <button class="access-btn" data-a="reset"><b style="font-size:26px">&#8634;</b><span>Reset All</span></button>
+            </div>
+            <div class="a11y-note" id="a11yNote"></div>
+        </div>
+    </div>
+    <!-- End Accessibility Toolbar -->
+
+    <style>
+        .accessibility-toolbar {
+            position: fixed;
+            top: 0px;
+            right: 0;
+            width: 531px;
+            background: #dfdfdf;
+            color: #fff;
+            z-index: 9999;
+            box-shadow: 0 2px 12px #39ef7440;
+            padding: 0;
+            border-radius: 15px 0px 0px 15px;
+            border: 5px solid #ffffff;
+        }
+
+        .accessibility-toolbar-inner {
+            display: block;
+            align-items: center;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .accessibility-title {
+            font-weight: 600;
+            font-size: 1.08em;
+            margin-right: 24px;
+            background: #005736;
+            width: 100%;
+            display: block;
+            padding: 10px;
+            border-radius: 10px 0px 0px 0px;
+        }
+
+        .accessibility-controls {
+            width: 100%;
+            padding: 12px 20px;
+        }
+
+        .accessibility-controls .access-btn {
+            background: #ffffff;
+            color: #222;
+            border: none;
+            border-radius: 6px;
+            margin: 8px 6px;
+            padding: 23px 5px;
+            font-size: 1.08em;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            font-family: "Noto Sans", sans-serif;
+            width: 145px
+        }
+
+        .accessibility-controls span {
+            font-size: 14px;
+            display: block;
+            text-align: center;
+            font-family: "Noto Sans", sans-serif;
+        }
+
+
+        .accessibility-controls .access-btn:hover {
+            background: #dbffe9;
+        }
+
+        .accessibility-close {
+            position: absolute;
+            right: 12px;
+            top: 8px;
+            background: transparent;
+            color: #fff;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        body.high-contrast {
+            background: #000 !important;
+            color: #fff !important;
+        }
+
+        body.high-contrast a,
+        body.high-contrast .access-btn {
+            color: #fff !important;
+            background: #000 !important;
+            border-color: #fff !important;
+        }
+
+        body.grayscale {
+            filter: grayscale(1) !important;
+        }
+
+        .accessibility-controls .access-btn.active {
+            background: #dbffe9 !important;
+            border: 2px solid #39ef74;
+            box-shadow: 0 0 8px #39ef7480;
+        }
+    </style>
+
+    <script>
+        /* shared accessibility engine (parent page + every embedded frame) */
+(function(){
+  const CSS=`
+html.a11y-spacing body *{letter-spacing:.08em!important;word-spacing:.16em!important}
+html.a11y-lines body *{line-height:1.9!important}
+html.a11y-links a,html.a11y-links button,html.a11y-links [onclick],html.a11y-links .nav-link,html.a11y-links [data-go]{outline:2px solid #f2c200!important;outline-offset:1px;background-color:#fff8d6!important;color:#1c2a23!important}
+html.a11y-dys body,html.a11y-dys body *{font-family:Verdana,"Comic Sans MS",Tahoma,sans-serif!important;letter-spacing:.04em}
+html.a11y-cursor,html.a11y-cursor *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l15 10-7 1 4 8-3 1-4-8-5 5z' fill='%23000' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E") 4 2,auto!important}
+html.a11y-contrast body{filter:contrast(1.35) saturate(1.25)}
+html.a11y-gray body{filter:grayscale(1)}
+html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
+`;
+  function ensureStyle(){if(document.getElementById('a11y-css'))return;const s=document.createElement('style');s.id='a11y-css';s.textContent=CSS;(document.head||document.documentElement).appendChild(s)}
+  let state={scale:1,spacing:0,lines:0,links:0,dys:0,cursor:0,contrast:0,gray:0,tts:0};
+  function apply(st){state=Object.assign({},state,st);ensureStyle();const h=document.documentElement;
+    if(window.self===window.top)h.style.zoom=state.scale===1?'':String(state.scale);
+    [['spacing','a11y-spacing'],['lines','a11y-lines'],['links','a11y-links'],['dys','a11y-dys'],['cursor','a11y-cursor'],['contrast','a11y-contrast'],['gray','a11y-gray']].forEach(([k,c])=>h.classList.toggle(c,!!state[k]));
+    if(!state.tts&&window.speechSynthesis)speechSynthesis.cancel();}
+  function speak(t){if(!state.tts||!window.speechSynthesis||!t)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.slice(0,600));u.lang='en-IN';u.rate=1;speechSynthesis.speak(u)}
+  document.addEventListener('mouseup',()=>{if(!state.tts)return;const sel=String(window.getSelection()||'').trim();if(sel)speak(sel)});
+  document.addEventListener('click',e=>{if(!state.tts)return;if(String(window.getSelection()||'').trim())return;const el=e.target.closest('h1,h2,h3,h4,p,li,td,th,button,a,.pt,.pd,.kpi,.alert');if(el)speak(el.innerText)});
+  window.addEventListener('message',e=>{if(e.data&&e.data.a11y)apply(e.data.a11y)});
+  window.EIP_A11Y={apply,get:()=>state};
+})();
+
+        (function(){
+          const tb=document.getElementById('accessibilityToolbar');
+          const open=()=>{tb.style.display='block'};document.getElementById('accessibilityCloseBtn').onclick=()=>{tb.style.display='none'};
+          document.querySelectorAll('.a11y-open').forEach(b=>b.addEventListener('click',open));
+          const ab=document.getElementById('accessibilityBtn');if(ab)ab.addEventListener('click',open);
+          const note=document.getElementById('a11yNote');
+          const sync=st=>{EIP_A11Y.apply(st);document.querySelectorAll('iframe').forEach(f=>{try{f.contentWindow.postMessage({a11y:EIP_A11Y.get()},'*')}catch(e){}});
+            const s=EIP_A11Y.get();document.querySelectorAll('.access-btn[data-a]').forEach(b=>{const k=b.dataset.a;b.classList.toggle('active',k==='bigger'?s.scale>1:k==='smaller'?s.scale<1:!!s[k])});
+            note.textContent=s.tts?'Text to Speech is on: click any heading, row or paragraph, or select text, to hear it read aloud.':'';
+            try{localStorage.setItem('eip_a11y',JSON.stringify(s))}catch(e){}};
+          document.querySelectorAll('.access-btn[data-a]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.a,s=EIP_A11Y.get();
+            if(k==='bigger')sync({scale:Math.min(1.3,+(s.scale+.1).toFixed(2))});
+            else if(k==='smaller')sync({scale:Math.max(.8,+(s.scale-.1).toFixed(2))});
+            else if(k==='reset')sync({scale:1,spacing:0,lines:0,links:0,dys:0,cursor:0,contrast:0,gray:0,tts:0});
+            else{const o={};o[k]=s[k]?0:1;sync(o);if(k==='tts'&&o.tts&&window.speechSynthesis){const u=new SpeechSynthesisUtterance('Text to speech is on.');u.lang='en-IN';speechSynthesis.speak(u)}}}));
+          // new frames get the current settings when they load
+          document.addEventListener('load',e=>{if(e.target.tagName==='IFRAME'){try{e.target.contentWindow.postMessage({a11y:EIP_A11Y.get()},'*')}catch(x){}}},true);
+          try{const saved=JSON.parse(localStorage.getItem('eip_a11y')||'null');if(saved)sync(saved)}catch(e){}
+        })();
+    </script>
+    <script src="https://translation-plugin.bhashini.co.in/v2/website_translation_utility.js" data-pos-x="100"
+        data-pos-y="100"></script>
+
+
+<footer class="pfoot">
+  <div class="pfoot-in">
+    <div class="pf-brand"><img src="images/logo.png" alt=""><div><b>Environmental Intelligence Platform</b><span>Rajasthan State Pollution Control Board</span><span>राजस्थान राज्य प्रदूषण नियंत्रण मंडल</span></div></div>
+    <div><h4>Modules</h4><div style="display:grid;grid-template-columns:1fr 1fr;column-gap:18px"><div><a onclick="switchTab('home');window.scrollTo(0,0)">Command centre</a><a onclick="switchTab('map');window.scrollTo(0,0)">Map &amp; priority zones</a><a onclick="switchTab('plan');window.scrollTo(0,0)">Inspection planner</a><a onclick="switchTab('consent');window.scrollTo(0,0)">Consent management</a><a onclick="switchTab('fac');window.scrollTo(0,0)">Facility 360</a><a onclick="switchTab('lab');window.scrollTo(0,0)">Laboratory &amp; samples</a><a onclick="switchTab('programme');window.scrollTo(0,0)">Programme tracker</a></div><div><a onclick="switchTab('air');window.scrollTo(0,0)">Air quality</a><a onclick="switchTab('water');window.scrollTo(0,0)">Water &amp; CETPs</a><a onclick="switchTab('waste');window.scrollTo(0,0)">Waste &amp; BMW</a><a onclick="switchTab('river');window.scrollTo(0,0)">River monitor</a><a onclick="switchTab('grievance');window.scrollTo(0,0)">Grievances</a><a onclick="switchTab('ngt');window.scrollTo(0,0)">NGT &amp; legal cases</a><a onclick="switchTab('knowledge');window.scrollTo(0,0)">Regulatory Knowledge Assistant</a></div></div></div>
+    <div><h4>Data sources</h4><div class="pf-ds"><i></i>Online consent system</div><div class="pf-ds"><i></i>OCEMS (industry stack &amp; effluent)</div><div class="pf-ds"><i></i>Ambient air stations (CAAQMS)</div><div class="pf-ds"><i></i>Satellite fire data (NASA FIRMS)</div><div class="pf-ds"><i></i>Grievance portal</div><div class="pf-ds"><i></i>Laboratory information system</div><div style="font-size:12.5px;color:#5d6b63;margin-top:6px">Shown as connected for demonstration</div></div>
+    <div class="pf-about"><h4>About this demo</h4><p>A concept demo illustrating how RSPCB's existing data could be brought into one platform for monitoring, prioritisation and action.</p><p>All units, readings, applications, complaints and locations shown are <b>synthetic</b>. They do not represent actual RSPCB data or any real facility. This is not an operational system.</p></div>
+  </div>
+  <div class="pfoot-bar"><span>Environmental Intelligence Platform · Concept demo</span><span>Concept demonstration · for discussion purposes only</span></div>
+</footer>
+<script>
+/* ===== Merged platform wiring (sections, tabs, embedded modules) ===== */
+const EIP_SECTIONS={
+  home:[['Command centre','platform.html?embed=1#home','new'],['Modules','__own__','']],
+  map:[['Priority zones','platform.html?embed=1#map','new'],['GIS hotspots','GIS.html',''],['District AQI','district-wise.html','']],
+  plan:[['Inspection planner','platform.html?embed=1#plan','new']],
+  consent:[['Overview','Consent-Management.html',''],['Pipeline &amp; renewals','platform.html?embed=1#consent','new']],
+  fac:[['Facility 360','platform.html?embed=1#fac','new']],
+  programme:[['Programme tracker','project-moniter.html','']],
+  river:[['River monitor','platform.html?embed=1#river','new']],
+  ngt:[['Case tracker','platform.html?embed=1#ngt','new']],
+  lab:[['Laboratory &amp; samples','platform.html?embed=1#lab','new']],
+  air:[['Overview','__own__',''],['AQI forecast','Predicted-air-quality.html','']],
+  water:[['Overview','__own__',''],['Analysis: CETPs &amp; rivers','platform.html?embed=1#water','new']],
+  waste:[['Overview','__own__',''],['Analysis: waste &amp; BMW tracking','platform.html?embed=1#waste','new']],
+  biomedical:[['Overview','__own__',''],['Analysis: BMW reconciliation','platform.html?embed=1#waste','new']],
+  grievance:[['Overview','__own__',''],['Analysis: register &amp; clusters','platform.html?embed=1#griev','new']],
+  knowledge:[['Rules assistant','Regulatory_Assistant.html?embed=1','new']]
+};
+const VIEW2TAB={home:['home',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
+function eipBuild(){
+  // Grievance section is accidentally nested inside the Knowledge section (unclosed tags); move it back
+  {const mc=document.querySelector('.main-content');document.querySelectorAll('.tab-content').forEach(t=>{if(t.parentElement!==mc)mc.appendChild(t)})}
+  Object.entries(EIP_SECTIONS).forEach(([sec,tabs])=>{
+    const box=document.getElementById(sec);if(!box||box.dataset.eip)return;box.dataset.eip=1;
+    const own=[...box.childNodes];box.innerHTML='';
+    if(tabs.length>1){const bar=document.createElement('div');bar.className='eip-tabs';
+      tabs.forEach(([lbl],i)=>{const b=document.createElement('button');b.innerHTML=lbl;b.onclick=()=>eipShow(sec,i);bar.appendChild(b)});box.appendChild(bar)}
+    tabs.forEach(([lbl,src],i)=>{const p=document.createElement('div');p.className='eip-pane';p.dataset.i=i;
+      if(src==='__own__')own.forEach(n=>p.appendChild(n));else{const f=document.createElement('iframe');f.className='eip-frame';f.dataset.src=src;f.title=lbl.replace(/&amp;/g,'&');p.appendChild(f)}
+      box.appendChild(p)});
+    eipShow(sec,0,null,sec==='home');
+  });
+}
+function eipShow(sec,i,hash,load=true){
+  const box=document.getElementById(sec);if(!box)return;
+  box.querySelectorAll('.eip-tabs button').forEach((b,k)=>b.classList.toggle('on',k===i));
+  box.querySelectorAll('.eip-pane').forEach((p,k)=>{p.classList.toggle('on',k===i);if(k===i){const f=p.querySelector('iframe');
+    if(f&&load){let src=f.dataset.src;if(hash)src=src.split('#')[0]+'#'+hash;if(!f.getAttribute('src')||hash)f.setAttribute('src',src)}
+    if(sec==='air'&&k===0&&window.aqiChart)setTimeout(()=>aqiChart.resize(),50)}});
+}
+window.addEventListener('message',e=>{const d=e.data;if(d&&d.eipH){document.querySelectorAll('iframe.eip-frame').forEach(f=>{if(f.contentWindow===e.source)f.style.height=d.eipH+'px'});return}
+  if(!d||!d.eip)return;const m=VIEW2TAB[d.view];if(!m)return;
+  const o=d.opts||{};let arg='';if(d.view==='fac'&&o.id)arg=':'+o.id;if(d.view==='map'){if(o.zone)arg=':'+o.zone;else if(o.llStr)arg=':'+o.llStr}if(d.view==='river'&&o.river)arg=':'+o.river;if(d.view==='ngt'&&o.case)arg=':'+o.case;if(d.view==='lab'&&o.id)arg=':'+o.id;if(d.view==='water'&&o.cetp)arg=':'+o.cetp;
+  switchTab(m[0]);eipShow(m[0],m[1],d.view+arg);window.scrollTo(0,0);});
+{const ft=document.querySelector('footer.pfoot');if(ft)document.body.appendChild(ft)}
+function eipPushView(){document.querySelectorAll('iframe.eip-frame').forEach(f=>{if(!f.offsetParent||!f.contentWindow)return;const r=f.getBoundingClientRect();const y0=Math.max(0,-r.top),y1=Math.min(r.height,innerHeight-r.top);if(y1<=y0)return;try{f.contentWindow.postMessage({eipView:{y0:Math.round(y0),y1:Math.round(y1)}},'*')}catch(e){}})}
+addEventListener('scroll',eipPushView,{passive:true});addEventListener('resize',eipPushView);setInterval(eipPushView,600);
+eipBuild();
+document.querySelectorAll('.nav-link[data-tab]').forEach(l=>l.addEventListener('click',()=>{const sec=l.dataset.tab;const box=document.getElementById(sec);if(!box||!box.dataset.eip)return;const on=[...box.querySelectorAll('.eip-pane')].findIndex(p=>p.classList.contains('on'));eipShow(sec,Math.max(0,on))}));
+</script>
+</body>
+
+</html>

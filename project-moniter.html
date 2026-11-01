@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Progress Table</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+
+    <style>
+        body {
+            background: #0b6b3a15;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        :root {
+            --primary: #0b6b3a;
+            --secondary: #0b6b3a;
+            --accent: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #7f8c8d;
+            --water: #3498db;
+            --waste: #8e44ad;
+            --ewaste: #16a085;
+            --biomedical: #c0392b;
+            --groundwater: #2980b9;
+            --grievance: #d35400;
+        }
+
+        /*********navbar***************/
+
+        /* Header Styles */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white !important;
+            font-weight: 600;
+        }
+
+        .logo {
+            width: 45px;
+            height: 45px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .time-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: white;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /************dashboard-header*********/
+        .dashboard-header {
+            color: var(--primary);
+            padding: 20px 0 10px 6px;
+            border-radius: 8px;
+            margin: 0 20px 0 0;
+        }
+
+        .dashboard-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+        .dashboard-header p {
+            font-size: 1rem;
+            font-weight: 100;
+        }
+
+        /***************************/
+
+        /**********tile************/
+
+        .card {
+            border-radius: 12px !important;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        }
+
+        .card .one {
+            background-color: #d2a02a;
+            padding: 8px;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            border: 5px solid #fff;
+        }
+
+
+
+        .card .two {
+            background-color: #00add8;
+            padding: 8px;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            border: 5px solid #fff;
+        }
+
+        .card .three {
+            background-color: #6dbf46;
+            padding: 8px;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            border: 5px solid #fff;
+        }
+
+        .card .four {
+            background-color: #ef402a;
+            padding: 8px;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            border: 5px solid #fff;
+        }
+
+        /*************four-tile**********/
+
+        .stat-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .stat-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #111;
+        }
+
+        .stat-change {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .text-success {
+            color: #2eb872 !important;
+        }
+
+        .text-danger {
+            color: #ff6f61 !important;
+        }
+
+        .chart-area {
+            height: 40px;
+            width: 100%;
+            border-radius: 0 0 15px 15px;
+        }
+
+        /* Gradient backgrounds */
+        /* .bg-air {
+            background: linear-gradient(180deg, rgba(44, 125, 192, 0.3) 0%, rgba(44, 125, 192, 0.05) 100%);
+        }
+
+        .bg-water {
+            background: linear-gradient(180deg, rgba(0, 168, 255, 0.3) 0%, rgba(0, 168, 255, 0.05) 100%);
+        }
+
+        .bg-waste {
+            background: linear-gradient(180deg, rgba(255, 111, 97, 0.3) 0%, rgba(255, 111, 97, 0.05) 100%);
+        }
+
+        .bg-industries {
+            background: linear-gradient(180deg, rgba(46, 184, 114, 0.3) 0%, rgba(46, 184, 114, 0.05) 100%);
+        } */
+
+        /******************************/
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 1rem;
+            margin: 2rem auto;
+            max-width: 100%;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            border-bottom: 3px solid #e9ecef;
+            padding-bottom: 0.5rem;
+        }
+
+        .table-title {
+            color: #2c7dc0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            width: 45px;
+            height: 45px;
+            background-color: #2c7dc0;
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .header-btn i {
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .header-btn:hover {
+            background-color: #1f5c8c;
+            transform: translateY(-2px);
+        }
+
+        .table-wrapper {
+            position: relative;
+            overflow: auto;
+            max-height: 600px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th,
+        td {
+            padding: 8px 12px;
+            text-align: center;
+            border-right: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
+            white-space: nowrap;
+            background: white;
+        }
+
+        thead th {
+            background: #2c7dc0;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Freeze first column */
+        th:first-child,
+        td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background: white;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        thead th:first-child {
+            z-index: 15;
+            background: #2c7dc0;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr:hover {
+            background-color: #e3f2fd;
+        }
+
+        th[colspan] {
+            background: #2c7dc0 !important;
+            font-size: 0.95rem;
+        }
+
+        .table-wrapper .ongoing {
+            background-color: #8b7eff1a;
+            color: #8b7eff;
+            font-size: 10px;
+            padding: 4px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .table-wrapper .delay {
+            background-color: #f842381a;
+            color: #f84238;
+            font-size: 10px;
+            padding: 4px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        /***************footer*****************/
+
+        .footer {
+            background-color: var(--footer-bg);
+            border-radius: 6px;
+        }
+
+        .footer .meri-life-logo {
+            height: 5rem;
+            margin-bottom: 12px;
+        }
+
+        .footer .visitors {
+            background-color: var(--primary);
+            color: #fff;
+            font-size: 20px;
+            letter-spacing: 1px;
+            font-weight: 500;
+            padding: 6px 8px;
+            border-radius: 8px;
+            width: auto;
+            text-align: center;
+        }
+
+        .footer h4 {
+            font-size: 18px;
+            color: var(--primary);
+        }
+
+        .footer h4::after {
+            content: "";
+            border-bottom: 1px solid var(--primary);
+            width: 50px;
+            display: block;
+            margin-left: 0px;
+            height: 5px;
+        }
+
+        .footer ul {
+            list-style: none;
+            padding: 0;
+            font-size: 14px;
+        }
+
+        .footer ul li a {
+            text-decoration: none;
+            font-size: 14px;
+            color: #505050;
+            line-height: 2;
+        }
+
+        .footer ul li a:hover {
+            color: var(--primary);
+        }
+
+        .footer .footer-text p {
+            font-size: 14px;
+        }
+
+        .footer .footer-texttwo p {
+            font-size: 14px;
+        }
+
+        .footer .footer-texttwo a {
+            text-decoration: none;
+        }
+
+        .footer-copyright {
+            background-color: var(--primary);
+            color: #fff;
+            padding: 8px 16px;
+            text-align: center;
+        }
+
+        p.footer-copyright-text {
+            margin-bottom: 0;
+            font-size: 16px;
+        }
+
+        .footer-copyright-link {
+            color: #fff;
+            text-decoration: none;
+        }
+    </style>
+<script>if(window.self!==window.top)document.documentElement.classList.add('in-frame');</script>
+<style>.in-frame body>nav.navbar,.in-frame body>section.footer{display:none!important}
+.in-frame body{background:transparent!important}</style>
+<script>if(window.self!==window.top){let last=0;const send=()=>{const h=Math.ceil(document.documentElement.scrollHeight);if(Math.abs(h-last)>4){last=h;parent.postMessage({eipH:h},'*')}};window.addEventListener('load',()=>{send();new ResizeObserver(send).observe(document.body)});setInterval(send,1000)}</script>
+<style>.in-frame,.in-frame body{overflow:hidden!important}</style>
+<script>/* shared accessibility engine (parent page + every embedded frame) */
+(function(){
+  const CSS=`
+html.a11y-spacing body *{letter-spacing:.08em!important;word-spacing:.16em!important}
+html.a11y-lines body *{line-height:1.9!important}
+html.a11y-links a,html.a11y-links button,html.a11y-links [onclick],html.a11y-links .nav-link,html.a11y-links [data-go]{outline:2px solid #f2c200!important;outline-offset:1px;background-color:#fff8d6!important;color:#1c2a23!important}
+html.a11y-dys body,html.a11y-dys body *{font-family:Verdana,"Comic Sans MS",Tahoma,sans-serif!important;letter-spacing:.04em}
+html.a11y-cursor,html.a11y-cursor *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l15 10-7 1 4 8-3 1-4-8-5 5z' fill='%23000' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E") 4 2,auto!important}
+html.a11y-contrast body{filter:contrast(1.35) saturate(1.25)}
+html.a11y-gray body{filter:grayscale(1)}
+html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
+`;
+  function ensureStyle(){if(document.getElementById('a11y-css'))return;const s=document.createElement('style');s.id='a11y-css';s.textContent=CSS;(document.head||document.documentElement).appendChild(s)}
+  let state={scale:1,spacing:0,lines:0,links:0,dys:0,cursor:0,contrast:0,gray:0,tts:0};
+  function apply(st){state=Object.assign({},state,st);ensureStyle();const h=document.documentElement;
+    if(window.self===window.top)h.style.zoom=state.scale===1?'':String(state.scale);
+    [['spacing','a11y-spacing'],['lines','a11y-lines'],['links','a11y-links'],['dys','a11y-dys'],['cursor','a11y-cursor'],['contrast','a11y-contrast'],['gray','a11y-gray']].forEach(([k,c])=>h.classList.toggle(c,!!state[k]));
+    if(!state.tts&&window.speechSynthesis)speechSynthesis.cancel();}
+  function speak(t){if(!state.tts||!window.speechSynthesis||!t)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.slice(0,600));u.lang='en-IN';u.rate=1;speechSynthesis.speak(u)}
+  document.addEventListener('mouseup',()=>{if(!state.tts)return;const sel=String(window.getSelection()||'').trim();if(sel)speak(sel)});
+  document.addEventListener('click',e=>{if(!state.tts)return;if(String(window.getSelection()||'').trim())return;const el=e.target.closest('h1,h2,h3,h4,p,li,td,th,button,a,.pt,.pd,.kpi,.alert');if(el)speak(el.innerText)});
+  window.addEventListener('message',e=>{if(e.data&&e.data.a11y)apply(e.data.a11y)});
+  window.EIP_A11Y={apply,get:()=>state};
+})();
+</script>
+<style id="eip-type">/* ===== EIP shared type system: one heading → subheading → card → KPI pattern on every screen ===== */
+:root{--eip-font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;--eip-head:#1f2d27;--eip-muted:#5d6b63;--eip-accent:#0b6b3a;--eip-line:#e3ebe6;--eip-shadow:0 2px 10px rgba(16,60,38,.06)}
+/* T1 page title · T2 subtitle · T3 card title · K1 KPI label · K2 KPI value · K3 KPI note · TH table header */
+.dashboard-header.eip-page h2{font-size:28px!important;font-weight:600!important;color:var(--eip-head)!important;letter-spacing:-.2px}
+.dashboard-header h2{font-size:18px;font-weight:600!important;color:var(--eip-head)!important}
+.table-title{font-size:18px!important;font-weight:600!important;color:var(--eip-head)!important}
+.table-title i{color:var(--eip-accent)!important}
+.stat-title{font-size:12.5px!important;font-weight:600!important;text-transform:uppercase;letter-spacing:.05em;color:var(--eip-muted)!important}
+.stat-value{font-size:22px!important;font-weight:700!important;color:var(--eip-head)!important}
+.stat-change{font-size:13px!important}
+.stat-card,.card{border-radius:12px!important;border:1px solid var(--eip-line)!important;box-shadow:var(--eip-shadow)!important}
+thead th,th[colspan],thead th:first-child{background:#f3f7f5!important;color:var(--eip-muted)!important;font-size:12px!important;font-weight:600!important;text-transform:uppercase;letter-spacing:.04em}
+.header-btn{background-color:var(--eip-accent)!important}
+.in-frame body>.container{max-width:none!important;padding-left:0!important;padding-right:0!important}
+.dashboard-h,.dashboard-header{padding-left:0!important}
+.numbers p{font-size:12.5px!important;font-weight:600!important;text-transform:uppercase!important;letter-spacing:.05em;color:var(--eip-muted)!important;margin-bottom:4px!important}
+.numbers h5,.numbers h5 span{font-size:28px!important;font-weight:700!important}
+</style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <div class="logo">
+                    <img src="./images/logo.png" class="img-fluid" />
+                </div>
+                <div class="header-title">
+                    <div>राजस्थान राज्य प्रदूषण नियंत्रण बोर्ड</div>
+                    <small class="d-none d-md-block">Rajasthan State Pollution Control Board</small>
+                </div>
+            </a>
+            <div class="header-controls ms-auto">
+                <div class="time-display">
+                    <span id="current-time">Tue, 4 Nov, 2025, 08:53:37 pm</span>
+                </div>
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <span class="d-none d-md-inline">Admin User</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header eip-page">
+            <div class="row">
+                <div class="col-md-8">
+                    <h2>Environmental Monitoring Dashboard</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4 col-md-6 col-12">
+                <div class="mb-3 card">
+                    <div class="p-3 card-body">
+                        <div class="d-flex flex-row-reverse align-items-center justify-content-between">
+                            <div class="text-center rounded-circle one">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24"
+                                    fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M21 12a9 9 0 1 1-9-9" />
+                                    <polyline points="21 3 21 12 12 12" />
+                                </svg>
+                            </div>
+                            <div class="">
+                                <div class="numbers">
+                                    <p class="mb-0 text-sm text-capitalize font-weight-bold">
+                                        Ongoing
+                                    </p>
+                                    <h5 class="mb-0">
+                                        <span id="countSpan" style="color: #d2a02a; font-weight: bold">87.5%</span>
+                                    </h5>
+                                    <!-- <span style="font-size: 0.9rem;">Onging Project</span> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12">
+                <div class="mb-3 card">
+                    <div class="p-3 card-body">
+                        <div class="d-flex flex-row-reverse align-items-center justify-content-between">
+                            <div class="text-center rounded-circle two">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24"
+                                    fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="9" />
+                                    <polyline points="12 7 12 12 15 15" />
+                                    <line x1="19" y1="19" x2="22" y2="22" />
+                                </svg>
+                            </div>
+                            <div class="">
+                                <div class="numbers">
+                                    <p class="mb-0 text-sm text-capitalize font-weight-bold">
+                                        Delays
+                                    </p>
+                                    <h5 class="mb-0 font-weight-bolder">
+                                        <span id="countSpan" style="color: #00add8; font-weight: bold">1,234</span>
+                                    </h5>
+                                    <!-- <span style="font-size: 0.9rem;">Onging Project</span> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12">
+                <div class="mb-3 card">
+                    <div class="p-3 card-body">
+                        <div class="d-flex flex-row-reverse align-items-center justify-content-between">
+                            <div class="text-center rounded-circle three">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24"
+                                    fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="9" />
+                                    <polyline points="9 12 11.5 14.5 15 10" />
+                                </svg>
+                            </div>
+                            <div class="">
+                                <div class="numbers">
+                                    <p class="mb-0 text-sm text-capitalize font-weight-bold">
+                                        Completed
+                                    </p>
+                                    <h5 class="mb-0 font-weight-bolder">
+                                        <span id="countSpan" style="color: #6dbf46; font-weight: bold">5,432</span>
+                                    </h5>
+                                    <!-- <span style="font-size: 0.9rem;">Onging Project</span> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="col-lg-3 col-md-6 col-12">
+                <div class="mb-3 card">
+                    <div class="p-3 card-body">
+                        <div class="d-flex flex-row-reverse align-items-center justify-content-between">
+                            <div class="text-center rounded-circle four">
+                                <svg width="50" height="50" viewBox="0 0 75 75" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <mask id="mask0_12_38" style="mask-type: alpha" maskUnits="userSpaceOnUse" x="0"
+                                        y="0" width="75" height="75">
+                                        <rect width="75" height="75" fill="white"></rect>
+                                    </mask>
+                                    <g mask="url(#mask0_12_38)">
+                                        <path
+                                            d="M23.6719 68.75V57.1094H0L14.7656 35.7031H7.34375L28.125 6.25L37.5 19.5312L46.875 6.25L67.6562 35.7031H60.3125L75 57.1094H51.4063V68.75H42.4219V57.1094H32.6562V68.75H23.6719ZM53.125 52.4219H66.0156L51.25 31.0156H58.2031L46.875 14.9219L40.625 23.9062L48.9062 35.7031H41.5625L53.125 52.4219ZM9.0625 52.4219H47.2656L32.5 31.0156H39.4531L28.125 14.9219L16.7969 31.0156H23.8281L9.0625 52.4219ZM9.0625 52.4219H23.8281H16.7969H39.4531H32.5H47.2656H9.0625ZM53.125 52.4219H41.5625H48.9062H40.625H58.2031H51.25H66.0156H53.125Z"
+                                            fill="white"></path>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="">
+                                <div class="numbers">
+                                    <p class="mb-0 text-sm text-capitalize font-weight-bold">
+                                        Legal Notices Issued
+                                    </p>
+
+                                    <h5 class="mb-0 font-weight-bolder">
+                                        <span id="countSpan" style="color: #ef402a; font-weight: bold">250</span>
+                                    </h5>
+                                    <span style="font-size: 0.9rem;">Onging Project</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+
+        <div class="dashboard-header">
+            <div class="row">
+                <div class="col-md-8">
+                    <h2>Current Status</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- 1. Air Quality Monitoring Inspection -->
+            <div class="col-md-3">
+                <div class="card stat-card bg-air">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stat-icon" style="background-color:#f8f1dc;">
+                                🌫️
+                            </div>
+                            <div>
+                                <div class="stat-title">CAAQMS</div>
+                                <div class="stat-value">35 Stations</div>
+                            </div>
+                        </div>
+                        <div class="text-success">↑ 8.5% <small class="text-muted">this week</small></div>
+                        <div id="totalSalesDashborad" style="min-height: 70px;">
+                            <div id="apexchartslqiup3xn" class="apexcharts-canvas apexchartslqiup3xn apexcharts-theme-"
+                                style="width: 230px; height: 70px;"><svg id="" width="230" height="70"
+                                    xmlns="http://www.w3.org/2000/svg" version="1.1"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev"
+                                    class="apexcharts-svg" xmlns:data="ApexChartsNS" transform="translate(0, 0)">
+                                    <foreignObject x="0" y="0" width="238" height="70">
+                                        <div xmlns="http://www.w3.org/1999/xhtml"
+                                            style="position: relative; height: 100%; width: 100%;">
+                                            <div class="apexcharts-legend" style="max-height: 35px;"></div>
+                                        </div>
+                                    </foreignObject>
+                                    <rect id="SvgjsRect1394" width="0" height="0" x="0" y="0" rx="0" ry="0" opacity="1"
+                                        stroke-width="0" stroke="none" stroke-dasharray="0" fill="#fefefe"></rect>
+                                    <g id="SvgjsG1399" class="apexcharts-datalabels-group"
+                                        transform="translate(0, 0) scale(1)"></g>
+                                    <g id="SvgjsG1400" class="apexcharts-datalabels-group"
+                                        transform="translate(0, 0) scale(1)"></g>
+                                    <g id="SvgjsG1444" class="apexcharts-yaxis" rel="0" transform="translate(-18, 0)">
+                                    </g>
+                                    <g id="SvgjsG1391" class="apexcharts-inner apexcharts-graphical"
+                                        transform="translate(0, 1)">
+                                        <defs id="SvgjsDefs1390">
+                                            <clipPath id="gridRectMasklqiup3xn">
+                                                <rect id="SvgjsRect1396" width="238" height="68" x="0" y="0" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="gridRectBarMasklqiup3xn">
+                                                <rect id="SvgjsRect1397" width="244" height="74" x="-3" y="-3" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="gridRectMarkerMasklqiup3xn">
+                                                <rect id="SvgjsRect1398" width="238" height="68" x="0" y="0" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="forecastMasklqiup3xn"></clipPath>
+                                            <clipPath id="nonForecastMasklqiup3xn"></clipPath>
+                                            <linearGradient id="SvgjsLinearGradient1405" x1="0" y1="0" x2="0" y2="1">
+                                                <stop id="SvgjsStop1406" stop-opacity="0.6"
+                                                    stop-color="rgba(207,162,27,0.6)" offset="0"></stop>
+                                                <stop id="SvgjsStop1407" stop-opacity="0.5"
+                                                    stop-color="rgba(245,236,209,0.5)" offset="1"></stop>
+                                                <stop id="SvgjsStop1408" stop-opacity="0.5"
+                                                    stop-color="rgba(245,236,209,0.5)" offset="1"></stop>
+                                            </linearGradient>
+                                        </defs>
+
+                                        <g id="SvgjsG1411" class="apexcharts-grid">
+                                            <g id="SvgjsG1412" class="apexcharts-gridlines-horizontal"
+                                                style="display: none;">
+                                                <line id="SvgjsLine1415" x1="0" y1="0" x2="238" y2="0" stroke="#e0e0e0"
+                                                    stroke-dasharray="0" stroke-linecap="butt"
+                                                    class="apexcharts-gridline"></line>
+                                                <line id="SvgjsLine1416" x1="0" y1="34" x2="238" y2="34"
+                                                    stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"
+                                                    class="apexcharts-gridline"></line>
+                                                <line id="SvgjsLine1417" x1="0" y1="68" x2="238" y2="68"
+                                                    stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"
+                                                    class="apexcharts-gridline"></line>
+                                            </g>
+                                            <g id="SvgjsG1413" class="apexcharts-gridlines-vertical"
+                                                style="display: none;"></g>
+                                            <line id="SvgjsLine1419" x1="0" y1="68" x2="238" y2="68"
+                                                stroke="transparent" stroke-dasharray="0" stroke-linecap="butt"></line>
+                                            <line id="SvgjsLine1418" x1="0" y1="1" x2="0" y2="68" stroke="transparent"
+                                                stroke-dasharray="0" stroke-linecap="butt"></line>
+                                        </g>
+                                        <g id="SvgjsG1414" class="apexcharts-grid-borders" style="display: none;"></g>
+                                        <g id="SvgjsG1401" class="apexcharts-area-series apexcharts-plot-series">
+                                            <g id="SvgjsG1402" class="apexcharts-series" zIndex="0"
+                                                seriesName="series-1" data:longestSeries="true" rel="1"
+                                                data:realIndex="0">
+                                                <path id="SvgjsPath1409"
+                                                    d="M0 20.40000000000009C4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34C238.00000000000003 34 238.00000000000003 34 238.00000000000003 68L0 68C0 68 0 20.40000000000009 0 20.40000000000009 "
+                                                    fill="url(#SvgjsLinearGradient1405)" fill-opacity="1"
+                                                    stroke-opacity="1" stroke-linecap="butt" stroke-width="0"
+                                                    stroke-dasharray="0" class="apexcharts-area" index="0"
+                                                    clip-path="url(#gridRectMasklqiup3xn)"
+                                                    pathTo="M 0 20.40000000000009C 4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C 16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C 29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C 41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C 54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C 67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C 79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C 92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C 104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C 117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C 129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C 142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C 154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C 167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C 179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C 192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C 204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C 217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C 229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34C 238.00000000000003 34 238.00000000000003 34 238.00000000000003 68 L 0 68z"
+                                                    pathFrom="M 0 2652 L 0 2652 L 12.526315789473685 2652 L 25.05263157894737 2652 L 37.578947368421055 2652 L 50.10526315789474 2652 L 62.631578947368425 2652 L 75.15789473684211 2652 L 87.6842105263158 2652 L 100.21052631578948 2652 L 112.73684210526316 2652 L 125.26315789473685 2652 L 137.78947368421055 2652 L 150.31578947368422 2652 L 162.84210526315792 2652 L 175.3684210526316 2652 L 187.8947368421053 2652 L 200.42105263157896 2652 L 212.94736842105266 2652 L 225.47368421052633 2652 L 238.00000000000003 2652z">
+                                                </path>
+                                                <path id="SvgjsPath1410"
+                                                    d="M0 20.40000000000009C4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34C238.00000000000003 34 238.00000000000003 34 238.00000000000003 34 "
+                                                    fill="none" fill-opacity="1" stroke="#cfa21b" stroke-opacity="1"
+                                                    stroke-linecap="butt" stroke-width="2" stroke-dasharray="0"
+                                                    class="apexcharts-area" index="0"
+                                                    clip-path="url(#gridRectMasklqiup3xn)"
+                                                    pathTo="M 0 20.40000000000009C 4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C 16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C 29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C 41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C 54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C 67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C 79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C 92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C 104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C 117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C 129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C 142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C 154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C 167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C 179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C 192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C 204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C 217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C 229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34"
+                                                    pathFrom="M 0 2652 L 0 2652 L 12.526315789473685 2652 L 25.05263157894737 2652 L 37.578947368421055 2652 L 50.10526315789474 2652 L 62.631578947368425 2652 L 75.15789473684211 2652 L 87.6842105263158 2652 L 100.21052631578948 2652 L 112.73684210526316 2652 L 125.26315789473685 2652 L 137.78947368421055 2652 L 150.31578947368422 2652 L 162.84210526315792 2652 L 175.3684210526316 2652 L 187.8947368421053 2652 L 200.42105263157896 2652 L 212.94736842105266 2652 L 225.47368421052633 2652 L 238.00000000000003 2652"
+                                                    fill-rule="evenodd"></path>
+                                                <g id="SvgjsG1403"
+                                                    class="apexcharts-series-markers-wrap apexcharts-hidden-element-shown"
+                                                    data:realIndex="0"></g>
+                                            </g>
+                                            <g id="SvgjsG1404" class="apexcharts-datalabels" data:realIndex="0"></g>
+                                        </g>
+                                        <g id="SvgjsG1422" class="apexcharts-xaxis" transform="translate(0, 0)">
+                                            <g id="SvgjsG1423" class="apexcharts-xaxis-texts-g"
+                                                transform="translate(0, 4)"></g>
+                                        </g>
+                                        <g id="SvgjsG1445"
+                                            class="apexcharts-yaxis-annotations apexcharts-hidden-element-shown"></g>
+                                        <g id="SvgjsG1446"
+                                            class="apexcharts-xaxis-annotations apexcharts-hidden-element-shown"></g>
+                                        <g id="SvgjsG1447"
+                                            class="apexcharts-point-annotations apexcharts-hidden-element-shown"></g>
+                                    </g>
+                                </svg></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Water -->
+            <div class="col-md-3">
+                <div class="card stat-card bg-water">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stat-icon" style="background-color:#fedfe6;">
+                                💧
+                            </div>
+                            <div>
+                                <div class="stat-title">Water</div>
+                                <div class="stat-value">22 Sampling Sites</div>
+                            </div>
+                        </div>
+                        <div class="text-danger">↓ 2.3% <small class="text-muted">this week</small></div>
+                        <div id="totalOrdersDashborad" style="min-height: 70px;">
+                            <div id="apexchartsvg6x67nqj"
+                                class="apexcharts-canvas apexchartsvg6x67nqj apexcharts-theme-"
+                                style="width: 238px; height: 70px;"><svg id="SvgjsSvg1448" width="238" height="70"
+                                    xmlns="http://www.w3.org/2000/svg" version="1.1"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev"
+                                    class="apexcharts-svg" xmlns:data="ApexChartsNS" transform="translate(0, 0)">
+                                    <foreignObject x="0" y="0" width="238" height="70">
+                                        <div xmlns="http://www.w3.org/1999/xhtml"
+                                            style="position: relative; height: 100%; width: 100%;">
+                                            <div class="apexcharts-legend" style="max-height: 35px;"></div>
+                                        </div>
+                                    </foreignObject>
+                                    <rect id="SvgjsRect1453" width="0" height="0" x="0" y="0" rx="0" ry="0" opacity="1"
+                                        stroke-width="0" stroke="none" stroke-dasharray="0" fill="#fefefe"></rect>
+                                    <g id="SvgjsG1458" class="apexcharts-datalabels-group"
+                                        transform="translate(0, 0) scale(1)"></g>
+                                    <g id="SvgjsG1459" class="apexcharts-datalabels-group"
+                                        transform="translate(0, 0) scale(1)"></g>
+                                    <g id="SvgjsG1503" class="apexcharts-yaxis" rel="0" transform="translate(-18, 0)">
+                                    </g>
+                                    <g id="SvgjsG1450" class="apexcharts-inner apexcharts-graphical"
+                                        transform="translate(0, 1)">
+                                        <defs id="SvgjsDefs1449">
+                                            <clipPath id="gridRectMaskvg6x67nqj">
+                                                <rect id="SvgjsRect1455" width="238" height="68" x="0" y="0" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="gridRectBarMaskvg6x67nqj">
+                                                <rect id="SvgjsRect1456" width="244" height="74" x="-3" y="-3" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="gridRectMarkerMaskvg6x67nqj">
+                                                <rect id="SvgjsRect1457" width="238" height="68" x="0" y="0" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="forecastMaskvg6x67nqj"></clipPath>
+                                            <clipPath id="nonForecastMaskvg6x67nqj"></clipPath>
+                                            <linearGradient id="SvgjsLinearGradient1464" x1="0" y1="0" x2="0" y2="1">
+                                                <stop id="SvgjsStop1465" stop-opacity="0.6"
+                                                    stop-color="rgba(248,40,90,0.6)" offset="0"></stop>
+                                                <stop id="SvgjsStop1466" stop-opacity="0.5"
+                                                    stop-color="rgba(254,212,222,0.5)" offset="1"></stop>
+                                                <stop id="SvgjsStop1467" stop-opacity="0.5"
+                                                    stop-color="rgba(254,212,222,0.5)" offset="1"></stop>
+                                            </linearGradient>
+                                        </defs>
+
+
+                                        <g id="SvgjsG1473" class="apexcharts-grid-borders" style="display: none;"></g>
+                                        <g id="SvgjsG1460" class="apexcharts-area-series apexcharts-plot-series">
+                                            <g id="SvgjsG1461" class="apexcharts-series" zIndex="0"
+                                                seriesName="series-1" data:longestSeries="true" rel="1"
+                                                data:realIndex="0">
+                                                <path id="SvgjsPath1468"
+                                                    d="M0 20.40000000000009C4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34C238.00000000000003 34 238.00000000000003 34 238.00000000000003 68L0 68C0 68 0 20.40000000000009 0 20.40000000000009 "
+                                                    fill="url(#SvgjsLinearGradient1464)" fill-opacity="1"
+                                                    stroke-opacity="1" stroke-linecap="butt" stroke-width="0"
+                                                    stroke-dasharray="0" class="apexcharts-area" index="0"
+                                                    clip-path="url(#gridRectMaskvg6x67nqj)"
+                                                    pathTo="M 0 20.40000000000009C 4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C 16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C 29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C 41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C 54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C 67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C 79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C 92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C 104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C 117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C 129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C 142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C 154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C 167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C 179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C 192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C 204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C 217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C 229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34C 238.00000000000003 34 238.00000000000003 34 238.00000000000003 68 L 0 68z"
+                                                    pathFrom="M 0 2652 L 0 2652 L 12.526315789473685 2652 L 25.05263157894737 2652 L 37.578947368421055 2652 L 50.10526315789474 2652 L 62.631578947368425 2652 L 75.15789473684211 2652 L 87.6842105263158 2652 L 100.21052631578948 2652 L 112.73684210526316 2652 L 125.26315789473685 2652 L 137.78947368421055 2652 L 150.31578947368422 2652 L 162.84210526315792 2652 L 175.3684210526316 2652 L 187.8947368421053 2652 L 200.42105263157896 2652 L 212.94736842105266 2652 L 225.47368421052633 2652 L 238.00000000000003 2652z">
+                                                </path>
+                                                <path id="SvgjsPath1469"
+                                                    d="M0 20.40000000000009C4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34C238.00000000000003 34 238.00000000000003 34 238.00000000000003 34 "
+                                                    fill="none" fill-opacity="1" stroke="#f8285a" stroke-opacity="1"
+                                                    stroke-linecap="butt" stroke-width="2" stroke-dasharray="0"
+                                                    class="apexcharts-area" index="0"
+                                                    clip-path="url(#gridRectMaskvg6x67nqj)"
+                                                    pathTo="M 0 20.40000000000009C 4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C 16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C 29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C 41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C 54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C 67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C 79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C 92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C 104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C 117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C 129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C 142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C 154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C 167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C 179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C 192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C 204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C 217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C 229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34"
+                                                    pathFrom="M 0 2652 L 0 2652 L 12.526315789473685 2652 L 25.05263157894737 2652 L 37.578947368421055 2652 L 50.10526315789474 2652 L 62.631578947368425 2652 L 75.15789473684211 2652 L 87.6842105263158 2652 L 100.21052631578948 2652 L 112.73684210526316 2652 L 125.26315789473685 2652 L 137.78947368421055 2652 L 150.31578947368422 2652 L 162.84210526315792 2652 L 175.3684210526316 2652 L 187.8947368421053 2652 L 200.42105263157896 2652 L 212.94736842105266 2652 L 225.47368421052633 2652 L 238.00000000000003 2652"
+                                                    fill-rule="evenodd"></path>
+                                                <g id="SvgjsG1462"
+                                                    class="apexcharts-series-markers-wrap apexcharts-hidden-element-shown"
+                                                    data:realIndex="0"></g>
+                                            </g>
+                                            <g id="SvgjsG1463" class="apexcharts-datalabels" data:realIndex="0"></g>
+                                        </g>
+
+                                        <g id="SvgjsG1481" class="apexcharts-xaxis" transform="translate(0, 0)">
+                                            <g id="SvgjsG1482" class="apexcharts-xaxis-texts-g"
+                                                transform="translate(0, 4)"></g>
+                                        </g>
+                                        <g id="SvgjsG1504"
+                                            class="apexcharts-yaxis-annotations apexcharts-hidden-element-shown"></g>
+                                        <g id="SvgjsG1505"
+                                            class="apexcharts-xaxis-annotations apexcharts-hidden-element-shown"></g>
+                                        <g id="SvgjsG1506"
+                                            class="apexcharts-point-annotations apexcharts-hidden-element-shown"></g>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Waste -->
+            <div class="col-md-3">
+                <div class="card stat-card bg-waste">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stat-icon" style="background-color:#dcf6e5;">
+                                ♻️
+                            </div>
+                            <div>
+                                <div class="stat-title">Waste</div>
+                                <div class="stat-value">18 Sites</div>
+                            </div>
+                        </div>
+                        <div class="text-success">↑ 4.6% <small class="text-muted">this week</small></div>
+                        <div id="totalEarningsDashborad" style="min-height: 70px;">
+                            <div id="apexcharts8qtz1nwn" class="apexcharts-canvas apexcharts8qtz1nwn apexcharts-theme-"
+                                style="width: 238px; height: 70px;"><svg id="SvgjsSvg1507" width="238" height="70"
+                                    xmlns="http://www.w3.org/2000/svg" version="1.1"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev"
+                                    class="apexcharts-svg" xmlns:data="ApexChartsNS" transform="translate(0, 0)">
+                                    <foreignObject x="0" y="0" width="238" height="70">
+                                        <div xmlns="http://www.w3.org/1999/xhtml"
+                                            style="position: relative; height: 100%; width: 100%;">
+                                            <div class="apexcharts-legend" style="max-height: 35px;"></div>
+                                        </div>
+                                    </foreignObject>
+                                    <rect id="SvgjsRect1512" width="0" height="0" x="0" y="0" rx="0" ry="0" opacity="1"
+                                        stroke-width="0" stroke="none" stroke-dasharray="0" fill="#fefefe"></rect>
+                                    <g id="SvgjsG1517" class="apexcharts-datalabels-group"
+                                        transform="translate(0, 0) scale(1)"></g>
+                                    <g id="SvgjsG1518" class="apexcharts-datalabels-group"
+                                        transform="translate(0, 0) scale(1)"></g>
+                                    <g id="SvgjsG1562" class="apexcharts-yaxis" rel="0" transform="translate(-18, 0)">
+                                    </g>
+                                    <g id="SvgjsG1509" class="apexcharts-inner apexcharts-graphical"
+                                        transform="translate(0, 1)">
+                                        <defs id="SvgjsDefs1508">
+                                            <clipPath id="gridRectMask8qtz1nwn">
+                                                <rect id="SvgjsRect1514" width="238" height="68" x="0" y="0" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="gridRectBarMask8qtz1nwn">
+                                                <rect id="SvgjsRect1515" width="244" height="74" x="-3" y="-3" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="gridRectMarkerMask8qtz1nwn">
+                                                <rect id="SvgjsRect1516" width="238" height="68" x="0" y="0" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="forecastMask8qtz1nwn"></clipPath>
+                                            <clipPath id="nonForecastMask8qtz1nwn"></clipPath>
+                                            <linearGradient id="SvgjsLinearGradient1523" x1="0" y1="0" x2="0" y2="1">
+                                                <stop id="SvgjsStop1524" stop-opacity="0.6"
+                                                    stop-color="rgba(23,198,83,0.6)" offset="0"></stop>
+                                                <stop id="SvgjsStop1525" stop-opacity="0.5"
+                                                    stop-color="rgba(209,244,221,0.5)" offset="1"></stop>
+                                                <stop id="SvgjsStop1526" stop-opacity="0.5"
+                                                    stop-color="rgba(209,244,221,0.5)" offset="1"></stop>
+                                            </linearGradient>
+                                        </defs>
+
+                                        <g id="SvgjsG1529" class="apexcharts-grid">
+                                            <g id="SvgjsG1530" class="apexcharts-gridlines-horizontal"
+                                                style="display: none;">
+                                                <line id="SvgjsLine1533" x1="0" y1="0" x2="238" y2="0" stroke="#e0e0e0"
+                                                    stroke-dasharray="0" stroke-linecap="butt"
+                                                    class="apexcharts-gridline"></line>
+                                                <line id="SvgjsLine1534" x1="0" y1="34" x2="238" y2="34"
+                                                    stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"
+                                                    class="apexcharts-gridline"></line>
+                                                <line id="SvgjsLine1535" x1="0" y1="68" x2="238" y2="68"
+                                                    stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"
+                                                    class="apexcharts-gridline"></line>
+                                            </g>
+                                            <g id="SvgjsG1531" class="apexcharts-gridlines-vertical"
+                                                style="display: none;"></g>
+
+                                        </g>
+                                        <g id="SvgjsG1532" class="apexcharts-grid-borders" style="display: none;"></g>
+                                        <g id="SvgjsG1519" class="apexcharts-area-series apexcharts-plot-series">
+                                            <g id="SvgjsG1520" class="apexcharts-series" zIndex="0"
+                                                seriesName="series-1" data:longestSeries="true" rel="1"
+                                                data:realIndex="0">
+                                                <path id="SvgjsPath1527"
+                                                    d="M0 20.40000000000009C4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34C238.00000000000003 34 238.00000000000003 34 238.00000000000003 68L0 68C0 68 0 20.40000000000009 0 20.40000000000009 "
+                                                    fill="url(#SvgjsLinearGradient1523)" fill-opacity="1"
+                                                    stroke-opacity="1" stroke-linecap="butt" stroke-width="0"
+                                                    stroke-dasharray="0" class="apexcharts-area" index="0"
+                                                    clip-path="url(#gridRectMask8qtz1nwn)"
+                                                    pathTo="M 0 20.40000000000009C 4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C 16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C 29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C 41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C 54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C 67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C 79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C 92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C 104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C 117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C 129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C 142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C 154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C 167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C 179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C 192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C 204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C 217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C 229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34C 238.00000000000003 34 238.00000000000003 34 238.00000000000003 68 L 0 68z"
+                                                    pathFrom="M 0 2652 L 0 2652 L 12.526315789473685 2652 L 25.05263157894737 2652 L 37.578947368421055 2652 L 50.10526315789474 2652 L 62.631578947368425 2652 L 75.15789473684211 2652 L 87.6842105263158 2652 L 100.21052631578948 2652 L 112.73684210526316 2652 L 125.26315789473685 2652 L 137.78947368421055 2652 L 150.31578947368422 2652 L 162.84210526315792 2652 L 175.3684210526316 2652 L 187.8947368421053 2652 L 200.42105263157896 2652 L 212.94736842105266 2652 L 225.47368421052633 2652 L 238.00000000000003 2652z">
+                                                </path>
+                                                <path id="SvgjsPath1528"
+                                                    d="M0 20.40000000000009C4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34C238.00000000000003 34 238.00000000000003 34 238.00000000000003 34 "
+                                                    fill="none" fill-opacity="1" stroke="#17c653" stroke-opacity="1"
+                                                    stroke-linecap="butt" stroke-width="2" stroke-dasharray="0"
+                                                    class="apexcharts-area" index="0"
+                                                    clip-path="url(#gridRectMask8qtz1nwn)"
+                                                    pathTo="M 0 20.40000000000009C 4.38421052631579 20.40000000000009 8.142105263157895 27.200000000000273 12.526315789473685 27.200000000000273C 16.910526315789475 27.200000000000273 20.66842105263158 20.40000000000009 25.05263157894737 20.40000000000009C 29.43684210526316 20.40000000000009 33.194736842105264 34 37.578947368421055 34C 41.963157894736845 34 45.72105263157895 27.200000000000273 50.10526315789474 27.200000000000273C 54.48947368421053 27.200000000000273 58.247368421052634 40.80000000000018 62.631578947368425 40.80000000000018C 67.01578947368421 40.80000000000018 70.77368421052633 40.80000000000018 75.15789473684211 40.80000000000018C 79.5421052631579 40.80000000000018 83.30000000000001 40.80000000000018 87.6842105263158 40.80000000000018C 92.06842105263158 40.80000000000018 95.8263157894737 27.200000000000273 100.21052631578948 27.200000000000273C 104.59473684210526 27.200000000000273 108.35263157894738 6.800000000000182 112.73684210526316 6.800000000000182C 117.12105263157895 6.800000000000182 120.87894736842107 20.40000000000009 125.26315789473685 20.40000000000009C 129.64736842105265 20.40000000000009 133.40526315789475 20.40000000000009 137.78947368421055 20.40000000000009C 142.17368421052635 20.40000000000009 145.93157894736842 27.200000000000273 150.31578947368422 27.200000000000273C 154.70000000000002 27.200000000000273 158.45789473684212 27.200000000000273 162.84210526315792 27.200000000000273C 167.22631578947372 27.200000000000273 170.9842105263158 34 175.3684210526316 34C 179.7526315789474 34 183.5105263157895 27.200000000000273 187.8947368421053 27.200000000000273C 192.2789473684211 27.200000000000273 196.03684210526316 20.40000000000009 200.42105263157896 20.40000000000009C 204.80526315789476 20.40000000000009 208.56315789473686 34 212.94736842105266 34C 217.33157894736846 34 221.08947368421053 40.80000000000018 225.47368421052633 40.80000000000018C 229.85789473684213 40.80000000000018 233.61578947368423 34 238.00000000000003 34"
+                                                    pathFrom="M 0 2652 L 0 2652 L 12.526315789473685 2652 L 25.05263157894737 2652 L 37.578947368421055 2652 L 50.10526315789474 2652 L 62.631578947368425 2652 L 75.15789473684211 2652 L 87.6842105263158 2652 L 100.21052631578948 2652 L 112.73684210526316 2652 L 125.26315789473685 2652 L 137.78947368421055 2652 L 150.31578947368422 2652 L 162.84210526315792 2652 L 175.3684210526316 2652 L 187.8947368421053 2652 L 200.42105263157896 2652 L 212.94736842105266 2652 L 225.47368421052633 2652 L 238.00000000000003 2652"
+                                                    fill-rule="evenodd"></path>
+                                                <g id="SvgjsG1521"
+                                                    class="apexcharts-series-markers-wrap apexcharts-hidden-element-shown"
+                                                    data:realIndex="0"></g>
+                                            </g>
+                                            <g id="SvgjsG1522" class="apexcharts-datalabels" data:realIndex="0"></g>
+                                        </g>
+
+                                        <g id="SvgjsG1540" class="apexcharts-xaxis" transform="translate(0, 0)">
+                                            <g id="SvgjsG1541" class="apexcharts-xaxis-texts-g"
+                                                transform="translate(0, 4)"></g>
+                                        </g>
+                                        <g id="SvgjsG1563"
+                                            class="apexcharts-yaxis-annotations apexcharts-hidden-element-shown"></g>
+                                        <g id="SvgjsG1564"
+                                            class="apexcharts-xaxis-annotations apexcharts-hidden-element-shown"></g>
+                                        <g id="SvgjsG1565"
+                                            class="apexcharts-point-annotations apexcharts-hidden-element-shown"></g>
+                                    </g>
+                                </svg></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Industries -->
+            <div class="col-md-3">
+                <div class="card stat-card bg-industries">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="stat-icon" style="background-color:#dbf7fd;">
+                                🏭
+                            </div>
+                            <div>
+                                <div class="stat-title">Industries</div>
+                                <div class="stat-value">27 Inspections</div>
+                            </div>
+                        </div>
+                        <div class="text-success">↑ 6.2% <small class="text-muted">this week</small></div>
+                        <div id="totalShipmentsDashboard" style="min-height: 70px;">
+                            <div id="apexchartsynqaixl4" class="apexcharts-canvas apexchartsynqaixl4 apexcharts-theme-"
+                                style="width: 238px; height: 70px;"><svg id="SvgjsSvg1566" width="238" height="70"
+                                    xmlns="http://www.w3.org/2000/svg" version="1.1"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev"
+                                    class="apexcharts-svg" xmlns:data="ApexChartsNS" transform="translate(0, 0)">
+                                    <foreignObject x="0" y="0" width="238" height="70">
+                                        <div xmlns="http://www.w3.org/1999/xhtml"
+                                            style="position: relative; height: 100%; width: 100%;">
+                                            <div class="apexcharts-legend" style="max-height: 35px;"></div>
+                                        </div>
+                                    </foreignObject>
+                                    <rect id="SvgjsRect1571" width="0" height="0" x="0" y="0" rx="0" ry="0" opacity="1"
+                                        stroke-width="0" stroke="none" stroke-dasharray="0" fill="#fefefe"></rect>
+                                    <g id="SvgjsG1576" class="apexcharts-datalabels-group"
+                                        transform="translate(0, 0) scale(1)"></g>
+                                    <g id="SvgjsG1577" class="apexcharts-datalabels-group"
+                                        transform="translate(0, 0) scale(1)"></g>
+                                    <g id="SvgjsG1621" class="apexcharts-yaxis" rel="0" transform="translate(-18, 0)">
+                                    </g>
+                                    <g id="SvgjsG1568" class="apexcharts-inner apexcharts-graphical"
+                                        transform="translate(0, 1)">
+                                        <defs id="SvgjsDefs1567">
+                                            <clipPath id="gridRectMaskynqaixl4">
+                                                <rect id="SvgjsRect1573" width="238" height="68" x="0" y="0" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="gridRectBarMaskynqaixl4">
+                                                <rect id="SvgjsRect1574" width="244" height="74" x="-3" y="-3" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="gridRectMarkerMaskynqaixl4">
+                                                <rect id="SvgjsRect1575" width="238" height="68" x="0" y="0" rx="0"
+                                                    ry="0" opacity="1" stroke-width="0" stroke="none"
+                                                    stroke-dasharray="0" fill="#fff"></rect>
+                                            </clipPath>
+                                            <clipPath id="forecastMaskynqaixl4"></clipPath>
+                                            <clipPath id="nonForecastMaskynqaixl4"></clipPath>
+                                            <linearGradient id="SvgjsLinearGradient1582" x1="0" y1="0" x2="0" y2="1">
+                                                <stop id="SvgjsStop1583" stop-opacity="0.6"
+                                                    stop-color="rgba(13,202,240,0.6)" offset="0"></stop>
+                                                <stop id="SvgjsStop1584" stop-opacity="0.5"
+                                                    stop-color="rgba(207,244,252,0.5)" offset="1"></stop>
+                                                <stop id="SvgjsStop1585" stop-opacity="0.5"
+                                                    stop-color="rgba(207,244,252,0.5)" offset="1"></stop>
+                                            </linearGradient>
+                                        </defs>
+
+                                        <g id="SvgjsG1588" class="apexcharts-grid">
+                                            <g id="SvgjsG1589" class="apexcharts-gridlines-horizontal"
+                                                style="display: none;">
+                                                <line id="SvgjsLine1592" x1="0" y1="0" x2="238" y2="0" stroke="#e0e0e0"
+                                                    stroke-dasharray="0" stroke-linecap="butt"
+                                                    class="apexcharts-gridline"></line>
+                                                <line id="SvgjsLine1593" x1="0" y1="34" x2="238" y2="34"
+                                                    stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"
+                                                    class="apexcharts-gridline"></line>
+                                                <line id="SvgjsLine1594" x1="0" y1="68" x2="238" y2="68"
+                                                    stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"
+                                                    class="apexcharts-gridline"></line>
+                                            </g>
+                                            <g id="SvgjsG1590" class="apexcharts-gridlines-vertical"
+                                                style="display: none;"></g>
+
+                                        </g>
+                                        <g id="SvgjsG1591" class="apexcharts-grid-borders" style="display: none;"></g>
+                                        <g id="SvgjsG1578" class="apexcharts-area-series apexcharts-plot-series">
+                                            <g id="SvgjsG1579" class="apexcharts-series" zIndex="0"
+                                                seriesName="series-1" data:longestSeries="true" rel="1"
+                                                data:realIndex="0">
+                                                <path id="SvgjsPath1586"
+                                                    d="M0 64.60000000000002C4.38421052631579 64.60000000000002 8.142105263157895 51 12.526315789473685 51C16.910526315789475 51 20.66842105263158 54.39999999999998 25.05263157894737 54.39999999999998C29.43684210526316 54.39999999999998 33.194736842105264 47.60000000000002 37.578947368421055 47.60000000000002C41.963157894736845 47.60000000000002 45.72105263157895 42.5 50.10526315789474 42.5C54.48947368421053 42.5 58.247368421052634 44.200000000000045 62.631578947368425 44.200000000000045C67.01578947368421 44.200000000000045 70.77368421052633 37.39999999999998 75.15789473684211 37.39999999999998C79.5421052631579 37.39999999999998 83.30000000000001 34 87.6842105263158 34C92.06842105263158 34 95.8263157894737 28.899999999999977 100.21052631578948 28.899999999999977C104.59473684210526 28.899999999999977 108.35263157894738 25.5 112.73684210526316 25.5C117.12105263157895 25.5 120.87894736842107 27.200000000000045 125.26315789473685 27.200000000000045C129.64736842105265 27.200000000000045 133.40526315789475 30.600000000000023 137.78947368421055 30.600000000000023C142.17368421052635 30.600000000000023 145.93157894736842 27.200000000000045 150.31578947368422 27.200000000000045C154.70000000000002 27.200000000000045 158.45789473684212 28.899999999999977 162.84210526315792 28.899999999999977C167.22631578947372 28.899999999999977 170.9842105263158 30.600000000000023 175.3684210526316 30.600000000000023C179.7526315789474 30.600000000000023 183.5105263157895 32.30000000000007 187.8947368421053 32.30000000000007C192.2789473684211 32.30000000000007 196.03684210526316 25.5 200.42105263157896 25.5C204.80526315789476 25.5 208.56315789473686 20.399999999999977 212.94736842105266 20.399999999999977C217.33157894736846 20.399999999999977 221.08947368421053 17 225.47368421052633 17C229.85789473684213 17 233.61578947368423 13.600000000000023 238.00000000000003 13.600000000000023C238.00000000000003 13.600000000000023 238.00000000000003 13.600000000000023 238.00000000000003 68L0 68C0 68 0 64.60000000000002 0 64.60000000000002 "
+                                                    fill="url(#SvgjsLinearGradient1582)" fill-opacity="1"
+                                                    stroke-opacity="1" stroke-linecap="butt" stroke-width="0"
+                                                    stroke-dasharray="0" class="apexcharts-area" index="0"
+                                                    clip-path="url(#gridRectMaskynqaixl4)"
+                                                    pathTo="M 0 64.60000000000002C 4.38421052631579 64.60000000000002 8.142105263157895 51 12.526315789473685 51C 16.910526315789475 51 20.66842105263158 54.39999999999998 25.05263157894737 54.39999999999998C 29.43684210526316 54.39999999999998 33.194736842105264 47.60000000000002 37.578947368421055 47.60000000000002C 41.963157894736845 47.60000000000002 45.72105263157895 42.5 50.10526315789474 42.5C 54.48947368421053 42.5 58.247368421052634 44.200000000000045 62.631578947368425 44.200000000000045C 67.01578947368421 44.200000000000045 70.77368421052633 37.39999999999998 75.15789473684211 37.39999999999998C 79.5421052631579 37.39999999999998 83.30000000000001 34 87.6842105263158 34C 92.06842105263158 34 95.8263157894737 28.899999999999977 100.21052631578948 28.899999999999977C 104.59473684210526 28.899999999999977 108.35263157894738 25.5 112.73684210526316 25.5C 117.12105263157895 25.5 120.87894736842107 27.200000000000045 125.26315789473685 27.200000000000045C 129.64736842105265 27.200000000000045 133.40526315789475 30.600000000000023 137.78947368421055 30.600000000000023C 142.17368421052635 30.600000000000023 145.93157894736842 27.200000000000045 150.31578947368422 27.200000000000045C 154.70000000000002 27.200000000000045 158.45789473684212 28.899999999999977 162.84210526315792 28.899999999999977C 167.22631578947372 28.899999999999977 170.9842105263158 30.600000000000023 175.3684210526316 30.600000000000023C 179.7526315789474 30.600000000000023 183.5105263157895 32.30000000000007 187.8947368421053 32.30000000000007C 192.2789473684211 32.30000000000007 196.03684210526316 25.5 200.42105263157896 25.5C 204.80526315789476 25.5 208.56315789473686 20.399999999999977 212.94736842105266 20.399999999999977C 217.33157894736846 20.399999999999977 221.08947368421053 17 225.47368421052633 17C 229.85789473684213 17 233.61578947368423 13.600000000000023 238.00000000000003 13.600000000000023C 238.00000000000003 13.600000000000023 238.00000000000003 13.600000000000023 238.00000000000003 68 L 0 68z"
+                                                    pathFrom="M 0 578 L 0 578 L 12.526315789473685 578 L 25.05263157894737 578 L 37.578947368421055 578 L 50.10526315789474 578 L 62.631578947368425 578 L 75.15789473684211 578 L 87.6842105263158 578 L 100.21052631578948 578 L 112.73684210526316 578 L 125.26315789473685 578 L 137.78947368421055 578 L 150.31578947368422 578 L 162.84210526315792 578 L 175.3684210526316 578 L 187.8947368421053 578 L 200.42105263157896 578 L 212.94736842105266 578 L 225.47368421052633 578 L 238.00000000000003 578z">
+                                                </path>
+                                                <path id="SvgjsPath1587"
+                                                    d="M0 64.60000000000002C4.38421052631579 64.60000000000002 8.142105263157895 51 12.526315789473685 51C16.910526315789475 51 20.66842105263158 54.39999999999998 25.05263157894737 54.39999999999998C29.43684210526316 54.39999999999998 33.194736842105264 47.60000000000002 37.578947368421055 47.60000000000002C41.963157894736845 47.60000000000002 45.72105263157895 42.5 50.10526315789474 42.5C54.48947368421053 42.5 58.247368421052634 44.200000000000045 62.631578947368425 44.200000000000045C67.01578947368421 44.200000000000045 70.77368421052633 37.39999999999998 75.15789473684211 37.39999999999998C79.5421052631579 37.39999999999998 83.30000000000001 34 87.6842105263158 34C92.06842105263158 34 95.8263157894737 28.899999999999977 100.21052631578948 28.899999999999977C104.59473684210526 28.899999999999977 108.35263157894738 25.5 112.73684210526316 25.5C117.12105263157895 25.5 120.87894736842107 27.200000000000045 125.26315789473685 27.200000000000045C129.64736842105265 27.200000000000045 133.40526315789475 30.600000000000023 137.78947368421055 30.600000000000023C142.17368421052635 30.600000000000023 145.93157894736842 27.200000000000045 150.31578947368422 27.200000000000045C154.70000000000002 27.200000000000045 158.45789473684212 28.899999999999977 162.84210526315792 28.899999999999977C167.22631578947372 28.899999999999977 170.9842105263158 30.600000000000023 175.3684210526316 30.600000000000023C179.7526315789474 30.600000000000023 183.5105263157895 32.30000000000007 187.8947368421053 32.30000000000007C192.2789473684211 32.30000000000007 196.03684210526316 25.5 200.42105263157896 25.5C204.80526315789476 25.5 208.56315789473686 20.399999999999977 212.94736842105266 20.399999999999977C217.33157894736846 20.399999999999977 221.08947368421053 17 225.47368421052633 17C229.85789473684213 17 233.61578947368423 13.600000000000023 238.00000000000003 13.600000000000023C238.00000000000003 13.600000000000023 238.00000000000003 13.600000000000023 238.00000000000003 13.600000000000023 "
+                                                    fill="none" fill-opacity="1" stroke="#0dcaf0" stroke-opacity="1"
+                                                    stroke-linecap="butt" stroke-width="2" stroke-dasharray="0"
+                                                    class="apexcharts-area" index="0"
+                                                    clip-path="url(#gridRectMaskynqaixl4)"
+                                                    pathTo="M 0 64.60000000000002C 4.38421052631579 64.60000000000002 8.142105263157895 51 12.526315789473685 51C 16.910526315789475 51 20.66842105263158 54.39999999999998 25.05263157894737 54.39999999999998C 29.43684210526316 54.39999999999998 33.194736842105264 47.60000000000002 37.578947368421055 47.60000000000002C 41.963157894736845 47.60000000000002 45.72105263157895 42.5 50.10526315789474 42.5C 54.48947368421053 42.5 58.247368421052634 44.200000000000045 62.631578947368425 44.200000000000045C 67.01578947368421 44.200000000000045 70.77368421052633 37.39999999999998 75.15789473684211 37.39999999999998C 79.5421052631579 37.39999999999998 83.30000000000001 34 87.6842105263158 34C 92.06842105263158 34 95.8263157894737 28.899999999999977 100.21052631578948 28.899999999999977C 104.59473684210526 28.899999999999977 108.35263157894738 25.5 112.73684210526316 25.5C 117.12105263157895 25.5 120.87894736842107 27.200000000000045 125.26315789473685 27.200000000000045C 129.64736842105265 27.200000000000045 133.40526315789475 30.600000000000023 137.78947368421055 30.600000000000023C 142.17368421052635 30.600000000000023 145.93157894736842 27.200000000000045 150.31578947368422 27.200000000000045C 154.70000000000002 27.200000000000045 158.45789473684212 28.899999999999977 162.84210526315792 28.899999999999977C 167.22631578947372 28.899999999999977 170.9842105263158 30.600000000000023 175.3684210526316 30.600000000000023C 179.7526315789474 30.600000000000023 183.5105263157895 32.30000000000007 187.8947368421053 32.30000000000007C 192.2789473684211 32.30000000000007 196.03684210526316 25.5 200.42105263157896 25.5C 204.80526315789476 25.5 208.56315789473686 20.399999999999977 212.94736842105266 20.399999999999977C 217.33157894736846 20.399999999999977 221.08947368421053 17 225.47368421052633 17C 229.85789473684213 17 233.61578947368423 13.600000000000023 238.00000000000003 13.600000000000023"
+                                                    pathFrom="M 0 578 L 0 578 L 12.526315789473685 578 L 25.05263157894737 578 L 37.578947368421055 578 L 50.10526315789474 578 L 62.631578947368425 578 L 75.15789473684211 578 L 87.6842105263158 578 L 100.21052631578948 578 L 112.73684210526316 578 L 125.26315789473685 578 L 137.78947368421055 578 L 150.31578947368422 578 L 162.84210526315792 578 L 175.3684210526316 578 L 187.8947368421053 578 L 200.42105263157896 578 L 212.94736842105266 578 L 225.47368421052633 578 L 238.00000000000003 578"
+                                                    fill-rule="evenodd"></path>
+                                                <g id="SvgjsG1580"
+                                                    class="apexcharts-series-markers-wrap apexcharts-hidden-element-shown"
+                                                    data:realIndex="0"></g>
+                                            </g>
+                                            <g id="SvgjsG1581" class="apexcharts-datalabels" data:realIndex="0"></g>
+                                        </g>
+
+                                        <g id="SvgjsG1599" class="apexcharts-xaxis" transform="translate(0, 0)">
+                                            <g id="SvgjsG1600" class="apexcharts-xaxis-texts-g"
+                                                transform="translate(0, 4)"></g>
+                                        </g>
+                                        <g id="SvgjsG1622"
+                                            class="apexcharts-yaxis-annotations apexcharts-hidden-element-shown"></g>
+                                        <g id="SvgjsG1623"
+                                            class="apexcharts-xaxis-annotations apexcharts-hidden-element-shown"></g>
+                                        <g id="SvgjsG1624"
+                                            class="apexcharts-point-annotations apexcharts-hidden-element-shown"></g>
+                                    </g>
+                                </svg></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header">
+                <h2 class="table-title">
+                    <i class="fas fa-diagram-project me-2"></i>Project Progress Report
+                </h2>
+                <div class="header-buttons">
+                    <button class="header-btn" title="Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <button class="header-btn" title="Refresh">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="frozen-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">S.No</th>
+                            <th rowspan="2">Project Name</th>
+                            <th rowspan="2">Theme</th>
+                            <th rowspan="2">Department</th>
+                            <th rowspan="2">Start Date</th>
+                            <th rowspan="2">End Date</th>
+                            <th rowspan="2">Progress</th>
+                            <th rowspan="2">Status</th>
+                            <th rowspan="2">Budget (CR)</th>
+                            <th rowspan="2">Utilization</th>
+                            <th rowspan="2">Nodal Officer</th>
+                            <th colspan="2">Site Inception</th>
+                            <th colspan="2">Report</th>
+                            <th colspan="1">Report Pending At</th>
+                            <th colspan="1">Age of Pending</th>
+                        </tr>
+                        <tr>
+                            <th>Conducted</th>
+                            <th>Planned</th>
+                            <th>Submitted</th>
+                            <th>Pending</th>
+                            <th>Name (Designation)</th>
+                            <th>Number of Days</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>National Water Quality Monitoring Program</td>
+                            <td>Water Quality</td>
+                            <td>RSPCB</td>
+                            <td>01-01-2024</td>
+                            <td>31-12-2025</td>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar" aria-valuenow="70"
+                                        aria-valuemin="0" aria-valuemax="100" style="width:70%">
+                                        70%
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="ongoing">Ongoing</span></td>
+                            <td>25</td>
+                            <td>15</td>
+                            <td>Mr. A Sharma</td>
+                            <td>Yes</td>
+                            <td>No</td>
+                            <td>Submitted</td>
+                            <td>-</td>
+                            <td>J. Singh (Director)</td>
+                            <td>12</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>National Clean Air Program</td>
+                            <td>Air Quality</td>
+                            <td>RSPCB</td>
+                            <td>10-03-2023</td>
+                            <td>20-11-2025</td>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar" aria-valuenow="70"
+                                        aria-valuemin="0" aria-valuemax="100" style="width:70%">
+                                        75%
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="delay">Delayed</span></td>
+                            <td>50</td>
+                            <td>40</td>
+                            <td>Ms. R Kaur</td>
+                            <td>No</td>
+                            <td>Yes</td>
+                            <td>-</td>
+                            <td>Pending</td>
+                            <td>R. Gupta (SE)</td>
+                            <td>30</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <section class="footer p-3 pb-1 mt-4" style="background-color: #fff;">
+        <div>
+            <div class="row mb-1">
+                <div class="col-xxl-2 col-xl-2 col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                    <img src="./images/logo.png" alt="Meri LiFE Logo" class="img-fluid meri-life-logo">
+                    <div class="down">
+                        <h4>Total Visitors</h4>
+                        <span class="visitors">10,000</span>
+                    </div>
+                </div>
+                <div class="col-xxl-2 col-xl-2 col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                    <h4>Useful Link</h4>
+                    <ul>
+                        <li><a href="#">Submit a Grievance</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms and Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-4 col-sm-6 col-xs-6">
+                    <h4>Our Location</h4>
+                    
+                </div>
+                <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                    <div class="d-flex align-items-center mt-2 mb-3">
+                        <div>
+                            <img src="images/logo.png" class="img-fluid" alt="logo" style="height: 80px;">
+                        </div>
+                    </div>
+
+                    <div class="footer-texttwo mx-2">
+                        <p>Rajasthan State Pollution Control Board H.O., Jaipur<br>
+                            Jaipur, Rajasthan
+                        </p>
+                        <p><span> Contact Details: RSPCB 00000</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="footer-copyright">
+                    <div class="footer-copyright-wrapper">
+                        <p class="footer-copyright-text">
+                            <a class="footer-copyright-link" href="#" target="_self">RSPCB Environmental
+                                Monitoring &amp; MIS Dashboard © 2025 | Rajasthan State Pollution Control Board</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>
