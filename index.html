@@ -831,7 +831,51 @@
         .eip-tabs button small{font-weight:500;color:#9aa8a0;margin-left:6px;font-size:11.5px}
         .eip-pane{display:none}.eip-pane.on{display:block}
         .eip-frame{width:100%;height:calc(100vh - 175px);min-height:560px;border:none;border-radius:10px;background:#f4f6f4;display:block}
-    </style>
+    
+/* consolidated waste module */
+.wh-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.wh-head h2 i{margin-right:6px}
+.wh-count{font-size:13px;color:#5d6b63;background:#fff;border:1px solid #e2e8e4;border-radius:20px;padding:4px 12px}
+.wh-filters{display:grid;grid-template-columns:1.3fr 1fr 1.2fr;gap:14px;background:#fff;border-radius:12px;padding:14px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05);margin-bottom:16px;border:1px solid #e2e8e4}
+.wh-filters label{display:flex;flex-direction:column;gap:5px;margin:0;position:relative}
+.wh-filters label span{font-size:12px;font-weight:600;color:#5d6b63;text-transform:uppercase;letter-spacing:.04em}
+.wh-filters select{border:1px solid #cfd8d3;border-radius:8px;padding:9px 10px;font-size:15px;background:#f8faf9;color:#1c2a23}
+.wh-filters select:disabled{opacity:.55}
+.wh-filters em{font-size:12px;color:#8a6d00;font-style:normal}
+.wh-tabs{display:flex;gap:6px;border-bottom:2px solid #dfe7e2;margin-bottom:18px;flex-wrap:wrap}
+.wh-tab{border:none;background:none;padding:10px 16px;font-size:15px;font-weight:600;color:#5d6b63;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer}
+.wh-tab.on{color:#0b6b3a;border-bottom-color:#0b6b3a}
+.wh-tab i{margin-right:6px}
+.wh-tile{cursor:pointer;position:relative}
+.wh-tile .kpi-value small{font-size:.9rem;color:#5d6b63;font-weight:600}
+.wh-tsub{font-size:13px;color:#5d6b63;min-height:36px;margin-bottom:8px}
+.wh-note{cursor:default;background:#f2f8f4!important}.wh-note p{font-size:13.5px;color:#3d4a43;margin:8px 0 0}
+.status-badge.wh-b{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
+.wh-b.ok{background:#e3f4ea;color:#1e8449}.wh-b.mid{background:#fdf2dc;color:#b9770e}.wh-b.bad{background:#fdecea;color:#c0392b}
+.wh-muted{font-size:12.5px;color:#7a877f}
+.wh-act{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px 11px 14px;border-left:4px solid #e74c3c;border-radius:8px;background:#fff;margin-bottom:8px;box-shadow:0 1px 0 #eef2ef;cursor:pointer;transition:background .2s}
+.wh-act.amber{border-left-color:#f39c12}.wh-act:hover{background:#f6faf7}
+.wh-act b{display:block;font-size:14.5px;color:#1c2a23}.wh-act span{font-size:12.5px;color:#5d6b63}.wh-act>i{color:#9aa8a0}
+.wh-meters{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px}
+.wh-meter .wh-mt{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}.wh-meter .wh-mt b{font-size:16px}
+.wh-meter b.ok{color:#1e8449}.wh-meter b.mid{color:#b9770e}.wh-meter b.bad{color:#c0392b}
+.wh-bar2{height:9px;background:#eef2ef;border-radius:6px;position:relative}.wh-bar2 i{display:block;height:100%;border-radius:6px}
+.wh-bar2 em{position:absolute;top:-3px;width:2px;height:15px;background:#1c2a23}
+.wh-rule{font-size:12px;color:#7a877f;margin-top:5px}.wh-rule i{color:#0b6b3a;margin-right:4px}
+.wh-rulebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#e7f3ec;color:#0d3b24;border-radius:10px;padding:9px 14px;font-size:14px;margin-bottom:16px}
+.wh-rulebar a{margin-left:auto;color:#0b6b3a;font-weight:600;cursor:pointer;text-decoration:none}
+.wh-scroll{overflow:auto}
+.wh-score td,.wh-score th{text-align:center;white-space:nowrap}.wh-score td:first-child,.wh-score th:first-child{text-align:left}
+.wh-dot{display:inline-block;min-width:38px;padding:3px 8px;border-radius:12px;font-weight:600;font-size:13px}
+.wh-dot.ok{background:#e3f4ea;color:#1e8449}.wh-dot.mid{background:#fdf2dc;color:#b9770e}.wh-dot.bad{background:#fdecea;color:#c0392b}
+.wh-legend{display:flex;gap:8px;font-size:12px}.wh-legend span{padding:2px 8px;border-radius:10px}.wh-legend .ok{background:#e3f4ea;color:#1e8449}.wh-legend .mid{background:#fdf2dc;color:#b9770e}.wh-legend .bad{background:#fdecea;color:#c0392b}
+.wh-foot{font-size:12.5px;color:#7a877f;margin-top:10px}.wh-showall{margin-top:12px}
+.wh-sel td{background:#e7f3ec!important}.wh-red{color:#c0392b;font-weight:600}
+.wh-ins .wh-ins-h{font-weight:600;font-size:15px;color:#0d3b24;margin-bottom:6px}.wh-ins .wh-ins-h i{color:#0b6b3a;margin-right:8px}
+.wh-ins p{font-size:14px;color:#3d4a43;margin:0;line-height:1.5}
+#wh-frame iframe{width:100%;border:0;min-height:600px}
+@media(max-width:900px){.wh-filters{grid-template-columns:1fr}.wh-meters{grid-template-columns:1fr}}
+</style>
 <style id="eip-type">/* ===== EIP shared type system: one heading → subheading → card → KPI pattern on every screen ===== */
 :root{--eip-font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;--eip-head:#1f2d27;--eip-muted:#5d6b63;--eip-accent:#0b6b3a;--eip-line:#e3ebe6;--eip-shadow:0 2px 10px rgba(16,60,38,.06)}
 /* T1 page title · T2 subtitle · T3 card title · K1 KPI label · K2 KPI value · K3 KPI note · TH table header */
@@ -947,17 +991,9 @@
                         <i class="fas fa-bridge-water nav-icon"></i>
                         <span>River monitor</span>
                     </a>
-                    <a role="button" tabindex="0" class="nav-link" data-tab="waste">
-                        <i class="fas fa-trash nav-icon"></i>
-                        <span>Waste Management Level</span>
-                    </a>
-                    <a role="button" tabindex="0" class="nav-link" data-tab="ewaste">
-                        <i class="fas fa-laptop nav-icon"></i>
-                        <span>E-Waste Level</span>
-                    </a>
-                    <a role="button" tabindex="0" class="nav-link" data-tab="biomedical">
-                        <i class="fas fa-syringe nav-icon"></i>
-                        <span>Biomedical Waste Level</span>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="wastehub">
+                        <i class="fas fa-recycle nav-icon"></i>
+                        <span>Waste management</span>
                     </a>
                     <a role="button" tabindex="0" class="nav-link" data-tab="groundwater">
                         <i class="fas fa-water nav-icon"></i>
@@ -1291,6 +1327,17 @@
                 </div>
 
                 <!-- Waste Management Dashboard -->
+                <div id="wastehub" class="tab-content">
+                    <div class="dashboard-title wh-head"><div><h2 id="wh-title">Waste management</h2><p class="text-muted">Every waste stream the Board regulates, in one place · <span id="wh-scope">Rajasthan</span></p></div><span class="wh-count" id="wh-count"></span></div>
+                    <div class="wh-filters">
+                        <label><span><i class="fas fa-layer-group"></i> Waste stream</span><select id="wh-stream"></select></label>
+                        <label><span><i class="fas fa-map"></i> District</span><select id="wh-dist"></select></label>
+                        <label><span><i class="fas fa-city"></i> Urban local body</span><select id="wh-ulb"></select><em id="wh-ulb-note"></em></label>
+                    </div>
+                    <div class="wh-tabs"><button class="wh-tab on" data-t="cc"><i class="fas fa-gauge-high"></i> Command centre</button><button class="wh-tab" data-t="an"><i class="fas fa-chart-column"></i> Analytics</button><button class="wh-tab" data-t="tr" id="wh-tab-tr"><i class="fas fa-truck-medical"></i> Movement tracking</button></div>
+                    <div id="wh-body"></div>
+                    <div id="wh-frame" style="display:none"><iframe class="eip-frame" title="Movement tracking" data-src="platform.html?embed=1#waste"></iframe></div>
+                </div>
                 <div id="waste" class="tab-content">
                     <div class="dashboard-title">
                         <h2>Waste Management</h2>
@@ -3317,6 +3364,7 @@ function eipShow(sec,i,hash,load=true){
 window.addEventListener('message',e=>{const d=e.data;if(d&&d.eipH){document.querySelectorAll('iframe.eip-frame').forEach(f=>{if(f.contentWindow===e.source)f.style.height=d.eipH+'px'});return}
   if(!d||!d.eip)return;const m=VIEW2TAB[d.view];if(!m)return;
   const o=d.opts||{};let arg='';if(d.view==='fac'&&o.id)arg=':'+o.id;if(d.view==='map'){if(o.zone)arg=':'+o.zone;else if(o.llStr)arg=':'+o.llStr}if(d.view==='river'&&o.river)arg=':'+o.river;if(d.view==='ngt'&&o.case)arg=':'+o.case;if(d.view==='lab'&&o.id)arg=':'+o.id;if(d.view==='water'&&o.cetp)arg=':'+o.cetp;
+  if(d.view==='waste'&&window.WH){switchTab('wastehub');WH.open('bmw','tr',d.view+arg);window.scrollTo(0,0);return}
   switchTab(m[0]);eipShow(m[0],m[1],d.view+arg);window.scrollTo(0,0);});
 {const ft=document.querySelector('footer.pfoot');if(ft)document.body.appendChild(ft)}
 function eipPushView(){document.querySelectorAll('iframe.eip-frame').forEach(f=>{if(!f.offsetParent||!f.contentWindow)return;const r=f.getBoundingClientRect();const y0=Math.max(0,-r.top),y1=Math.min(r.height,innerHeight-r.top);if(y1<=y0)return;try{f.contentWindow.postMessage({eipView:{y0:Math.round(y0),y1:Math.round(y1)}},'*')}catch(e){}})}
@@ -3332,6 +3380,7 @@ function fit(){raf=0;if(innerWidth<=992){sb.style.maxHeight='';return}const top=
   sb.style.maxHeight=Math.max(200,bottom-top)+'px'}
 const q=()=>{if(!raf)raf=requestAnimationFrame(fit)};addEventListener('scroll',q,{passive:true});addEventListener('resize',q);addEventListener('load',q);fit()})();
 </script>
+<script src="wastehub.js"></script>
 </body>
 
 </html>
