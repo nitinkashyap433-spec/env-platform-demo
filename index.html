@@ -790,6 +790,8 @@
         button.bhashini-dropdown-btn {
             position: fixed;
             bottom: 0;
+            transform: scale(.6) !important;
+            transform-origin: bottom right !important;
         }
 
         .bhashini-dropdown-content {
@@ -810,7 +812,7 @@
         .nav-link{cursor:pointer;padding:9px 20px!important}
         .eip-frame{height:auto;min-height:300px;overflow:hidden}
         /* portal footer */
-        .pfoot{background:#fff;border-top:1px solid #e2e8e4;margin-top:0;width:100%;position:relative;z-index:5;font-family:"Segoe UI",system-ui,sans-serif}
+        .pfoot{background:#0d3b24;border-top:none;margin-top:0;width:100%;position:relative;z-index:5;font-family:"Segoe UI",system-ui,sans-serif}
         .pfoot-in{display:grid;grid-template-columns:1.2fr 1.5fr 1.1fr 1.5fr;gap:32px;padding:30px 36px 26px;max-width:1500px;margin:0 auto}
         .pfoot h4{font-size:13px;margin:0 0 10px;color:#0d3b24;font-weight:600;padding-bottom:6px;border-bottom:2px solid #e7f3ec;display:inline-block}
         .pfoot a{display:block;color:#1c2a23;text-decoration:none;font-size:13px;padding:3px 0;cursor:pointer}
@@ -819,7 +821,7 @@
         .pf-brand b{display:block;font-size:14.5px;color:#0d3b24}.pf-brand span{display:block;font-size:12.5px;color:#5d6b63;margin-top:2px}
         .pf-ds{font-size:13px;padding:3px 0;display:flex;align-items:center;gap:8px}.pf-ds i{width:7px;height:7px;border-radius:50%;background:#2f8f5b}
         .pf-about p{font-size:12.5px;color:#5d6b63;margin:0 0 8px;line-height:1.5}.pf-about b{color:#1c2a23}
-        .pfoot-bar{background:#0d3b24;color:#dfeee5;font-size:12.5px;padding:11px 290px 11px 36px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+        .pfoot-bar{background:#0d3b24;color:#dfeee5;font-size:13px;padding:10px 210px 10px 28px;display:flex;justify-content:space-between;align-items:center;gap:10px 20px;flex-wrap:wrap}.pfoot-bar b{color:#fff;font-weight:600}.pf-l{display:flex;align-items:center;gap:12px}.pf-l img{height:34px;width:auto;background:#fff;border-radius:7px;padding:3px 5px}@media(max-width:900px){.pfoot-bar{padding:10px 16px}}
         @media(max-width:1000px){.pfoot-in{grid-template-columns:1fr 1fr}}
         /* ---- merged platform: section tabs + embedded frames ---- */
         .nav-sec{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#7f8c8d;padding:14px 20px 4px}
@@ -3269,13 +3271,7 @@ html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
 
 
 <footer class="pfoot">
-  <div class="pfoot-in">
-    <div class="pf-brand"><img src="images/logo.png" alt=""><div><b>Environmental Intelligence Platform</b><span>Rajasthan State Pollution Control Board</span><span>राजस्थान राज्य प्रदूषण नियंत्रण मंडल</span></div></div>
-    <div><h4>Modules</h4><div style="display:grid;grid-template-columns:1fr 1fr;column-gap:18px"><div><a onclick="switchTab('home');window.scrollTo(0,0)">Command centre</a><a onclick="switchTab('map');window.scrollTo(0,0)">Map &amp; priority zones</a><a onclick="switchTab('plan');window.scrollTo(0,0)">Inspection planner</a><a onclick="switchTab('consent');window.scrollTo(0,0)">Consent management</a><a onclick="switchTab('fac');window.scrollTo(0,0)">Facility 360</a><a onclick="switchTab('lab');window.scrollTo(0,0)">Laboratory &amp; samples</a><a onclick="switchTab('programme');window.scrollTo(0,0)">Programme tracker</a></div><div><a onclick="switchTab('air');window.scrollTo(0,0)">Air quality</a><a onclick="switchTab('water');window.scrollTo(0,0)">Water &amp; CETPs</a><a onclick="switchTab('waste');window.scrollTo(0,0)">Waste &amp; BMW</a><a onclick="switchTab('river');window.scrollTo(0,0)">River monitor</a><a onclick="switchTab('grievance');window.scrollTo(0,0)">Grievances</a><a onclick="switchTab('ngt');window.scrollTo(0,0)">NGT &amp; legal cases</a><a onclick="switchTab('knowledge');window.scrollTo(0,0)">Regulatory Knowledge Assistant</a></div></div></div>
-    <div><h4>Data sources</h4><div class="pf-ds"><i></i>Online consent system</div><div class="pf-ds"><i></i>OCEMS (industry stack &amp; effluent)</div><div class="pf-ds"><i></i>Ambient air stations (CAAQMS)</div><div class="pf-ds"><i></i>Satellite fire data (NASA FIRMS)</div><div class="pf-ds"><i></i>Grievance portal</div><div class="pf-ds"><i></i>Laboratory information system</div><div style="font-size:12.5px;color:#5d6b63;margin-top:6px">Shown as connected for demonstration</div></div>
-    <div class="pf-about"><h4>About this demo</h4><p>A concept demo illustrating how RSPCB's existing data could be brought into one platform for monitoring, prioritisation and action.</p><p>All units, readings, applications, complaints and locations shown are <b>synthetic</b>. They do not represent actual RSPCB data or any real facility. This is not an operational system.</p></div>
-  </div>
-  <div class="pfoot-bar"><span>Environmental Intelligence Platform · Concept demo</span><span>Concept demonstration · for discussion purposes only</span></div>
+  <div class="pfoot-bar"><span class="pf-l"><img src="images/logo.png" alt=""><span><b>Environmental Intelligence Platform</b> · Rajasthan State Pollution Control Board</span></span><span>Concept demonstration · for discussion purposes only</span></div>
 </footer>
 <script>
 /* ===== Merged platform wiring (sections, tabs, embedded modules) ===== */
@@ -3327,6 +3323,14 @@ function eipPushView(){document.querySelectorAll('iframe.eip-frame').forEach(f=>
 addEventListener('scroll',eipPushView,{passive:true});addEventListener('resize',eipPushView);setInterval(eipPushView,600);
 eipBuild();
 document.querySelectorAll('.nav-link[data-tab]').forEach(l=>l.addEventListener('click',()=>{const sec=l.dataset.tab;const box=document.getElementById(sec);if(!box||!box.dataset.eip)return;const on=[...box.querySelectorAll('.eip-pane')].findIndex(p=>p.classList.contains('on'));eipShow(sec,Math.max(0,on))}));
+</script>
+<script>
+/* keep the whole sidebar reachable: its height always matches the visible part of the window */
+(function(){const sb=document.getElementById('sidebar');if(!sb)return;let raf=0;
+function fit(){raf=0;if(innerWidth<=992){sb.style.maxHeight='';return}const top=Math.max(0,sb.getBoundingClientRect().top);
+  const ft=document.querySelector('footer.pfoot');const fr=ft?ft.getBoundingClientRect().top:innerHeight;const bottom=Math.min(innerHeight,fr);
+  sb.style.maxHeight=Math.max(200,bottom-top)+'px'}
+const q=()=>{if(!raf)raf=requestAnimationFrame(fit)};addEventListener('scroll',q,{passive:true});addEventListener('resize',q);addEventListener('load',q);fit()})();
 </script>
 </body>
 
