@@ -1056,6 +1056,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 @media(max-width:1100px){#v-home .hero-k{grid-template-columns:1fr 1fr!important}}
 @media(max-width:560px){#v-home .hero-k{grid-template-columns:1fr!important}}
 </style>
+<style id="sched-css">.tbl-sch{width:100%;border-collapse:collapse;font-size:13px}.tbl-sch th{font-size:11.5px;color:var(--muted);font-weight:600;text-align:left;padding:4px 6px;border-bottom:1px solid var(--line)}.tbl-sch td{padding:6px;border-bottom:1px solid #f0f3f1;vertical-align:top}.tbl-sch .num{text-align:right}.weights label{grid-template-columns:132px 1fr 38px!important}#ptable td:nth-child(6){min-width:150px}</style>
 </head>
 <body>
 
@@ -1148,7 +1149,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <div class="grid g-6040">
         <div class="card">
           <div class="card-h"><h2>Risk-ranked units</h2>
-            <div class="flt"><select id="pRO"></select><select id="pCat"><option value="">All categories</option><option>Red</option><option>Orange</option><option>Green</option></select></div>
+            <div class="flt"><select id="pRO"></select><select id="pCat"><option value="">All categories</option><option>Red</option><option>Orange</option><option>Green</option></select><select id="pSch"><option value="">All inspection status</option><option value="over">Overdue as per schedule</option><option value="due">Due in 30 days</option></select></div>
           </div>
           <div class="legend" style="margin-bottom:8px" id="compLegend"></div>
           <div style="max-height:620px;overflow:auto"><table id="ptable"></table></div>
@@ -1160,6 +1161,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
             <div class="small muted" style="margin-bottom:6px">Drag to change what matters most. The ranking updates instantly.</div>
             <div class="weights" id="weights"></div>
           </div>
+          <div class="card mt" id="schCard"><div class="card-h"><h2>Inspection schedule compliance</h2><span class="hint">as per RSPCB order, 24.08.2023</span></div><div id="schBody"></div></div>
           <div class="card mt">
             <div class="card-h"><h2>This week's plan</h2><span class="hint" id="planCount"></span></div>
             <div class="flt" style="margin-bottom:10px"><span class="small">Pick top</span><select id="topN"><option>10</option><option selected>20</option><option>30</option></select><button class="btn sm" id="autoPick">Select</button><button class="btn sm" id="clearPick">Clear</button></div>
@@ -1380,6 +1382,45 @@ const hot={BLT:12,PAL:11,BHW:10,JDH:8,JPR:7,KOT:4,BHL:5,ALW:3,CHT:3,UDR:2,KSG:3,
 CLUSTERS.forEach(cl=>{for(let i=0;i<hot[cl.id];i++){const ll=[cl.c[0]+gauss()*0.05,cl.c[1]+gauss()*0.055];COMP.push({ll,type:pick(['BLT','PAL','JDH','BHL'].includes(cl.id)?['Coloured effluent in drain','Foul smell at night','Effluent discharge on land']:['Smoke / dust from unit','Open burning of waste','Noise at night','Foul smell at night']),days:ri(1,40),ro:cl.ro})}});
 for(let i=0;i<4;i++)COMP.push({ll:[STAR.ll[0]+gauss()*0.006,STAR.ll[1]+gauss()*0.007],type:i%2?'Foul smell at night':'Coloured effluent in drain',days:ri(2,15),ro:'Balotra'});
 FAC.forEach(f=>{f.complaints=COMP.filter(c=>km(c.ll,f.ll)<=2).length});
+/* ===== inspection schedule (RSPCB Order F12(5-Adm)/RSPCB/1672-1681, 24.08.2023) and balanced demo data ===== */
+const SCH_ORDER='RSPCB Order dated 24.08.2023';
+const FREQ={Q:[90,'Quarterly'],H:[182,'Half-yearly'],A:[365,'Annually'],T:[730,'Once in two years'],N:[0,'Need based'],M:[30,'Monthly']};
+const C17=['Pharma','Fertiliser','Non-ferrous metal'];
+(function(){const r2=mulberry32(4242);const x=()=>r2();const ri2=(a,b)=>a+Math.floor(x()*(b-a+1));
+ FAC.forEach(f=>{f.scale=x()<.35?'Large':'MSME';let k='N',why='';
+  if(f.sector==='Textile dyeing'||f.sector==='Textile printing'){f.kld=Math.round(f.scale==='Large'?ri2(150,900):ri2(20,180));f.zld=x()<.3;
+    if(f.zld){k=f.kld>500?'Q':f.kld>100?'H':'A';why=`Textile, own ETP (ZLD), ${f.kld} KLD`}else{k=f.kld>100?'H':'A';why=`Textile, CETP-connected, ${f.kld} KLD`}}
+  else if(f.sector==='Cement'){f.scale='Large';k='Q';why='Integrated cement plant'}
+  else if(f.sector==='Thermal power'){f.scale='Large';f.mw=ri2(120,1200);k='Q';why=`Power plant, ${f.mw} MW`}
+  else if(f.sector==='Mining'){f.lease=ri2(2,160);k=f.lease>100?'A':f.lease>5?'T':'N';why=`Mine, lease ${f.lease} ha`}
+  else if(C17.includes(f.sector)||(f.sector==='Chemical'&&x()<.4)){f.c17=true;k='Q';why='17-category highly polluting industry'}
+  else if(f.cat==='Red'){k=f.scale==='Large'?'H':'A';why=`Red category (${f.scale==='Large'?'large':'MSME'})`}
+  else if(f.cat==='Orange'){k=f.scale==='Large'?'A':'T';why=`Orange category (${f.scale==='Large'?'large':'MSME'})`}
+  else{k='N';why='Green category'}
+  f.freqK=k;f.freqD=FREQ[k][0];f.freqL=FREQ[k][1];f.freqWhy=why;
+  if(f.freqD)f.lastInsp=Math.round(f.freqD*(.2+x()*1.2));else f.lastInsp=ri2(200,900);
+  if(x()<.55)f.pastViol=0;else if(f.pastViol>2&&x()<.5)f.pastViol=2;});
+ /* spread the strongest cases across regional offices and sectors, so no one RO or unit tops every view */
+ const set=(id,o)=>{const f=FAC.find(z=>z.id===id);if(f)Object.assign(f,o);return f};
+ const pickU=(cl,pred)=>FAC.find(f=>f.cluster===cl&&f!==STAR&&(!pred||pred(f)));
+ const re=(f,pat)=>{if(!f||!f.ocems)return;f.pattern=pat;f.series=genSeries(f,1000+FAC.indexOf(f));analyse(f);f.flagged=f.m.lowAvail||f.m.flatFlag||f.m.nightFlag||f.m.exceed>0};
+ Object.assign(STAR,{pastViol:0,complaints:1,lastInsp:Math.round(STAR.freqD*1.1)||200});
+ FAC.filter(f=>['BLT','PAL'].includes(f.cluster)&&f!==STAR&&f!==EXP).forEach(f=>{if(f.pattern==='exceed'||f.pattern==='night'){if(x()<.8)re(f,'normal')}f.pastViol=Math.min(f.pastViol,1)});
+ let u;
+ u=pickU('BHW',f=>f.ocems&&f.sector==='Chemical');if(u){re(u,'flatline');Object.assign(u,{pastViol:1,complaints:Math.max(u.complaints,3)})}
+ u=pickU('JDH',f=>f.ocems&&f.sector==='Textile dyeing');if(u){re(u,'night');Object.assign(u,{pastViol:1,complaints:Math.max(u.complaints,2)})}
+ u=pickU('CHT',f=>f.ocems);if(u){re(u,'exceed');Object.assign(u,{validTo:new Date(TODAY.getTime()-21*DAY),pastViol:1})}
+ u=pickU('UDR',f=>f.ocems);if(u){re(u,'exceed');Object.assign(u,{pastViol:2,complaints:Math.max(u.complaints,3)})}
+ u=pickU('BHL',f=>f.ocems);if(u){re(u,'exceed');Object.assign(u,{lastInsp:Math.round((u.freqD||182)*2.2),complaints:Math.max(u.complaints,2),pastViol:1})}
+ u=pickU('JPR',f=>f.ocems&&f.cat==='Red');if(u){re(u,'exceed');Object.assign(u,{complaints:Math.max(u.complaints,6),pastViol:1})}
+ u=pickU('ALW',f=>f.ocems)||pickU('NMR',f=>f.ocems);if(u){re(u,'exceed');Object.assign(u,{validTo:new Date(TODAY.getTime()+9*DAY),pastViol:2})}
+ const k3=FAC.find(f=>f.id==='RJ-KOT-003');if(k3){re(k3,'exceed');k3.pastViol=Math.min(k3.pastViol,1)}
+})();
+const inspDue=f=>f.freqD?f.freqD-f.lastInsp:null;
+function schedChip(f){const d=inspDue(f);if(d===null)return `<span class="chip grey" title="${esc(f.freqWhy)}">Need based</span>`;
+  if(d<0)return `<span class="chip bad" title="${esc(f.freqWhy)} · due ${f.freqL.toLowerCase()}">${f.freqL} · overdue ${-d} d</span>`;
+  if(d<=30)return `<span class="chip warn" title="${esc(f.freqWhy)}">${f.freqL} · due in ${d} d</span>`;
+  return `<span class="chip ok" title="${esc(f.freqWhy)}">${f.freqL} · next in ${d} d</span>`}
 const CETPS=[
  {n:'CETP Balotra',ll:[25.85,72.27],cap:18,inlet:2650,outlet:410,limit:250},
  {n:'CETP Pali',ll:[25.79,73.35],cap:24,inlet:2400,outlet:265,limit:250},
@@ -1396,7 +1437,7 @@ const COMPS=[
  {k:'cmp',label:'Complaints nearby',color:'var(--c-cmp)',w:15},
  {k:'con',label:'Consent status',color:'var(--c-con)',w:10},
  {k:'his',label:'Violation history',color:'var(--c-his)',w:5},
- {k:'gap',label:'Time since inspection',color:'var(--c-gap)',w:5}
+ {k:'gap',label:'Inspection overdue',color:'var(--c-gap)',w:5}
 ];
 const W={};COMPS.forEach(c=>W[c.k]=c.w);
 const daysToExpiry=f=>Math.round((f.validTo-TODAY)/DAY);
@@ -1408,7 +1449,7 @@ function score(f){
     cmp:Math.min(1,f.complaints/5),
     con:dte<0?1:dte<=30?.6:dte<=90?.3:0,
     his:Math.min(1,f.pastViol/3),
-    gap:Math.min(1,f.lastInsp/540)};
+    gap:f.freqD?Math.min(1,Math.max(0,f.lastInsp-f.freqD)/Math.max(60,f.freqD*.75)):(f.lastInsp>730?.3:0)};
   const tot=Object.values(W).reduce((a,b)=>a+b,0)||1;
   const parts={};let s=0;COMPS.forEach(c=>{parts[c.k]=raw[c.k]*W[c.k]/tot*100;s+=parts[c.k]});
   f.parts=parts;f.score=Math.round(s);
@@ -1420,7 +1461,7 @@ function score(f){
   if(m.exceed)rs.push(`${m.exceed} h above limit`);
   if(f.complaints>=2)rs.push(`${f.complaints} complaints within 2 km`);
   if(f.pastViol>=2)rs.push(`${f.pastViol} past violations`);
-  if(f.lastInsp>365)rs.push('Not inspected in 12+ months');
+  {const d=inspDue(f);if(d!==null&&d<0)rs.push(`Inspection overdue ${-d} d (${f.freqL.toLowerCase()})`)}
   f.reasons=rs;
 }
 const rescore=()=>FAC.forEach(score);rescore();
@@ -1636,21 +1677,28 @@ let PICK=new Set();
 function initPlan(){
   $('#pRO').innerHTML='<option value="">All Regional Offices</option>'+ROS.map(r=>`<option>${r}</option>`).join('');
   $('#compLegend').innerHTML=COMPS.map(c=>`<span><i style="background:${c.color}"></i>${c.label}</span>`).join('');
-  $('#weights').innerHTML=COMPS.map(c=>`<label><span>${c.label}</span><input type="range" min="0" max="40" value="${W[c.k]}" data-w="${c.k}"><b id="wv-${c.k}">${W[c.k]}</b></label>`).join('');
-  $$('#weights input').forEach(i=>i.addEventListener('input',()=>{W[i.dataset.w]=+i.value;$('#wv-'+i.dataset.w).textContent=i.value;rescore();renderPlanTable();renderCoverage()}));
-  $('#wReset').addEventListener('click',()=>{COMPS.forEach(c=>{W[c.k]=c.w;$(`#weights input[data-w=${c.k}]`).value=c.w;$('#wv-'+c.k).textContent=c.w});rescore();renderPlanTable();renderCoverage()});
-  $('#pRO').addEventListener('change',renderPlanTable);$('#pCat').addEventListener('change',renderPlanTable);
+  $('#weights').innerHTML=COMPS.map(c=>`<label><span>${c.label}</span><input type="range" min="0" max="40" value="${W[c.k]}" data-w="${c.k}"><b id="wv-${c.k}"></b></label>`).join('');showW();
+  $$('#weights input').forEach(i=>i.addEventListener('input',()=>{W[i.dataset.w]=+i.value;showW();rescore();renderPlanTable();renderCoverage()}));
+  $('#wReset').addEventListener('click',()=>{COMPS.forEach(c=>{W[c.k]=c.w;$(`#weights input[data-w=${c.k}]`).value=c.w;});showW();rescore();renderPlanTable();renderCoverage()});
+  $('#pRO').addEventListener('change',()=>{renderPlanTable();renderSched()});$('#pCat').addEventListener('change',renderPlanTable);$('#pSch').addEventListener('change',renderPlanTable);
   $('#autoPick').addEventListener('click',()=>autoPick(+$('#topN').value));
   $('#clearPick').addEventListener('click',()=>{PICK.clear();renderPlanTable();renderCoverage()});
   $('#genOrders').addEventListener('click',()=>{if(!PICK.size)return toast('Select units first');const by={};[...PICK].forEach(id=>{const f=FAC.find(x=>x.id===id);(by[f.ro]=by[f.ro]||[]).push(f)});
     modal(`<h2>Inspection orders (draft)</h2><p class="small muted">One order per Regional Office, with the reason each unit was picked. Officers see these on their mobile app.</p>${Object.entries(by).map(([ro,fs])=>`<div style="margin:12px 0"><b>${ro}</b> · ${fs.length} unit${fs.length>1?'s':''} · assign to ${OFFICERS[ro][0]}<ul class="small" style="margin:6px 0 0 18px;padding:0">${fs.map(f=>`<li>${f.id} – ${esc(f.sector)} – check: ${f.reasons.slice(0,2).join(', ')||'routine'}</li>`).join('')}</ul></div>`).join('')}<div class="btn-row"><button class="btn primary" onclick="closeModal();toast('Orders issued (demo)')">Issue orders</button><button class="btn" onclick="closeModal()">Close</button></div>`)});
 }
-function curList(){const ro=$('#pRO').value||(ROLE!=='HQ'?ROLE:''),cat=$('#pCat').value;return FAC.filter(f=>(!ro||f.ro===ro)&&(!cat||f.cat===cat)).sort((a,b)=>b.score-a.score)}
+function showW(){const t=Object.values(W).reduce((a,b)=>a+b,0)||1;COMPS.forEach(c=>{const e=$('#wv-'+c.k);if(e)e.textContent=Math.round(W[c.k]/t*100)+'%'})}
+function curList(){const ro=$('#pRO').value||(ROLE!=='HQ'?ROLE:''),cat=$('#pCat').value;const sch=$('#pSch')?$('#pSch').value:'';return FAC.filter(f=>(!ro||f.ro===ro)&&(!cat||f.cat===cat)&&(!sch||(sch==='over'?inspDue(f)!==null&&inspDue(f)<0:inspDue(f)!==null&&inspDue(f)>=0&&inspDue(f)<=30))).sort((a,b)=>b.score-a.score)}
 function autoPick(n){PICK.clear();curList().slice(0,n).forEach(f=>PICK.add(f.id));renderPlanTable();renderCoverage()}
-function renderPlan(){if(ROLE!=='HQ')$('#pRO').value=ROLE;renderPlanTable();renderCoverage()}
+function renderSched(){const ro=$('#pRO').value||(ROLE!=='HQ'?ROLE:'');const L=FAC.filter(f=>!ro||f.ro===ro);
+  const grp=[['Q','Quarterly','17-category, cement, power >100 MW, large ZLD textile'],['H','Half-yearly','Red large-scale, textile >100 KLD'],['A','Annually','Red MSME, Orange large, textile ≤100 KLD'],['T','Once in two years','Orange MSME, mines 5–100 ha'],['N','Need based','Green category, small mines']];
+  const row=g=>{const U=L.filter(f=>f.freqK===g[0]);if(!U.length)return '';const ov=U.filter(f=>inspDue(f)!==null&&inspDue(f)<0).length,du=U.filter(f=>{const d=inspDue(f);return d!==null&&d>=0&&d<=30}).length;
+    return `<tr><td><b>${g[1]}</b><div class="small muted">${g[2]}</div></td><td class="num">${U.length}</td><td class="num"${ov?' style="color:var(--red);font-weight:600"':''}>${g[0]==='N'?'–':ov}</td><td class="num">${g[0]==='N'?'–':du}</td></tr>`};
+  const ovT=L.filter(f=>inspDue(f)!==null&&inspDue(f)<0).length;
+  $('#schBody').innerHTML=`<div class="small" style="margin-bottom:8px"><b style="color:var(--red)">${ovT}</b> of ${L.length} units are past their required inspection date${ro?' in RO '+esc(ro):''}.</div><table class="tbl-sch"><thead><tr><th>Frequency</th><th class="num">Units</th><th class="num">Overdue</th><th class="num">Due ≤30 d</th></tr></thead><tbody>${grp.map(row).join('')}</tbody></table><button class="btn sm" style="margin-top:10px" onclick="$('#pSch').value='over';renderPlanTable()">Show overdue units</button>`}
+function renderPlan(){if(ROLE!=='HQ')$('#pRO').value=ROLE;renderPlanTable();renderCoverage();renderSched()}
 function renderPlanTable(){
   const L=curList();
-  $('#ptable').innerHTML=`<thead><tr><th></th><th>#</th><th>Unit</th><th>RO</th><th>Category</th><th>Why it is high</th><th>Score</th><th></th></tr></thead><tbody>${L.map((f,i)=>`<tr><td><input type="checkbox" data-pk="${f.id}" ${PICK.has(f.id)?'checked':''}></td><td class="muted">${i+1}</td><td><a href="#" data-go="fac" data-id="${f.id}" style="font-weight:600;text-decoration:none">${f.id}</a><div class="small muted">${f.sector}</div></td><td class="small">${f.ro}</td><td>${catChip(f.cat)}</td><td style="max-width:280px">${f.reasons.slice(0,3).map(r=>`<span class="reason">${r}</span>`).join('')||'<span class="small muted">No current issues</span>'}</td><td class="num"><span class="score">${f.score}</span></td><td>${sbar(f)}</td></tr>`).join('')}</tbody>`;
+  $('#ptable').innerHTML=`<thead><tr><th></th><th>#</th><th>Unit</th><th>RO</th><th>Category</th><th>Inspection schedule</th><th>Why it is high</th><th>Score</th><th></th></tr></thead><tbody>${L.map((f,i)=>`<tr><td><input type="checkbox" data-pk="${f.id}" ${PICK.has(f.id)?'checked':''}></td><td class="muted">${i+1}</td><td><a href="#" data-go="fac" data-id="${f.id}" style="font-weight:600;text-decoration:none">${f.id}</a><div class="small muted">${f.sector}</div></td><td class="small">${f.ro}</td><td>${catChip(f.cat)}</td><td>${schedChip(f)}</td><td style="max-width:280px">${f.reasons.slice(0,3).map(r=>`<span class="reason">${r}</span>`).join('')||'<span class="small muted">No current issues</span>'}</td><td class="num"><span class="score">${f.score}</span></td><td>${sbar(f)}</td></tr>`).join('')}</tbody>`;
   $$('#ptable input[data-pk]').forEach(cb=>cb.addEventListener('change',()=>{cb.checked?PICK.add(cb.dataset.pk):PICK.delete(cb.dataset.pk);renderCoverage()}));
 }
 function renderCoverage(){
@@ -1744,7 +1792,7 @@ function renderFac(id){
   <div class="card">
     <div class="fhead"><div><div class="small muted">Facility 360</div><h1 style="margin-top:2px">${esc(f.name)}</h1>
       <div class="meta">${f.id} · ${f.sector} · ${f.clusterName} · Regional Office ${f.ro} · ${f.ll[0].toFixed(4)}, ${f.ll[1].toFixed(4)}</div>
-      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${catChip(f.cat)}${consentChip(f)}${f.ocems?'<span class="chip grey">OCEMS: '+S.media+' '+S.param+'</span>':'<span class="chip grey">No OCEMS required</span>'}</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${catChip(f.cat)}${consentChip(f)}${schedChip(f)}${f.ocems?'<span class="chip grey">OCEMS: '+S.media+' '+S.param+'</span>':'<span class="chip grey">No OCEMS required</span>'}</div>
       <div class="btn-row" style="margin-top:14px"><button class="btn primary" onclick="assignDlg('${f.id}')">Assign inspection</button><button class="btn" onclick="noticeDlg('${f.id}')">Draft show-cause notice</button>${f.ocems?`<button class="btn" onclick="audit('${f.id}')">Request OCEMS audit</button>`:''}<button class="btn" onclick="go('map',{ll:[${f.ll}]})">Show on map</button></div>
     </div>
     <div style="display:flex;gap:18px;align-items:center">${ring(f.score)}<div style="min-width:290px">${COMPS.map(c=>`<div class="comp"><span>${c.label}</span><div class="bg"><span style="width:${f.parts[c.k]/Math.max(1,W[c.k]/Object.values(W).reduce((a,b)=>a+b,0)*100)*100}%;background:${c.color}"></span></div><b style="text-align:right">${f.parts[c.k].toFixed(0)}</b></div>`).join('')}</div></div></div>
