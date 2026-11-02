@@ -891,7 +891,7 @@
 .table thead th{background:#f3f7f5!important;color:var(--eip-muted)!important;font-size:12px!important;font-weight:600!important;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--eip-line)!important}
 .eip-frame{background:transparent!important}
 </style>
-<style id="eip-brand">.eip-name{font-weight:700;letter-spacing:.2px}.eip-demo{display:inline-block;font-size:11px;font-weight:600;background:#ffe600;color:#1c2a23;border-radius:10px;padding:2px 8px;vertical-align:3px;margin-left:6px}@media(max-width:768px){.navbar-brand .header-title{display:block!important}.eip-name{font-size:14px;line-height:1.2}.eip-demo{display:none}}</style>
+<style id="eip-brand">.eip-sub{font-size:13px;opacity:.9;margin-top:2px}.navbar .time-display{white-space:nowrap;font-size:14px}.navbar .a11y-open{padding:8px 11px;font-size:1rem}.navbar .user-profile{white-space:nowrap}.navbar .header-controls{gap:10px;flex-wrap:nowrap}.navbar .navbar-brand{white-space:nowrap}.eip-name{font-weight:700;letter-spacing:.2px}.eip-demo{display:inline-block;font-size:11px;font-weight:600;background:#ffe600;color:#1c2a23;border-radius:10px;padding:2px 8px;vertical-align:3px;margin-left:6px}@media(max-width:768px){.navbar-brand .header-title{display:block!important}.eip-name{font-size:14px;line-height:1.2}.eip-demo{display:none}}</style>
 <style id="mobile-fix">
 @media (max-width:600px){
  .accessibility-toolbar{width:100vw!important;max-width:100vw!important;max-height:100vh;overflow-y:auto;border-radius:0!important;border-width:0!important}
@@ -971,11 +971,11 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
                 </div>
                 <div class="header-title">
                     <div class="eip-name">Environmental Intelligence Platform <span class="eip-demo">Concept demo</span></div>
-                    <small class="d-none d-md-block">for Rajasthan State Pollution Control Board · राजस्थान राज्य प्रदूषण नियंत्रण मंडल</small>
+                    <small class="d-none d-md-block eip-sub">राजस्थान राज्य प्रदूषण नियंत्रण मंडल</small>
                 </div>
             </a>
             <div class="header-controls ms-auto">
-                <button class="a11y-open" title="Accessibility options"><i class="fa-solid fa-universal-access"></i><span class="d-none d-md-inline">Accessibility</span></button>
+                <button class="a11y-open" title="Accessibility options" aria-label="Accessibility options"><i class="fa-solid fa-universal-access"></i></button>
                 <div class="time-display">
                     <span id="current-time">Loading...</span>
                 </div>

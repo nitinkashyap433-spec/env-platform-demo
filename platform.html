@@ -1045,6 +1045,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #ptable td:nth-child(8) .sbar,#ptable td:nth-child(8)>*{min-width:90px}
 @media (max-width:1100px){#v-plan>.grid.g-6040{grid-template-columns:1fr}#v-plan>.grid.g-6040>div:last-child{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}#v-plan>.grid.g-6040>div:last-child>.card{margin-top:0!important}}@media (max-width:700px){#v-plan>.grid.g-6040>div:last-child{grid-template-columns:1fr}}
 </style>
+<style id="kpi-cards">
+#v-home .hero-k{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:14px!important;border-top:none!important;padding-top:4px!important}
+#v-home .hk{border:1px solid #e2e8e4!important;border-left:1px solid #e2e8e4!important;background:#fff!important;border-radius:12px!important;padding:16px 18px!important;box-shadow:0 2px 8px rgba(16,60,38,.05);transition:transform .2s ease,box-shadow .2s ease!important;justify-content:flex-start}
+#v-home .hk:first-child{padding-left:18px!important}
+#v-home .hk:hover{background:#fff!important;transform:translateY(-4px);box-shadow:0 10px 22px rgba(16,60,38,.13)}
+#v-home .hk:hover b{text-decoration:none!important}
+#v-home .hk::after{content:'Open \203A';font-size:12px;color:#0b6b3a;font-weight:600;margin-top:10px;opacity:0;transition:opacity .2s}
+#v-home .hk:hover::after{opacity:1}
+@media(max-width:1100px){#v-home .hero-k{grid-template-columns:1fr 1fr!important}}
+@media(max-width:560px){#v-home .hero-k{grid-template-columns:1fr!important}}
+</style>
 </head>
 <body>
 
@@ -1557,16 +1568,16 @@ function renderHome(){
   const oc=roleFac.filter(f=>f.ocems);const avgAvail=oc.length?oc.reduce((a,f)=>a+f.m.avail,0)/oc.length:0;
   const beyond=appsR.filter(a=>a.age>SLA[a.cat]).length;
   const flg=roleFac.filter(f=>f.flagged);const byCat=c=>flg.filter(f=>f.cat===c).length;
-  const lowAv=oc.filter(f=>f.m.avail<85).length;
+  const lowAv=oc.filter(f=>f.m.avail<85).length;const worstAv=[...oc].sort((x,y)=>x.m.avail-y.m.avail)[0];
   const due15=appsR.filter(a=>{const r=SLA[a.cat]-a.age;return r>=0&&r<=15}).length;
   const exp60=roleFac.filter(f=>{const d=daysToExpiry(f);return d>=0&&d<=60}).length;
   const cR=COMP.filter(c=>inRole(c.ro));const c15=cR.filter(c=>c.days>15).length,c30=cR.filter(c=>c.days>30).length;
   const chip=(n,l,cls)=>`<i class="hkc ${cls||''}">${n} ${l}</i>`;
   const K=[[flg.length,'units flagged this week','plan',chip(byCat('Red'),'Red','r')+chip(byCat('Orange'),'Orange','o')+chip(byCat('Green'),'Green','g')],
-    [avgAvail.toFixed(1)+'%','OCEMS data availability','lab',chip(lowAv,'units below 85%',lowAv?'o':'')],
+    [avgAvail.toFixed(1)+'%','OCEMS data availability','fac',chip(lowAv,'units below 85%',lowAv?'o':'')],
     [beyond,'consents past deadline','consent',chip(due15,'applications due in 15 days',due15?'o':'')+chip(exp60,'consents expiring in 60 days','')],
     [cR.length,'open complaints','griev',chip(c15,'past 15 days',c15?'o':'')+chip(c30,'past 30 days',c30?'r':'')]];
-  $('#kpis').innerHTML=K.map(k=>`<button class="hk" data-go="${k[2]}" title="Open"><b>${k[0]}</b><span>${k[1]}</span><span class="hkb">${k[3]}</span></button>`).join('');
+  $('#kpis').innerHTML=K.map(k=>`<button class="hk" data-go="${k[2]}" ${k[2]==='fac'&&worstAv?`data-id="${worstAv.id}" title="Open the unit with the lowest OCEMS data availability (${worstAv.id})"`:'title="Open"'}><b>${k[0]}</b><span>${k[1]}</span><span class="hkb">${k[3]}</span></button>`).join('');
   const bnStage='site inspection';
   const T=[
    ['map','Map & priority zones','See every unit, station, fire and complaint on one map.',`${Math.min(4,ZONES.length)} priority zones today`,'<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>'],
