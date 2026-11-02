@@ -891,6 +891,7 @@
 .table thead th{background:#f3f7f5!important;color:var(--eip-muted)!important;font-size:12px!important;font-weight:600!important;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--eip-line)!important}
 .eip-frame{background:transparent!important}
 </style>
+<style id="eip-brand">.eip-name{font-weight:700;letter-spacing:.2px}.eip-demo{display:inline-block;font-size:11px;font-weight:600;background:#ffe600;color:#1c2a23;border-radius:10px;padding:2px 8px;vertical-align:3px;margin-left:6px}@media(max-width:768px){.navbar-brand .header-title{display:block!important}.eip-name{font-size:14px;line-height:1.2}.eip-demo{display:none}}</style>
 <style id="mobile-fix">
 @media (max-width:600px){
  .accessibility-toolbar{width:100vw!important;max-width:100vw!important;max-height:100vh;overflow-y:auto;border-radius:0!important;border-width:0!important}
@@ -924,7 +925,6 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .chart-container,.ranking-card,.kpi-card{overflow-x:auto}
 }
 @media (max-width: 576px){
-  .navbar-brand .header-title{display:none!important}
   .wh-meters{grid-template-columns:1fr!important}
   .pf-l span{font-size:12px}
 }
@@ -970,8 +970,8 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
                     <img src="./images/logo.png" class="img-fluid" />
                 </div>
                 <div class="header-title">
-                    <div>राजस्थान राज्य प्रदूषण नियंत्रण मंडल</div>
-                    <small class="d-none d-md-block"> Rajasthan State Pollution Control Board</small>
+                    <div class="eip-name">Environmental Intelligence Platform <span class="eip-demo">Concept demo</span></div>
+                    <small class="d-none d-md-block">for Rajasthan State Pollution Control Board · राजस्थान राज्य प्रदूषण नियंत्रण मंडल</small>
                 </div>
             </a>
             <div class="header-controls ms-auto">
