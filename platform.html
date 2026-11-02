@@ -1088,7 +1088,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <button class="nav" data-v="map"><svg viewBox="0 0 24 24"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Map &amp; priority zones</button>
     <button class="nav" data-v="plan"><svg viewBox="0 0 24 24"><path d="M9 5H5v15h14V5h-4"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M8 12l2 2 4-4"/></svg>Inspection planner</button>
     <button class="nav" data-v="consent"><svg viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M8 13h8M8 17h5"/></svg>Consent pipeline</button>
-    <button class="nav" data-v="fac"><svg viewBox="0 0 24 24"><path d="M3 21V10l6 3V10l6 3V6l6 3v12z"/></svg>Facility 360</button>
+    <button class="nav" data-v="fac"><svg viewBox="0 0 24 24"><path d="M3 21V10l6 3V10l6 3V6l6 3v12z"/></svg>Industry 360</button>
     <div class="sec">Media &amp; public</div>
     <button class="nav" data-v="water"><svg viewBox="0 0 24 24"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg>Water &amp; CETPs</button>
     <button class="nav" data-v="waste"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Waste &amp; BMW</button>
@@ -1241,7 +1241,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     </div>
     <div class="fcol">
       <h4>Modules</h4>
-      <a href="#" data-go="home">Command centre</a><a href="#" data-go="map">Map &amp; priority zones</a><a href="#" data-go="plan">Inspection planner</a><a href="#" data-go="consent">Consent pipeline</a><a href="#" data-go="fac">Facility 360</a><a href="#" data-go="water">Water &amp; CETPs</a><a href="#" data-go="waste">Waste &amp; BMW</a><a href="#" data-go="griev">Grievances</a>
+      <a href="#" data-go="home">Command centre</a><a href="#" data-go="map">Map &amp; priority zones</a><a href="#" data-go="plan">Inspection planner</a><a href="#" data-go="consent">Consent pipeline</a><a href="#" data-go="fac">Industry 360</a><a href="#" data-go="water">Water &amp; CETPs</a><a href="#" data-go="waste">Waste &amp; BMW</a><a href="#" data-go="griev">Grievances</a>
     </div>
     <div class="fcol">
       <h4>Data sources</h4>
@@ -1661,7 +1661,7 @@ function renderHome(){
   const TILE={
    plan:['Inspection planner','Rank units by risk and build the week\'s inspection list.',`${roleFac.filter(f=>f.score>=50).length} high-risk units · ${roleFac.filter(f=>inspDue(f)!==null&&inspDue(f)<0).length} overdue as per schedule`,'<path d="M9 5H5v15h14V5h-4"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M8 12l2 2 4-4"/>'],
    consent:['Consent pipeline','Find where applications are stuck and what lapses next.',`Bottleneck: ${bnStage}`,'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M8 13h8M8 17h5"/>'],
-   fac:['Facility 360','One page per unit: consent, live data, history, surroundings.',`${roleFac.length} units profiled`,'<path d="M3 21V10l6 3V10l6 3V6l6 3v12z"/>'],
+   fac:['Industry 360','One page per unit: consent, live data, history, surroundings.',`${roleFac.length} units profiled`,'<path d="M3 21V10l6 3V10l6 3V6l6 3v12z"/>'],
    river:['River monitor','Follow a river past every plant and drain, live.',`${myRiv.reduce((t,r)=>t+rvSummary(r,RH-1).failing,0)} plants failing on ${myRiv.length} river${myRiv.length>1?'s':''}`,'<path d="M3 7c3-2 5 2 9 0s6-2 9 0M3 12c3-2 5 2 9 0s6-2 9 0M3 17c3-2 5 2 9 0s6-2 9 0"/>',myRiv.length>0],
    ngt:['NGT & legal cases','Hearings, directions and compliance in one register.',`${ngtR.filter(atRisk).length} hearings at risk · ${ngtR.length} active cases`,'<path d="M12 3v18M5 7h14M5 7l-3 7h6zM19 7l-3 7h6zM8 21h8"/>',ngtR.length>0],
    lab:['Laboratory & samples','Track samples and check OCEMS against the Board\'s lab.',`${labLow} units with weak OCEMS data`,'<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/>'],
@@ -1693,7 +1693,7 @@ function tileDnD(){let src=null;document.querySelectorAll('#tiles .tile[draggabl
   el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('over');const dst=el.dataset.k;if(!src||src===dst)return;const o=tileOrder().filter(x=>x!==src);o.splice(o.indexOf(dst),0,src);tileSave(o)})})}
 /* ============ BIG MAP ============ */
 let bigMap=null,LAY={},bufLayer=null,base={};
-function facPopup(f){const m=f.m;return `<b>${esc(f.name)}</b><br><span class="muted">${f.id} · ${f.sector}</span><br>${catChip(f.cat)} ${consentChip(f)}<br>Risk score <b>${f.score}</b>${f.reasons.length?'<br><span class="small">'+f.reasons.slice(0,3).join(' · ')+'</span>':''}<br><button class="btn sm primary" style="margin-top:6px" data-go="fac" data-id="${f.id}">Open Facility 360</button>`}
+function facPopup(f){const m=f.m;return `<b>${esc(f.name)}</b><br><span class="muted">${f.id} · ${f.sector}</span><br>${catChip(f.cat)} ${consentChip(f)}<br>Risk score <b>${f.score}</b>${f.reasons.length?'<br><span class="small">'+f.reasons.slice(0,3).join(' · ')+'</span>':''}<br><button class="btn sm primary" style="margin-top:6px" data-go="fac" data-id="${f.id}">Open Industry 360</button>`}
 function initBigMap(){
   if(bigMap)return;
   bigMap=L.map('bigmap',{zoomControl:false});L.control.zoom({position:'bottomright'}).addTo(bigMap);bigMap.setView([26.4,74.2],7);
@@ -1853,7 +1853,7 @@ function renderFac(id){
   const condStat=CONDS.map((c,i)=>{let s='ok';if(f.m&&f.m.lowAvail&&i===1)s='bad';else if(f.m&&f.m.nightFlag&&i===2)s='bad';else if(f.pastViol&&i===3)s='warn';else if(r2()<.2)s='warn';return[c,s]});
   $('#facBody').innerHTML=`
   <div class="card">
-    <div class="fhead"><div><div class="small muted">Facility 360</div><h1 style="margin-top:2px">${esc(f.name)}</h1>
+    <div class="fhead"><div><div class="small muted">Industry 360</div><h1 style="margin-top:2px">${esc(f.name)}</h1>
       <div class="meta">${f.id} · ${f.sector} · ${f.clusterName} · Regional Office ${f.ro} · ${f.ll[0].toFixed(4)}, ${f.ll[1].toFixed(4)}</div>
       <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${catChip(f.cat)}${consentChip(f)}${schedChip(f)}${f.ocems?'<span class="chip grey">OCEMS: '+S.media+' '+S.param+'</span>':'<span class="chip grey">No OCEMS required</span>'}</div>
       <div class="btn-row" style="margin-top:14px"><button class="btn primary" onclick="assignDlg('${f.id}')">Assign inspection</button><button class="btn" onclick="noticeDlg('${f.id}')">Draft show-cause notice</button>${f.ocems?`<button class="btn" onclick="audit('${f.id}')">Request OCEMS audit</button>`:''}<button class="btn" onclick="go('map',{ll:[${f.ll}]})">Show on map</button></div>
@@ -5080,7 +5080,7 @@ function lbOpen(id){
   ${s.stage==='rep'||i>=3?`<h3 style="font-size:14px;margin:16px 0 6px">Results</h3><table><thead><tr><th>Parameter</th><th>Result</th><th>Limit</th><th>Status</th></tr></thead><tbody>${s.res.map(r=>`<tr><td>${r.p}</td><td><b>${r.v}</b> ${r.u}</td><td class="small">${r.lo!=null&&r.hi!=null?r.lo+' – '+r.hi:r.hi!=null?'max '+r.hi:'min '+r.lo} ${r.u}</td><td><span class="chip ${r.ex?'bad':'ok'}">${r.ex?'Exceeds':'OK'}</span></td></tr>`).join('')}</tbody></table>`:'<div class="small muted mt">Results appear here once analysis is complete.</div>'}
   ${s.ocems&&s.stage==='rep'?`<div class="callout mt">The unit's OCEMS reported <b>${s.ocems.v} ${s.ocems.u}</b> ${s.ocems.p} at the hour of sampling, against <b>${s.ocems.lab}</b> in the lab (${Math.round((s.ocems.v/s.ocems.lab-1)*100)}%). ${Math.abs(s.ocems.v/s.ocems.lab-1)>.25?`<a href="#" onclick="lbUnit('${s.unit}');return false">Compare all visits →</a>`:'Within the expected tolerance.'}</div>`:''}
   <h3 style="font-size:14px;margin:16px 0 6px">Chain of custody</h3><div class="tl">${tl}</div>
-  <div class="btn-row mt">${s.stage==='rep'&&s.exceed&&!s.act&&f?`<button class="btn primary" onclick="lbAct('${s.id}')">Draft show-cause notice</button>`:''}${s.stage==='rep'?`<button class="btn" onclick="toast('Signed report PDF with chain-of-custody record (demo)')">Download signed report</button>`:''}${s.stage==='qa'?`<button class="btn primary" onclick="lbSign('${s.id}')">Sign off and issue report</button>`:''}${f?`<button class="btn" onclick="closeModal();go('fac',{id:'${f.id}'})">Open Facility 360</button>`:''}</div>`);
+  <div class="btn-row mt">${s.stage==='rep'&&s.exceed&&!s.act&&f?`<button class="btn primary" onclick="lbAct('${s.id}')">Draft show-cause notice</button>`:''}${s.stage==='rep'?`<button class="btn" onclick="toast('Signed report PDF with chain-of-custody record (demo)')">Download signed report</button>`:''}${s.stage==='qa'?`<button class="btn primary" onclick="lbSign('${s.id}')">Sign off and issue report</button>`:''}${f?`<button class="btn" onclick="closeModal();go('fac',{id:'${f.id}'})">Open Industry 360</button>`:''}</div>`);
 }
 function lbUnit(id){
   const f=FAC.find(x=>x.id===id);const u=lbUnits(SAMPLES).find(x=>x.f.id===id);if(!f||!u)return;const S=SECTORS[f.sector];
@@ -5097,7 +5097,7 @@ function lbUnit(id){
   </div>
   <div style="margin-top:12px">${legendHTML([['#1f5fa8','Board lab result'],['#0b6b3a','OCEMS at the same hour']])}</div>${ch}
   <div class="callout mt">${u.low?`The OCEMS has read lower than the lab on every visit. ${hidden?`On ${hidden} visit${hidden>1?'s':''} the lab found a violation that the live feed did not show. `:''}Ask for a third-party calibration check of the analyser, and take the next sample at night without notice.`:u.high?'The OCEMS reads higher than the lab. That points to calibration drift rather than concealment. Ask the unit to recalibrate within 15 days.':'Readings agree within tolerance.'}</div>
-  <div class="btn-row mt">${u.low||u.high?`<button class="btn primary" onclick="lbAudit('${f.id}')">Order analyser calibration audit</button>`:''}${u.low?`<button class="btn" onclick="toast('Unannounced night sampling added to next week\\'s inspection plan (demo)')">Schedule surprise night sample</button>`:''}<button class="btn" onclick="closeModal();go('fac',{id:'${f.id}'})">Open Facility 360</button></div>`);
+  <div class="btn-row mt">${u.low||u.high?`<button class="btn primary" onclick="lbAudit('${f.id}')">Order analyser calibration audit</button>`:''}${u.low?`<button class="btn" onclick="toast('Unannounced night sampling added to next week\\'s inspection plan (demo)')">Schedule surprise night sample</button>`:''}<button class="btn" onclick="closeModal();go('fac',{id:'${f.id}'})">Open Industry 360</button></div>`);
 }
 function lbAudit(id){const f=FAC.find(x=>x.id===id);try{histFor(f).unshift({d:new Date(),t:'OCEMS calibration audit ordered',s:'Lab results disagree with OCEMS readings',isNew:true})}catch(e){}toast('Calibration audit ordered and the unit notified (demo)')}
 function lbAct(id){const s=SAMPLES.find(x=>x.id===id);s.act='Show-cause notice issued';try{const f=FAC.find(x=>x.id===s.unit);histFor(f).unshift({d:new Date(),t:'Show-cause notice issued',s:'Based on lab report '+s.id,isNew:true})}catch(e){}toast('Show-cause notice drafted from the lab report and sent for approval (demo)');lbOpen(id);renderLab()}

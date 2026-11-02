@@ -993,68 +993,68 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
             <div class="col-lg-3 col-md-3 sidebar" id="sidebar">
                 <div class="sidebar-title"></div>
                 <div class="nav flex-column">
-<div class="nav-sec">Decide &amp; act</div>
                     <a role="button" tabindex="0" class="nav-link active" data-tab="home">
                         <i class="fas fa-home nav-icon"></i>
                         <span>Command centre</span>
                     </a>
+<div class="nav-sec">Insights &amp; action</div>
                     <a role="button" tabindex="0" class="nav-link" data-tab="plan">
                         <i class="fas fa-clipboard-check nav-icon"></i>
                         <span>Inspection planner</span>
+                    </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="fac">
+                        <i class="fas fa-industry nav-icon"></i>
+                        <span>Industry 360</span>
                     </a>
                     <a role="button" tabindex="0" class="nav-link" data-tab="consent">
                         <i class="fas fa-file-signature nav-icon"></i>
                         <span>Consent management</span>
                     </a>
-                    <a role="button" tabindex="0" class="nav-link" data-tab="fac">
-                        <i class="fas fa-industry nav-icon"></i>
-                        <span>Facility 360</span>
-                    </a>
-                    <a role="button" tabindex="0" class="nav-link" data-tab="lab">
-                        <i class="fas fa-flask nav-icon"></i>
-                        <span>Laboratory &amp; samples</span>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="grievance">
+                        <i class="fas fa-comments nav-icon"></i>
+                        <span>Grievance management</span>
                     </a>
                     <a role="button" tabindex="0" class="nav-link" data-tab="programme">
                         <i class="fas fa-chart-line nav-icon"></i>
                         <span>Programme tracker</span>
                     </a>
-<div class="nav-sec">Environment</div>
+<div class="nav-sec">Environmental data</div>
                     <a role="button" tabindex="0" class="nav-link" data-tab="air">
                         <i class="fas fa-wind nav-icon"></i>
-                        <span>Air Quality Level</span>
+                        <span>Air quality</span>
                     </a>
                     <a role="button" tabindex="0" class="nav-link" data-tab="water">
                         <i class="fas fa-tint nav-icon"></i>
-                        <span>Water Quality &amp; CETPs</span>
+                        <span>Water quality &amp; CETPs</span>
                     </a>
                     <a role="button" tabindex="0" class="nav-link" data-tab="river">
                         <i class="fas fa-bridge-water nav-icon"></i>
                         <span>River monitor</span>
                     </a>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="groundwater">
+                        <i class="fas fa-water nav-icon"></i>
+                        <span>Groundwater</span>
+                    </a>
                     <a role="button" tabindex="0" class="nav-link" data-tab="wastehub">
                         <i class="fas fa-recycle nav-icon"></i>
                         <span>Waste management</span>
                     </a>
-                    <a role="button" tabindex="0" class="nav-link" data-tab="groundwater">
-                        <i class="fas fa-water nav-icon"></i>
-                        <span>Groundwater Level</span>
+                    <a role="button" tabindex="0" class="nav-link" data-tab="lab">
+                        <i class="fas fa-flask nav-icon"></i>
+                        <span>Laboratory &amp; samples</span>
                     </a>
                     <a role="button" tabindex="0" class="nav-link" data-tab="map">
                         <i class="fas fa-map-location-dot nav-icon"></i>
                         <span>GIS maps &amp; hotspots</span>
                     </a>
-<div class="nav-sec">Public &amp; rules</div>
-                    <a role="button" tabindex="0" class="nav-link" data-tab="grievance">
-                        <i class="fas fa-comments nav-icon"></i>
-                        <span>Grievance Management</span>
-                    </a>
+<div class="nav-sec">Legal &amp; knowledge</div>
                     <a role="button" tabindex="0" class="nav-link" data-tab="ngt">
                         <i class="fas fa-scale-balanced nav-icon"></i>
                         <span>NGT &amp; legal cases</span>
                     </a>
                     <a role="button" tabindex="0" class="nav-link" data-tab="knowledge">
                         <i class="fas fa-robot nav-icon"></i>
-                        <span>Regulatory Knowledge Assistant</span>
+                        <span>Rules &amp; Regulations Assistant</span>
                     </a>
                 </div>
             </div>
@@ -2056,7 +2056,7 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
 <!-- Regulatory Knowledge Assistant -->
 <div id="knowledge" class="tab-content">
     <div class="dashboard-title">
-        <h2>RSPCB Regulatory Knowledge Assistant</h2>
+        <h2>Rules &amp; Regulations Knowledge Assistant</h2>
         <p class="text-muted">
             Search environmental rules, regulations, guidelines and notifications
         </p>
@@ -3371,7 +3371,7 @@ const EIP_SECTIONS={
   map:[['Priority zones','platform.html?embed=1#map','new'],['GIS hotspots','GIS.html',''],['District AQI','district-wise.html','']],
   plan:[['Inspection planner','platform.html?embed=1#plan','new']],
   consent:[['Overview','Consent-Management.html',''],['Pipeline &amp; renewals','platform.html?embed=1#consent','new']],
-  fac:[['Facility 360','platform.html?embed=1#fac','new']],
+  fac:[['Industry 360','platform.html?embed=1#fac','new']],
   programme:[['Programme tracker','project-moniter.html','']],
   river:[['River monitor','platform.html?embed=1#river','new']],
   ngt:[['Case tracker','platform.html?embed=1#ngt','new']],
@@ -3381,7 +3381,7 @@ const EIP_SECTIONS={
   waste:[['Overview','__own__',''],['Analysis: waste &amp; BMW tracking','platform.html?embed=1#waste','new']],
   biomedical:[['Overview','__own__',''],['Analysis: BMW reconciliation','platform.html?embed=1#waste','new']],
   grievance:[['Overview','__own__',''],['Analysis: register &amp; clusters','platform.html?embed=1#griev','new']],
-  knowledge:[['Rules assistant','Regulatory_Assistant.html?embed=1','new']]
+  knowledge:[['Rules & regulations assistant','Regulatory_Assistant.html?embed=1','new']]
 };
 const VIEW2TAB={home:['home',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
 function eipBuild(){
