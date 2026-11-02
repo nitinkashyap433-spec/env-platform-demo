@@ -1068,6 +1068,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .tbl-sch td.small{font-size:12.5px}
 </style>
 <style id="tiles-css">.tilebar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:-4px}.tile.editing{cursor:grab;position:relative;border-style:dashed;border-color:#9cc9ae}.tile.drag{opacity:.4}.tile.over{box-shadow:0 0 0 3px #ffe600}.tile .tx{position:absolute;top:8px;right:8px;border:none;background:#fdecea;color:#b42318;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:12px}.tile .tdrag{position:absolute;top:10px;right:40px;font-size:11px;color:#7a877f}.maplink{font-size:13px;font-weight:600;color:var(--g700);margin-left:10px;text-decoration:none}.maplink:hover{text-decoration:underline}</style>
+<style id="fwd-css">.stage.clickable{cursor:pointer;border-radius:8px;transition:background .15s}.stage.clickable:hover{background:#f2f8f4}.stg-more{font-size:12px;color:var(--g700);font-weight:600;margin-left:4px;opacity:.7}.stage.clickable:hover .stg-more{opacity:1}.fwd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.fwd-grid label,.fwd-l{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted);margin-top:8px}.fwd-grid select,.fwd-l input{border:1px solid var(--line);border-radius:7px;padding:7px 9px;font:inherit;font-size:14px;color:var(--ink)}</style>
 </head>
 <body>
 
@@ -1495,6 +1496,26 @@ ROS.forEach(ro=>{const n=Math.round(48*roWeight[ro]);for(let i=0;i<n;i++){
   const before={scr:0,qry:ri(4,10),ins:ri(10,35),com:ri(25,55)}[st];
   APPS.push({ro,cat,st,inStage,age:before+inStage,type:R()<.55?'Consent to Operate (renewal)':R()<.6?'Consent to Establish':'Consent to Operate (new)',loops:st==='qry'?ri(1,2):R()<.15?ri(1,3):0});
 }});
+/* where inside each stage an application sits (separate seed so other figures stay unchanged) */
+const SUBLV={scr:[['Dealing assistant, RO',.45],['Assistant Environmental Engineer, RO',.35],['Fee verification, accounts',.2]],
+ qry:[['Awaiting applicant reply',.6],['Reply under review at RO',.28],['Second query issued',.12]],
+ ins:[['Inspection not yet scheduled',.32],['Inspected, report being written',.3],['Samples awaiting lab result',.22],['Report with Regional Officer',.16]],
+ com:[['Regional Officer',.28],['Group In-charge, HQ',.24],['Chief Environmental Engineer',.18],['Member Secretary',.15],['Consent committee meeting',.09],['Chairperson',.06]]};
+(function(){const r=mulberry32(77031);let n=0;APPS.forEach(a=>{n++;a.no=(a.type.startsWith('Consent to Establish')?'CTE':'CTO')+'/'+a.ro.slice(0,3).toUpperCase()+'/2026/'+String(1000+n);
+  let L=SUBLV[a.st];if(a.st==='com'&&a.cat!=='Red')L=L.filter(x=>x[0]!=='Chairperson'&&x[0]!=='Consent committee meeting');
+  const tot=L.reduce((t,x)=>t+x[1],0);let u=r()*tot;a.sub=L[L.length-1][0];for(const x of L){if(u<x[1]){a.sub=x[0];break}u-=x[1]}
+  a.subDays=Math.max(1,Math.round(a.inStage*(.3+r()*.7)))})})();
+function stageOpen(k){const ro=$('#cRO').value,cat=$('#cCat').value;const s=STAGES.find(x=>x.k===k);
+  const A=APPS.filter(a=>a.st===k&&(!ro||a.ro===ro)&&(!cat||a.cat===cat));
+  const rows=SUBLV[k].map(([lv])=>{const xs=A.filter(a=>a.sub===lv);if(!xs.length)return '';const av=xs.reduce((t,a)=>t+a.subDays,0)/xs.length;const late=xs.filter(a=>a.age>SLA[a.cat]).length;const old=Math.max(...xs.map(a=>a.subDays));
+    return `<tr><td><b>${esc(lv)}</b></td><td class="num">${xs.length}</td><td style="width:34%"><div class="bar" style="height:10px;border-radius:4px;background:${late/xs.length>.4?'var(--red)':'var(--g500)'};width:${Math.max(4,xs.length/A.length*100)}%"></div></td><td class="num">${av.toFixed(0)} d</td><td class="num">${old} d</td><td class="num"${late?' style="color:var(--red);font-weight:600"':''}>${late}</td></tr>`}).join('');
+  const top=[...A].sort((a,b)=>b.subDays-a.subDays).slice(0,8);
+  modal(`<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div class="small muted">Consent pipeline${ro?' · RO '+esc(ro):''}${cat?' · '+esc(cat):''}</div><h2 style="margin:4px 0">${esc(s.name)}: ${A.length} applications</h2><div class="small muted">Where they are sitting right now, and for how long. Norm for this stage: ${s.norm} days.</div></div><button class="btn sm" onclick="closeModal()">Close</button></div>
+   <table class="tbl-sch" style="margin-top:12px"><thead><tr><th>Sitting with / status</th><th class="num">Apps</th><th></th><th class="num">Avg days here</th><th class="num">Oldest</th><th class="num">Past deadline</th></tr></thead><tbody>${rows}</tbody></table>
+   <h3 style="font-size:14px;margin:16px 0 6px">Longest waiting in this stage</h3>
+   <table class="tbl-sch"><thead><tr><th>Application</th><th>Type</th><th>RO</th><th>With</th><th class="num">Days here</th></tr></thead><tbody>${top.map(a=>`<tr><td><b>${a.no}</b> ${catChip(a.cat)}</td><td class="small">${esc(a.type)}</td><td>${esc(a.ro)}</td><td class="small">${esc(a.sub)}</td><td class="num">${a.subDays}</td></tr>`).join('')}</tbody></table>
+   <div class="btn-row mt"><button class="btn primary" onclick="closeModal();toast('Reminder sent to the officers holding these files (demo)')">Send reminders</button><button class="btn" onclick="closeModal()">Close</button></div>`);
+  const m=document.querySelector('.modal');if(m)m.style.maxWidth='820px'}
 const QREASONS=[['Groundwater NOC not attached',31],['Hazardous waste quantities missing',22],['Site plan / layout unclear',17],['Fee shortfall',12],['Stack monitoring report outdated',10],['ETP / ZLD design details missing',8]];
 
 /* ============ helpers ============ */
@@ -1772,7 +1793,7 @@ function renderConsent(){
   $('#ckpis').innerHTML=K.map(k=>`<div class="card kpi"><div class="lbl">${k[0]}</div><div class="val">${k[1]}</div><div class="ctx">${k[2]}</div></div>`).join('');
   const st=STAGES.map(s=>{const xs=A.filter(a=>a.st===s.k);return{...s,n:xs.length,avg:xs.reduce((t,a)=>t+a.inStage,0)/Math.max(1,xs.length)}});
   const maxN=Math.max(...st.map(s=>s.n),1);const bn=st.slice().sort((a,b)=>(b.avg/b.norm)-(a.avg/a.norm))[0];
-  $('#funnel').innerHTML=st.map(s=>`<div class="stage ${s===bn?'bottleneck':''}"><div style="font-weight:600">${s.name}</div><div><div class="bar" style="width:${Math.max(6,s.n/maxN*100)}%">${s.n}</div></div><div class="days">avg <b>${s.avg.toFixed(0)}</b> d · norm ${s.norm} d${s===bn?' <span class="chip bad">Bottleneck</span>':''}</div></div>`).join('');
+  $('#funnel').innerHTML=st.map(s=>`<div class="stage clickable ${s===bn?'bottleneck':''}" onclick="stageOpen('${s.k}')" title="See where these ${s.n} applications are sitting"><div style="font-weight:600">${s.name}</div><div><div class="bar" style="width:${Math.max(6,s.n/maxN*100)}%">${s.n}</div></div><div class="days">avg <b>${s.avg.toFixed(0)}</b> d · norm ${s.norm} d${s===bn?' <span class="chip bad">Bottleneck</span>':''} <span class="stg-more">Details ›</span></div></div>`).join('');
   const roSlow=ROS.map(r=>{const xs=A.filter(a=>a.ro===r&&a.st===bn.k);return[r,xs.reduce((t,a)=>t+a.inStage,0)/Math.max(1,xs.length),xs.length]}).filter(x=>x[2]>0).sort((a,b)=>b[1]-a[1]);
   $('#funnelNote').innerHTML=`<b>${bn.name}</b> is the slowest stage, at ${bn.avg.toFixed(0)} days against a norm of ${bn.norm}. ${roSlow.length>1?`It is slowest in ${roSlow.slice(0,2).map(x=>x[0]).join(' and ')}, which suggests an inspection staffing gap there rather than a state-wide problem.`:''}`;
   const qmax=QREASONS[0][1];
@@ -2193,8 +2214,30 @@ function ngtOpen(id){
   <h3 style="font-size:14px;margin:16px 0 6px">Timeline</h3><div class="tl">${tl.map(e=>`<div class="ev ${e.d>TODAY?'':''}"><div class="when">${fmtD(e.d)}</div><div style="font-weight:600">${esc(e.t)}</div><div class="small muted">${esc(e.s)}</div></div>`).join('')}</div>
   ${(c.units.length||c.river)?`<h3 style="font-size:14px;margin:12px 0 6px">Linked to</h3><div class="btn-row">${c.river?`<button class="btn sm" onclick="closeModal();go('river',{river:'${c.river}'})">River monitor: ${RIVNAME[c.river]}</button>`:''}${c.units.map(u=>`<button class="btn sm" onclick="closeModal();go('fac',{id:'${u}'})">${u}</button>`).join('')}</div>`:''}
   <div class="small muted" style="margin-top:12px">Nodal officer: ${c.nodal?esc(c.nodal):'<b style="color:var(--red)">not assigned</b>'} · Counsel: ${c.counsel?esc(c.counsel):'<b style="color:var(--red)">not assigned</b>'}</div>
-  <div class="btn-row mt"><button class="btn primary" onclick="ngtAffidavit('${c.id}')">Draft compliance affidavit</button>${!c.nodal?`<button class="btn" onclick="ngtNodal('${c.id}')">Assign nodal officer</button>`:''}${c.stale?`<button class="btn" onclick="ngtUpdate('${c.id}')">Record last hearing outcome</button>`:''}<button class="btn" onclick="toast('Added to the Member Secretary\\'s weekly legal review (demo)')">Add to weekly review</button></div>`);
+  <div class="btn-row mt"><button class="btn primary" onclick="ngtAffidavit('${c.id}')">Draft compliance affidavit</button><button class="btn primary" onclick="ngtForward('${c.id}')">Forward case summary</button>${!c.nodal?`<button class="btn" onclick="ngtNodal('${c.id}')">Assign nodal officer</button>`:''}${c.stale?`<button class="btn" onclick="ngtUpdate('${c.id}')">Record last hearing outcome</button>`:''}<button class="btn" onclick="toast('Added to the Member Secretary\\'s weekly legal review (demo)')">Add to weekly review</button></div>`);
 }
+const FWD_TO=['Member Secretary','Chairperson','Chief Environmental Engineer','Group In-charge (Legal)','Standing Counsel, RSPCB'];
+function ngtSummary(c){const d=c.nh?daysTo(c.nh):null;const od=overdueDirs(c);
+  const L=[`Case: ${caseRef(c)} (${c.forum})`,`Title: ${c.title}`,`Subject: ${c.summary}. District: ${c.district}.`,'',
+   `Next hearing: ${c.nh?fmtD(c.nh)+(d>=0?` (in ${d} days)`:' (date passed, outcome not recorded)'):'not listed'}`,
+   `Last order: ${fmtD(c.lastOrder)}`,'',`Directions (${c.dirs.length}, ${c.dirs.filter(x=>x.st==='Complied').length} complied, ${od.length} overdue):`,
+   ...c.dirs.map((x,i)=>`  ${i+1}. ${x.txt} | due ${fmtD(x.due)} | ${x.owner} | ${x.st}${od.includes(x)?' (OVERDUE)':''}`),''];
+  if(c.ec)L.push(`Environmental compensation: Rs ${c.ec} crore imposed, Rs ${c.rec} crore recovered.`);
+  if(c.units&&c.units.length)L.push(`Units linked: ${c.units.slice(0,6).join(', ')}`);
+  L.push(`Nodal officer: ${c.nodal||'NOT ASSIGNED'} | Counsel: ${c.counsel||'NOT ASSIGNED'}`,'');
+  const act=[];if(od.length)act.push(`${od.length} direction(s) overdue; compliance status to be reported before the hearing`);if(!c.nodal)act.push('Nodal officer to be assigned');if(!c.counsel)act.push('Counsel to be assigned');if(c.stale)act.push('Outcome of last hearing to be recorded');if(d!==null&&d>=0&&d<=14)act.push('Compliance affidavit to be finalised before the hearing');
+  L.push('Action required:',...(act.length?act.map(a=>'  - '+a):['  - For information']));
+  return L.join('\n')}
+function ngtForward(id){const c=NGT.find(x=>x.id===id);const to=FWD_TO.concat(['Regional Officer, '+c.district]);
+  const subj=`[${(c.nh&&daysTo(c.nh)<=14&&daysTo(c.nh)>=0)?'Hearing in '+daysTo(c.nh)+' days':'Case update'}] ${caseRef(c)} – ${c.title}`.slice(0,140);
+  modal(`<h2>Forward case summary</h2><p class="small muted">Prepared from the case record. Edit before sending.</p>
+   <div class="fwd-grid"><label>To<select id="fwTo">${to.map(t=>`<option>${esc(t)}</option>`).join('')}</select></label><label>Cc<select id="fwCc"><option value="">None</option>${to.map(t=>`<option>${esc(t)}</option>`).join('')}</select></label></div>
+   <label class="fwd-l">Subject<input id="fwSub" value="${esc(subj)}"></label>
+   <label class="fwd-l">Message<textarea id="fwBody" style="min-height:260px">${esc('Sir/Madam,\n\nPlease find below the current status of the case for your information and necessary action.\n\n'+ngtSummary(c)+'\n\nOrders and affidavits are attached in the case file on the platform.\n\nRegards,\nLegal Cell, RSPCB')}</textarea></label>
+   <label class="chk" style="margin-top:6px"><input type="checkbox" checked> Attach last order and compliance documents</label>
+   <div class="btn-row mt"><button class="btn primary" onclick="closeModal();toast('Case summary forwarded to '+document.getElementById('fwTo').value+' (demo)')">Send</button><button class="btn" onclick="ngtMail()">Open in email</button><button class="btn" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('fwBody').value);toast('Summary copied')">Copy text</button><button class="btn" onclick="ngtOpen('${c.id}')">Back to case</button></div>`);
+  const m=document.querySelector('.modal');if(m)m.style.maxWidth='760px'}
+function ngtMail(){const s=encodeURIComponent($('#fwSub').value),b=encodeURIComponent($('#fwBody').value.slice(0,1800));window.open('mailto:?subject='+s+'&body='+b,'_blank')}
 function ngtComply(id,i){const c=NGT.find(x=>x.id===id);c.dirs[i].st='Complied';toast('Direction marked complied. Evidence to be attached (demo)');ngtOpen(id);renderNGT()}
 function ngtNodal(id){const c=NGT.find(x=>x.id===id);c.nodal='Regional Officer, '+c.district;toast('Nodal officer assigned and notified (demo)');ngtOpen(id);renderNGT()}
 function ngtUpdate(id){const c=NGT.find(x=>x.id===id);c.stale=false;c.lastOrder=new Date(c.nh);c.nh=new Date(TODAY.getTime()+rint(20,60)*DAY);toast('Outcome recorded. Next hearing date updated (demo)');ngtOpen(id);renderNGT()}
