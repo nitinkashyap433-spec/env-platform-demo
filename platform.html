@@ -2167,7 +2167,7 @@ function renderNGT(sel){
     .sort((a,b)=>(atRisk(b)-atRisk(a))||((a.nh?daysTo(a.nh):999)-(b.nh?daysTo(b.nh):999)));
   const opt=(k,arr,lab,all)=>`<select onchange="ngtF.${k}=this.value;renderNGT()"><option value="">${all}</option>${arr.map(x=>`<option value="${esc(x[0])}" ${ngtF[k]===x[0]?'selected':''}>${esc(x[1])}</option>`).join('')}</select>`;
   const stChip=c=>{const s=caseStatus(c);return s==='Not updated'?'<span class="chip warn">Date not updated</span>':s==='No date'?'<span class="chip grey">No date</span>':s==='This week'?'<span class="chip bad">This week</span>':s==='Next 30 days'?'<span class="chip blue">Next 30 days</span>':'<span class="chip ok">Later</span>'};
-  $('#ngtBody').innerHTML=`<h1>NGT &amp; legal cases</h1><p class="sub">Every case the Board is party to, with its next hearing, the directions issued and whether they have been complied with.</p>
+  $('#ngtBody').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><h1>NGT &amp; legal cases</h1><button class="btn primary" onclick="ngtExportDlg()" style="margin-top:6px">&#8681; Export report (PDF)</button></div><p class="sub">Every case the Board is party to, with its next hearing, the directions issued and whether they have been complied with.</p>
   <div class="grid g5">${kpiRow([['Active cases',active,'NGT, High Court and Supreme Court'],['Hearings in next 14 days',wk,'across all forums'],['Directions overdue',odirs,'compliance not reported in time',odirs?'var(--red)':''],['Hearings at risk',risk.length,'hearing soon with a direction pending',risk.length?'var(--red)':''],['Compensation recovered','₹'+ecR.toFixed(1)+' cr','of ₹'+ecI.toFixed(1)+' cr imposed']])}</div>
   <div class="grid g-6040 mt">
    <div class="card"><div class="card-h"><h2>Hearings at risk</h2><span class="hint">Hearing within 14 days and a direction not yet complied</span></div>
@@ -2238,6 +2238,51 @@ function ngtForward(id){const c=NGT.find(x=>x.id===id);const to=FWD_TO.concat(['
    <div class="btn-row mt"><button class="btn primary" onclick="closeModal();toast('Case summary forwarded to '+document.getElementById('fwTo').value+' (demo)')">Send</button><button class="btn" onclick="ngtMail()">Open in email</button><button class="btn" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('fwBody').value);toast('Summary copied')">Copy text</button><button class="btn" onclick="ngtOpen('${c.id}')">Back to case</button></div>`);
   const m=document.querySelector('.modal');if(m)m.style.maxWidth='760px'}
 function ngtMail(){const s=encodeURIComponent($('#fwSub').value),b=encodeURIComponent($('#fwBody').value.slice(0,1800));window.open('mailto:?subject='+s+'&body='+b,'_blank')}
+const ngtSectors=c=>[...new Set((c.units||[]).map(u=>{const f=FAC.find(x=>x.id===u||x.id===(u&&u.id));return f&&f.sector}).filter(Boolean))];
+function ngtExportDlg(){const dists=[...new Set(NGT.map(c=>c.district))].sort();const forums=[...new Set(NGT.map(c=>c.forum))].sort();const secs=[...new Set(NGT.flatMap(ngtSectors))].sort();
+  modal(`<h2>Export legal case report</h2><p class="small muted">Choose what goes into the report. It opens as a print-ready page: choose <b>Save as PDF</b> in the print window.</p>
+   <div class="fwd-grid"><label>Regional office / district<select id="exD"><option value="">All (state)</option>${dists.map(d=>`<option ${ROLE===d?'selected':''}>${esc(d)}</option>`).join('')}</select></label>
+   <label>Forum<select id="exF"><option value="">All forums</option>${forums.map(d=>`<option>${esc(d)}</option>`).join('')}</select></label>
+   <label>Subject area<select id="exS"><option value="">All subjects</option>${Object.entries(SUBJ).map(([k,v])=>`<option value="${k}">${esc(v.label)}</option>`).join('')}</select></label>
+   <label>Industry sector (linked units)<select id="exI"><option value="">All sectors</option>${secs.map(d=>`<option>${esc(d)}</option>`).join('')}</select></label>
+   <label>Cases to include<select id="exQ"><option value="">All active cases</option><option value="risk">Hearings at risk only</option><option value="wk">Hearing in next 14 days</option><option value="od">With overdue directions</option></select></label>
+   <label>Detail<select id="exL"><option value="full">Summary + case-wise directions</option><option value="sum">Summary table only</option></select></label></div>
+   <div class="btn-row mt"><button class="btn primary" onclick="ngtExport()">Generate PDF</button><button class="btn" onclick="closeModal()">Cancel</button></div>`);
+  const m=document.querySelector('.modal');if(m)m.style.maxWidth='720px'}
+function ngtExport(){const D=$('#exD').value,Fo=$('#exF').value,S=$('#exS').value,I=$('#exI').value,Q=$('#exQ').value,full=$('#exL').value==='full';
+  let L=NGT.filter(c=>(!D||c.district===D)&&(!Fo||c.forum===Fo)&&(!S||c.subj===S)&&(!I||ngtSectors(c).includes(I)));
+  if(Q==='risk')L=L.filter(atRisk);if(Q==='wk')L=L.filter(c=>c.nh&&daysTo(c.nh)>=0&&daysTo(c.nh)<=14);if(Q==='od')L=L.filter(c=>overdueDirs(c).length);
+  L=L.sort((a,b)=>(a.nh?daysTo(a.nh):9999)-(b.nh?daysTo(b.nh):9999));
+  if(!L.length){toast('No cases match these choices');return}
+  const now=new Date();const stamp=now.toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const ecI=L.reduce((t,c)=>t+c.ec,0),ecR=L.reduce((t,c)=>t+c.rec,0),od=L.flatMap(overdueDirs).length,dirs=L.flatMap(c=>c.dirs).length,comp=L.flatMap(c=>c.dirs).filter(d=>d.st==='Complied').length;
+  const scope=[D?'District/RO: '+D:'All districts',Fo||'All forums',S?SUBJ[S].label:'All subjects',I?'Sector: '+I:'All sectors',{risk:'Hearings at risk',wk:'Hearing within 14 days',od:'With overdue directions'}[Q]||'All active cases'].join(' · ');
+  const logo=(document.querySelector('.hero-logo')||{}).src||'';
+  const e=s=>esc(String(s==null?'':s));
+  const kp=[['Cases',L.length],['Hearings in 14 days',L.filter(c=>c.nh&&daysTo(c.nh)>=0&&daysTo(c.nh)<=14).length],['Hearings at risk',L.filter(atRisk).length],['Directions complied',comp+' / '+dirs],['Directions overdue',od],['Compensation recovered','₹'+ecR.toFixed(1)+' of ₹'+ecI.toFixed(1)+' cr']];
+  const rows=L.map((c,i)=>{const o=overdueDirs(c).length;const d=c.nh?daysTo(c.nh):null;return `<tr><td>${i+1}</td><td><b>${e(caseRef(c))}</b><div class="m">${e(c.forum)}</div></td><td>${e(c.title)}<div class="m">${e(SUBJ[c.subj]?SUBJ[c.subj].label:'')}</div></td><td>${e(c.district)}</td><td>${c.nh?e(fmtD(c.nh))+(d>=0?`<div class="m">in ${d} d</div>`:'<div class="m r">date passed</div>'):'–'}</td><td class="n">${c.dirs.filter(x=>x.st==='Complied').length}/${c.dirs.length}${o?`<div class="r">${o} overdue</div>`:''}</td><td class="n">${c.ec?'₹'+c.rec+' / '+c.ec+' cr':'–'}</td><td>${atRisk(c)?'<span class="tag r">At risk</span>':o?'<span class="tag a">Overdue</span>':'<span class="tag g">On track</span>'}</td></tr>`}).join('');
+  const det=full?L.map(c=>`<div class="case"><div class="ch"><b>${e(caseRef(c))}</b> · ${e(c.forum)}<span>${atRisk(c)?'<span class="tag r">At risk</span>':''}</span></div><div class="ct">${e(c.title)}</div><div class="m">${e(c.summary)} · ${e(c.district)} · Last order ${e(fmtD(c.lastOrder))} · Next hearing ${c.nh?e(fmtD(c.nh)):'not listed'} · Nodal: ${e(c.nodal||'not assigned')} · Counsel: ${e(c.counsel||'not assigned')}</div>
+    <table class="dt"><thead><tr><th>#</th><th>Direction</th><th>Due</th><th>Owner</th><th>Status</th></tr></thead><tbody>${c.dirs.map((x,i)=>`<tr><td>${i+1}</td><td>${e(x.txt)}</td><td>${e(fmtD(x.due))}</td><td>${e(x.owner)}</td><td class="${overdueDirs(c).includes(x)?'r':x.st==='Complied'?'g':''}">${e(x.st)}${overdueDirs(c).includes(x)?' (overdue)':''}</td></tr>`).join('')}</tbody></table></div>`).join(''):'';
+  const fname='RSPCB_Legal_Case_Report_'+(D||'State').replace(/\s+/g,'_')+'_'+now.toISOString().slice(0,10);
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>${fname}</title><style>
+  @page{size:A4 landscape;margin:12mm 12mm 14mm}*{box-sizing:border-box}body{font-family:"Segoe UI",Arial,sans-serif;color:#1c2a23;font-size:10.5pt;margin:0}
+  .hd{display:flex;align-items:center;gap:14px;border-bottom:3px solid #0b6b3a;padding-bottom:10px}.hd img{width:56px;height:56px;border-radius:50%}
+  .hd h1{font-size:17pt;margin:0;color:#0d3b24}.hd .s{font-size:9.5pt;color:#5d6b63;margin-top:2px}.hd .rt{margin-left:auto;text-align:right;font-size:9pt;color:#5d6b63}
+  .sc{background:#f2f8f4;border:1px solid #d6e9dd;border-radius:6px;padding:7px 10px;font-size:9.5pt;margin:10px 0}
+  .kp{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:8px 0 12px}.kp div{border:1px solid #e2e8e4;border-radius:6px;padding:7px 9px}.kp b{display:block;font-size:14pt;color:#0d3b24}.kp span{font-size:8.5pt;color:#5d6b63}
+  h2{font-size:12pt;color:#0d3b24;margin:14px 0 6px}table{width:100%;border-collapse:collapse}th{background:#0b6b3a;color:#fff;font-size:8.5pt;text-align:left;padding:5px 6px}td{border-bottom:1px solid #e2e8e4;padding:5px 6px;vertical-align:top;font-size:9pt}
+  tr{page-break-inside:avoid}.n{text-align:right}.m{font-size:8pt;color:#6b7a72}.r{color:#b42318;font-weight:600}.g{color:#1e8449}.tag{font-size:8pt;padding:1px 7px;border-radius:9px;white-space:nowrap}.tag.r{background:#fdecea;color:#b42318}.tag.a{background:#fff4e0;color:#9a5b00}.tag.g{background:#e3f4ea;color:#1e8449}
+  .case{border:1px solid #e2e8e4;border-radius:6px;padding:8px 10px;margin:8px 0;page-break-inside:avoid}.ch{display:flex;justify-content:space-between;font-size:9.5pt}.ct{font-weight:600;margin:3px 0}.dt th{background:#eef2ef;color:#1c2a23}
+  .ft{margin-top:14px;border-top:1px solid #e2e8e4;padding-top:6px;font-size:8pt;color:#6b7a72;display:flex;justify-content:space-between}
+  .pb{page-break-before:always}@media screen{body{max-width:1100px;margin:20px auto;padding:0 16px}}</style></head><body>
+  <div class="hd">${logo?`<img src="${logo}">`:''}<div><h1>NGT &amp; Legal Case Status Report</h1><div class="s">Rajasthan State Pollution Control Board · राजस्थान राज्य प्रदूषण नियंत्रण मंडल</div></div><div class="rt">Generated ${e(stamp)}<br>by Admin User<br>Environmental Intelligence Platform</div></div>
+  <div class="sc"><b>Report scope:</b> ${e(scope)}</div>
+  <div class="kp">${kp.map(k=>`<div><b>${e(k[1])}</b><span>${e(k[0])}</span></div>`).join('')}</div>
+  <h2>Case summary (sorted by next hearing)</h2><table><thead><tr><th>#</th><th>Case</th><th>Title / subject</th><th>District</th><th>Next hearing</th><th class="n">Directions complied</th><th class="n">EC recovered / imposed</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+  ${full?`<h2 class="pb">Case-wise directions and compliance</h2>${det}`:''}
+  <div class="ft"><span>Downloaded from the Environmental Intelligence Platform (concept demo) on ${e(stamp)}. All case data shown is illustrative.</span><span>For official use</span></div>
+  <script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`;
+  closeModal();const w=window.open('','_blank');if(!w){toast('Allow pop-ups to export the report');return}w.document.open();w.document.write(html);w.document.close();toast('Report ready: choose "Save as PDF" in the print window')}
 function ngtComply(id,i){const c=NGT.find(x=>x.id===id);c.dirs[i].st='Complied';toast('Direction marked complied. Evidence to be attached (demo)');ngtOpen(id);renderNGT()}
 function ngtNodal(id){const c=NGT.find(x=>x.id===id);c.nodal='Regional Officer, '+c.district;toast('Nodal officer assigned and notified (demo)');ngtOpen(id);renderNGT()}
 function ngtUpdate(id){const c=NGT.find(x=>x.id===id);c.stale=false;c.lastOrder=new Date(c.nh);c.nh=new Date(TODAY.getTime()+rint(20,60)*DAY);toast('Outcome recorded. Next hearing date updated (demo)');ngtOpen(id);renderNGT()}
