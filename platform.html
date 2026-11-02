@@ -1058,6 +1058,16 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </style>
 <style id="sched-css">.tbl-sch{width:100%;border-collapse:collapse;font-size:13px}.tbl-sch th{font-size:11.5px;color:var(--muted);font-weight:600;text-align:left;padding:4px 6px;border-bottom:1px solid var(--line)}.tbl-sch td{padding:6px;border-bottom:1px solid #f0f3f1;vertical-align:top}.tbl-sch .num{text-align:right}.weights label{grid-template-columns:132px 1fr 38px!important}#ptable td:nth-child(6){min-width:150px}</style>
 <style id="plan-fix2">#ptable .reason{white-space:normal!important}#ptable td:nth-child(7){min-width:0!important}#ptable td:nth-child(6){min-width:0!important}#ptable .chip{white-space:nowrap}#ptable .sc-cell{min-width:96px}#ptable .sc-cell .sbar{margin-top:6px;width:90px;margin-left:auto}#v-plan .card>div[style*="overflow:auto"]{overflow-x:auto!important}#ptable td:nth-child(3) .small{white-space:nowrap}</style>
+<style id="plan-fix3">
+@media (max-width:1300px){
+ #v-plan>.grid.g-6040>div:last-child{grid-template-columns:1fr 1fr!important}
+ #v-plan #schCard{grid-column:1 / -1;grid-row:2}
+ #v-plan>.grid.g-6040>div:last-child>.card{margin-top:0!important;height:100%}
+}
+@media (max-width:700px){#v-plan>.grid.g-6040>div:last-child{grid-template-columns:1fr!important}#v-plan #schCard{grid-row:auto}}
+.tbl-sch td.small{font-size:12.5px}
+</style>
+<style id="tiles-css">.tilebar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:-4px}.tile.editing{cursor:grab;position:relative;border-style:dashed;border-color:#9cc9ae}.tile.drag{opacity:.4}.tile.over{box-shadow:0 0 0 3px #ffe600}.tile .tx{position:absolute;top:8px;right:8px;border:none;background:#fdecea;color:#b42318;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:12px}.tile .tdrag{position:absolute;top:10px;right:40px;font-size:11px;color:#7a877f}.maplink{font-size:13px;font-weight:600;color:var(--g700);margin-left:10px;text-decoration:none}.maplink:hover{text-decoration:underline}</style>
 </head>
 <body>
 
@@ -1104,7 +1114,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       </div>
       <div class="grid home-main mt">
         <div class="card" style="padding:0;overflow:hidden">
-          <div class="card-h" style="padding:16px 18px 0"><h2>Rajasthan at a glance</h2>
+          <div class="card-h" style="padding:16px 18px 0"><h2>Rajasthan at a glance <a href="#" data-go="map" class="maplink">Open full map ›</a></h2>
             <div class="seg" id="mapMode"><button data-m="zones" class="on">Priority zones</button><button data-m="aqi">Air quality</button><button data-m="comp">Complaints</button></div></div>
           <div id="minimap" class="homemap"></div>
           <div class="maplegend" id="homeLegend"></div>
@@ -1114,7 +1124,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
           <div id="alerts"></div>
         </div>
       </div>
-      <div class="grid g3 mt" id="tiles"></div>
+      <div class="tilebar mt" id="tileBar"></div><div class="grid g3 mt" id="tiles"></div>
     </section>
     <!-- MAP -->
     <section class="view" id="v-map">
@@ -1621,17 +1631,45 @@ function renderHome(){
     [cR.length,'open complaints','griev',chip(c15,'past 15 days',c15?'o':'')+chip(c30,'past 30 days',c30?'r':'')]];
   $('#kpis').innerHTML=K.map(k=>`<button class="hk" data-go="${k[2]}" ${k[2]==='fac'&&worstAv?`data-id="${worstAv.id}" title="Open the unit with the lowest OCEMS data availability (${worstAv.id})"`:'title="Open"'}><b>${k[0]}</b><span>${k[1]}</span><span class="hkb">${k[3]}</span></button>`).join('');
   const bnStage='site inspection';
-  const T=[
-   ['map','Map & priority zones','See every unit, station, fire and complaint on one map.',`${Math.min(4,ZONES.length)} priority zones today`,'<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>'],
-   ['plan','Inspection planner','Rank units by risk and build the week\'s inspection list.',`${roleFac.filter(f=>f.score>=50).length} high-risk units`,'<path d="M9 5H5v15h14V5h-4"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M8 12l2 2 4-4"/>'],
-   ['consent','Consent pipeline','Find where applications are stuck and what lapses next.',`Bottleneck: ${bnStage}`,'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M8 13h8M8 17h5"/>'],
-   ['fac','Facility 360','One page per unit: consent, live data, history, surroundings.',`${roleFac.length} units profiled`,'<path d="M3 21V10l6 3V10l6 3V6l6 3v12z"/>'],
-   ['river','River monitor','Follow a river past every plant and drain, live.',`${Object.values(RIVERS2).reduce((t,r)=>t+rvSummary(r,RH-1).failing,0)} plants failing on 5 rivers`,'<path d="M3 7c3-2 5 2 9 0s6-2 9 0M3 12c3-2 5 2 9 0s6-2 9 0M3 17c3-2 5 2 9 0s6-2 9 0"/>'],
-   ['ngt','NGT & legal cases','Hearings, directions and compliance in one register.',`${NGT.filter(atRisk).length} hearings at risk`,'<path d="M12 3v18M5 7h14M5 7l-3 7h6zM19 7l-3 7h6zM8 21h8"/>']
-  ];
-  $('#tiles').innerHTML=T.map(t=>`<button class="tile" data-go="${t[0]}"><span class="tic"><svg viewBox="0 0 24 24">${t[4]}</svg></span><span class="tt">${t[1]}</span><span class="td">${t[2]}</span><span class="ts">${t[3]} →</span></button>`).join('');
+  const RIV_RO={jojari:['Jodhpur'],bandi:['Pali'],luni:['Balotra'],chambal:['Kota'],berach:['Udaipur','Chittorgarh','Bhilwara']};
+  const myRiv=Object.entries(RIVERS2).filter(([k])=>ROLE==='HQ'||(RIV_RO[k]||[]).includes(ROLE)).map(x=>x[1]);
+  const ngtR=NGT.filter(c=>ROLE==='HQ'||c.district===ROLE||(c.nodal||'').includes(ROLE));
+  const cetpR=CETPS.filter(c=>ROLE==='HQ'||(c.n||'').includes(ROLE));
+  const compOld=COMP.filter(c=>inRole(c.ro)&&c.days>15).length;
+  const labLow=roleFac.filter(f=>f.m&&f.m.lowAvail).length;
+  const TILE={
+   plan:['Inspection planner','Rank units by risk and build the week\'s inspection list.',`${roleFac.filter(f=>f.score>=50).length} high-risk units · ${roleFac.filter(f=>inspDue(f)!==null&&inspDue(f)<0).length} overdue as per schedule`,'<path d="M9 5H5v15h14V5h-4"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M8 12l2 2 4-4"/>'],
+   consent:['Consent pipeline','Find where applications are stuck and what lapses next.',`Bottleneck: ${bnStage}`,'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M8 13h8M8 17h5"/>'],
+   fac:['Facility 360','One page per unit: consent, live data, history, surroundings.',`${roleFac.length} units profiled`,'<path d="M3 21V10l6 3V10l6 3V6l6 3v12z"/>'],
+   river:['River monitor','Follow a river past every plant and drain, live.',`${myRiv.reduce((t,r)=>t+rvSummary(r,RH-1).failing,0)} plants failing on ${myRiv.length} river${myRiv.length>1?'s':''}`,'<path d="M3 7c3-2 5 2 9 0s6-2 9 0M3 12c3-2 5 2 9 0s6-2 9 0M3 17c3-2 5 2 9 0s6-2 9 0"/>',myRiv.length>0],
+   ngt:['NGT & legal cases','Hearings, directions and compliance in one register.',`${ngtR.filter(atRisk).length} hearings at risk · ${ngtR.length} active cases`,'<path d="M12 3v18M5 7h14M5 7l-3 7h6zM19 7l-3 7h6zM8 21h8"/>',ngtR.length>0],
+   lab:['Laboratory & samples','Track samples and check OCEMS against the Board\'s lab.',`${labLow} units with weak OCEMS data`,'<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/>'],
+   water:['Water quality & CETPs','CETP inlet and outlet against norms.',`${cetpR.filter(c=>c.outlet>c.limit).length} of ${cetpR.length} CETPs above norm`,'<path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/>',cetpR.length>0],
+   griev:['Grievances','Complaints by area, age and likely source.',`${compOld} complaints older than 15 days`,'<path d="M4 5h16v11H8l-4 4z"/>']
+  };
+  const DEF=['plan','consent','fac','river','ngt','lab'];
+  let order=tileOrder().filter(k=>TILE[k]);
+  const shown=order.filter(k=>TILE[k][4]!==false);
+  const notApplic=order.filter(k=>TILE[k][4]===false).map(k=>TILE[k][0]);
+  const addable=Object.keys(TILE).filter(k=>!order.includes(k)&&TILE[k][4]!==false);
+  const ED=window.TILE_EDIT;
+  $('#tiles').innerHTML=shown.map(k=>{const t=TILE[k];return `<div class="tile${ED?' editing':''}" ${ED?`draggable="true" data-k="${k}"`:`data-go="${k}" role="button" tabindex="0"`}>${ED?`<button class="tx" title="Remove" onclick="tileHide('${k}')">✕</button><span class="tdrag">⠿ drag</span>`:''}<span class="tic"><svg viewBox="0 0 24 24">${t[3]}</svg></span><span class="tt">${t[0]}</span><span class="td">${t[1]}</span><span class="ts">${t[2]} →</span></div>`}).join('');
+  $('#tileBar').innerHTML=`<span class="small muted">${ROLE==='HQ'?'Modules for the whole state':'Modules relevant to RO '+esc(ROLE)}${notApplic.length?` · ${notApplic.map(esc).join(', ')} hidden (not applicable here)`:''}</span><span style="flex:1"></span>${ED&&addable.length?addable.map(k=>`<button class="btn sm" onclick="tileAdd('${k}')">+ ${esc(TILE[k][0])}</button>`).join(''):''}${ED?'<button class="btn sm" onclick="tileReset()">Reset</button>':''}<button class="btn sm ${ED?'primary':''}" onclick="TILE_EDIT=!TILE_EDIT;renderHome()">${ED?'Done':'Customise'}</button>`;
+  if(ED)tileDnD();
   homeMap();
 }
+window.TILE_EDIT=false;
+function tileOrder(){if(window.__tileMem)return window.__tileMem;try{const s=JSON.parse(localStorage.getItem('eipTiles')||'null');if(Array.isArray(s)&&s.length)return s}catch(e){}return ['plan','consent','fac','river','ngt','lab']}
+function tileSave(o){try{localStorage.setItem('eipTiles',JSON.stringify(o))}catch(e){}window.__tileMem=o;renderHome()}
+function tileHide(k){tileSave(tileOrder().filter(x=>x!==k))}
+function tileAdd(k){tileSave([...tileOrder(),k])}
+function tileReset(){window.__tileMem=null;try{localStorage.removeItem('eipTiles')}catch(e){}renderHome()}
+function tileDnD(){let src=null;document.querySelectorAll('#tiles .tile[draggable]').forEach(el=>{
+  el.addEventListener('dragstart',e=>{src=el.dataset.k;el.classList.add('drag');e.dataTransfer.effectAllowed='move'});
+  el.addEventListener('dragend',()=>el.classList.remove('drag'));
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('over')});
+  el.addEventListener('dragleave',()=>el.classList.remove('over'));
+  el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('over');const dst=el.dataset.k;if(!src||src===dst)return;const o=tileOrder().filter(x=>x!==src);o.splice(o.indexOf(dst),0,src);tileSave(o)})})}
 /* ============ BIG MAP ============ */
 let bigMap=null,LAY={},bufLayer=null,base={};
 function facPopup(f){const m=f.m;return `<b>${esc(f.name)}</b><br><span class="muted">${f.id} · ${f.sector}</span><br>${catChip(f.cat)} ${consentChip(f)}<br>Risk score <b>${f.score}</b>${f.reasons.length?'<br><span class="small">'+f.reasons.slice(0,3).join(' · ')+'</span>':''}<br><button class="btn sm primary" style="margin-top:6px" data-go="fac" data-id="${f.id}">Open Facility 360</button>`}
@@ -1681,7 +1719,7 @@ function initPlan(){
   $('#weights').innerHTML=COMPS.map(c=>`<label><span>${c.label}</span><input type="range" min="0" max="40" value="${W[c.k]}" data-w="${c.k}"><b id="wv-${c.k}"></b></label>`).join('');showW();
   $$('#weights input').forEach(i=>i.addEventListener('input',()=>{W[i.dataset.w]=+i.value;showW();rescore();renderPlanTable();renderCoverage()}));
   $('#wReset').addEventListener('click',()=>{COMPS.forEach(c=>{W[c.k]=c.w;$(`#weights input[data-w=${c.k}]`).value=c.w;});showW();rescore();renderPlanTable();renderCoverage()});
-  $('#pRO').addEventListener('change',()=>{renderPlanTable();renderSched()});$('#pCat').addEventListener('change',renderPlanTable);$('#pSch').addEventListener('change',renderPlanTable);
+  $('#pRO').addEventListener('change',()=>{renderPlanTable();renderSched()});$('#pCat').addEventListener('change',renderPlanTable);$('#pSch').addEventListener('change',()=>{renderPlanTable();renderSched()});
   $('#autoPick').addEventListener('click',()=>autoPick(+$('#topN').value));
   $('#clearPick').addEventListener('click',()=>{PICK.clear();renderPlanTable();renderCoverage()});
   $('#genOrders').addEventListener('click',()=>{if(!PICK.size)return toast('Select units first');const by={};[...PICK].forEach(id=>{const f=FAC.find(x=>x.id===id);(by[f.ro]=by[f.ro]||[]).push(f)});
@@ -1693,9 +1731,12 @@ function autoPick(n){PICK.clear();curList().slice(0,n).forEach(f=>PICK.add(f.id)
 function renderSched(){const ro=$('#pRO').value||(ROLE!=='HQ'?ROLE:'');const L=FAC.filter(f=>!ro||f.ro===ro);
   const grp=[['Q','Quarterly','17-category, cement, power >100 MW, large ZLD textile'],['H','Half-yearly','Red large-scale, textile >100 KLD'],['A','Annually','Red MSME, Orange large, textile ≤100 KLD'],['T','Once in two years','Orange MSME, mines 5–100 ha'],['N','Need based','Green category, small mines']];
   const row=g=>{const U=L.filter(f=>f.freqK===g[0]);if(!U.length)return '';const ov=U.filter(f=>inspDue(f)!==null&&inspDue(f)<0).length,du=U.filter(f=>{const d=inspDue(f);return d!==null&&d>=0&&d<=30}).length;
-    return `<tr><td><b>${g[1]}</b><div class="small muted">${g[2]}</div></td><td class="num">${U.length}</td><td class="num"${ov?' style="color:var(--red);font-weight:600"':''}>${g[0]==='N'?'–':ov}</td><td class="num">${g[0]==='N'?'–':du}</td></tr>`};
+    return `<tr><td><b>${g[1]}</b></td><td class="small muted">${g[2]}</td><td class="num">${U.length}</td><td class="num"${ov?' style="color:var(--red);font-weight:600"':''}>${g[0]==='N'?'–':ov}</td><td class="num">${g[0]==='N'?'–':du}</td></tr>`};
   const ovT=L.filter(f=>inspDue(f)!==null&&inspDue(f)<0).length;
-  $('#schBody').innerHTML=`<div class="small" style="margin-bottom:8px"><b style="color:var(--red)">${ovT}</b> of ${L.length} units are past their required inspection date${ro?' in RO '+esc(ro):''}.</div><table class="tbl-sch"><thead><tr><th>Frequency</th><th class="num">Units</th><th class="num">Overdue</th><th class="num">Due ≤30 d</th></tr></thead><tbody>${grp.map(row).join('')}</tbody></table><button class="btn sm" style="margin-top:10px" onclick="$('#pSch').value='over';renderPlanTable()">Show overdue units</button>`}
+  $('#schBody').innerHTML=`<div class="small" style="margin-bottom:8px"><b style="color:var(--red)">${ovT}</b> of ${L.length} units are past their required inspection date${ro?' in RO '+esc(ro):''}.</div><table class="tbl-sch"><thead><tr><th>Frequency</th><th>Applies to</th><th class="num">Units</th><th class="num">Overdue</th><th class="num">Due ≤30 d</th></tr></thead><tbody>${grp.map(row).join('')}</tbody></table><button class="btn sm primary" style="margin-top:10px" onclick="schToggle()">${$('#pSch').value==='over'?'Show all units':'Show overdue units in the table'}</button>`}
+function schToggle(){const s=$('#pSch');const on=s.value!=='over';s.value=on?'over':'';renderPlanTable();renderSched();
+  const t=$('#ptable');if(t)t.closest('.card').scrollIntoView({behavior:'smooth',block:'start'});
+  toast(on?`Showing ${curList().length} units past their required inspection date`:'Showing all units')}
 function renderPlan(){if(ROLE!=='HQ')$('#pRO').value=ROLE;renderPlanTable();renderCoverage();renderSched()}
 function renderPlanTable(){
   const L=curList();
