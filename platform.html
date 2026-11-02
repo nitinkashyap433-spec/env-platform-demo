@@ -1057,6 +1057,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 @media(max-width:560px){#v-home .hero-k{grid-template-columns:1fr!important}}
 </style>
 <style id="sched-css">.tbl-sch{width:100%;border-collapse:collapse;font-size:13px}.tbl-sch th{font-size:11.5px;color:var(--muted);font-weight:600;text-align:left;padding:4px 6px;border-bottom:1px solid var(--line)}.tbl-sch td{padding:6px;border-bottom:1px solid #f0f3f1;vertical-align:top}.tbl-sch .num{text-align:right}.weights label{grid-template-columns:132px 1fr 38px!important}#ptable td:nth-child(6){min-width:150px}</style>
+<style id="plan-fix2">#ptable .reason{white-space:normal!important}#ptable td:nth-child(7){min-width:0!important}#ptable td:nth-child(6){min-width:0!important}#ptable .chip{white-space:nowrap}#ptable .sc-cell{min-width:96px}#ptable .sc-cell .sbar{margin-top:6px;width:90px;margin-left:auto}#v-plan .card>div[style*="overflow:auto"]{overflow-x:auto!important}#ptable td:nth-child(3) .small{white-space:nowrap}</style>
 </head>
 <body>
 
@@ -1698,7 +1699,7 @@ function renderSched(){const ro=$('#pRO').value||(ROLE!=='HQ'?ROLE:'');const L=F
 function renderPlan(){if(ROLE!=='HQ')$('#pRO').value=ROLE;renderPlanTable();renderCoverage();renderSched()}
 function renderPlanTable(){
   const L=curList();
-  $('#ptable').innerHTML=`<thead><tr><th></th><th>#</th><th>Unit</th><th>RO</th><th>Category</th><th>Inspection schedule</th><th>Why it is high</th><th>Score</th><th></th></tr></thead><tbody>${L.map((f,i)=>`<tr><td><input type="checkbox" data-pk="${f.id}" ${PICK.has(f.id)?'checked':''}></td><td class="muted">${i+1}</td><td><a href="#" data-go="fac" data-id="${f.id}" style="font-weight:600;text-decoration:none">${f.id}</a><div class="small muted">${f.sector}</div></td><td class="small">${f.ro}</td><td>${catChip(f.cat)}</td><td>${schedChip(f)}</td><td style="max-width:280px">${f.reasons.slice(0,3).map(r=>`<span class="reason">${r}</span>`).join('')||'<span class="small muted">No current issues</span>'}</td><td class="num"><span class="score">${f.score}</span></td><td>${sbar(f)}</td></tr>`).join('')}</tbody>`;
+  $('#ptable').innerHTML=`<thead><tr><th></th><th>#</th><th>Unit</th><th>RO</th><th>Category</th><th>Inspection schedule</th><th>Why it is high</th><th class="num">Score</th></tr></thead><tbody>${L.map((f,i)=>`<tr><td><input type="checkbox" data-pk="${f.id}" ${PICK.has(f.id)?'checked':''}></td><td class="muted">${i+1}</td><td><a href="#" data-go="fac" data-id="${f.id}" style="font-weight:600;text-decoration:none">${f.id}</a><div class="small muted">${f.sector}</div></td><td class="small">${f.ro}</td><td>${catChip(f.cat)}</td><td>${schedChip(f)}</td><td style="max-width:280px">${f.reasons.slice(0,3).map(r=>`<span class="reason">${r}</span>`).join('')||'<span class="small muted">No current issues</span>'}</td><td class="num sc-cell"><span class="score">${f.score}</span>${sbar(f)}</td></tr>`).join('')}</tbody>`;
   $$('#ptable input[data-pk]').forEach(cb=>cb.addEventListener('change',()=>{cb.checked?PICK.add(cb.dataset.pk):PICK.delete(cb.dataset.pk);renderCoverage()}));
 }
 function renderCoverage(){
