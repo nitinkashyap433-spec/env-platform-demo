@@ -15,9 +15,12 @@
     moved: { label: 'Camera moved', desc: 'The camera is no longer pointing at its usual view.', icon: '↻' },
     frozen: { label: 'Feed frozen', desc: 'The picture has stopped changing, as if the feed is stuck or replaced.', icon: '❚❚' },
     lost: { label: 'Feed lost', desc: 'The camera stopped sending video.', icon: '✕' },
+    mismatch: { label: 'Visible plume, OCEMS reads low', desc: 'A plume is visible above the stack while OCEMS reports low particulate levels.', icon: '≠', x: 1 },
+    nodata: { label: 'Plume visible, OCEMS offline', desc: 'The plant appears to be running while OCEMS is sending no data.', icon: '∅', x: 1 },
   };
-  const CHECKS = [['covered', 'Lens view'], ['frozen', 'Live picture'], ['moved', 'Camera position'], ['flame', 'Flame or flaring']];
-  const DEF = { hold: 5, detAbs: 2.5, detRel: 0.3, dark: 16, frozen: 0.12, moved: 0.75, flame: 0.0015, clear: 3, cooldown: 20 };
+  const CHECKS = [['covered', 'Lens view'], ['frozen', 'Live picture'], ['moved', 'Camera position'], ['flame', 'Flame or flaring'], ['mismatch', 'Camera vs OCEMS']];
+  const LIM = 50; // illustrative PM limit, mg/Nm3
+  const DEF = { hold: 5, detAbs: 2.5, detRel: 0.3, dark: 16, frozen: 0.12, moved: 0.75, flame: 0.0015, clear: 3, cooldown: 20, xStd: 5, xSat: 0.3, xGain: 1.5, xPlume: 25, xHold: 10, xLow: 0.6, xRef: 18 };
   const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v } catch (e) { return d } };
   const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {} };
   const T = Object.assign({}, DEF, load('cwTune', {}));
@@ -86,6 +89,22 @@
 .cw-tune td{padding:4px 6px;border-bottom:1px solid #eef2ef}
 .cw-tune input{width:72px;padding:3px 5px;border:1px solid #cfd9d3;border-radius:6px;font:inherit}
 .cw-tune b.on{color:#b42318}
+.cw-roic{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cw-roic.draw{pointer-events:auto;cursor:crosshair}
+.cw-x{margin-top:16px;border-top:1px solid #e6ece8;padding-top:14px}
+.cw-xh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.cw-xh h3{font-size:14px;margin:0;font-weight:600}
+.cw-xgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px}
+@media(max-width:980px){.cw-xgrid{grid-template-columns:1fr}}
+.cw-xc{width:100%;height:170px;display:block;background:#fbfcfb;border:1px solid #e6ece8;border-radius:8px}
+.cw-xleg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#55665c;margin-top:6px}
+.cw-xleg i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.cw-xrow{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #eef2ef}
+.cw-xrow b{font-weight:600}
+.cw-xlab{display:block;font-size:12.5px;color:#6a7a70;margin-top:10px}
+.cw-xlab select{display:block;width:100%;margin-top:4px;padding:6px 8px;border:1px solid #cfd9d3;border-radius:7px;font:inherit;font-size:13px;color:#1c2a23;background:#fff}
+.cw-xmsg{font-size:12.5px;margin-top:10px;line-height:1.45;color:#55665c}
+.cw-xmsg b{color:#b42318}
 `;
   function injectCss() { if (document.getElementById('cw-css')) return; const s = document.createElement('style'); s.id = 'cw-css'; s.textContent = css; document.head.appendChild(s) }
 
@@ -151,6 +170,7 @@
           <div class="cw-pill ok"><i></i><span>Monitoring · OK</span></div>
           <div class="cw-live">LIVE</div>
           <div class="cw-osd"></div>
+          <canvas class="cw-roic"></canvas>
         </div>
         <div class="cw-foot">
           <button class="cw-btn cw-reset" disabled>Reset normal view</button>
@@ -168,6 +188,22 @@
         <div class="cw-inc"><div class="cw-note" style="margin:0">No alerts yet. An alert is raised only when a condition holds for ${T.hold} seconds.</div></div>
         <div class="cw-note">Alerts reach the regional office by email with a single snapshot. Repeated tampering raises the unit's risk score.</div>
       </div>
+    </div>
+    <div class="cw-x" hidden>
+      <div class="cw-xh"><h3>Camera vs OCEMS cross-check</h3><span class="cw-tag y">OCEMS values are illustrative until live data access</span></div>
+      <div class="cw-xgrid">
+        <div><canvas class="cw-xc"></canvas>
+          <div class="cw-xleg"><span><i style="background:#8a5a2b"></i>Plume index from camera (0–100)</span><span><i style="background:#0b7a42"></i>OCEMS particulate, mg/Nm³ (illustrative)</span><span><i style="background:#d7263d;height:2px"></i>Limit ${LIM} mg/Nm³</span></div></div>
+        <div class="cw-xside">
+          <div class="cw-xrow"><span>Plume index</span><b class="cw-xp">–</b></div>
+          <div class="cw-xrow"><span>Plume type</span><b class="cw-xpt">–</b></div>
+          <div class="cw-xrow"><span>OCEMS particulate</span><b class="cw-xo">–</b></div>
+          <label class="cw-xlab">Illustrative OCEMS behaviour
+            <select class="cw-xs"><option value="low">Reports low (suspicious)</option><option value="track">Tracks the plume (consistent)</option><option value="off">Sends no data</option></select></label>
+          <div class="cw-xmsg"></div>
+          <div class="cw-foot" style="margin-top:8px"><button class="cw-btn cw-roib">Mark plume area</button></div>
+        </div>
+      </div>
     </div>`;
     const q = s => el.querySelector(s);
     q('.cw-codein').value = load('cwCode', '');
@@ -177,9 +213,14 @@
     q('.cw-share').onclick = () => { stopPairing(); connectLocal('screen') };
     q('.cw-stop').onclick = () => { stop(true); startPairing() };
     q('.cw-recon').onclick = () => { if (C.kind === 'remote') connectRemote(C.code); else connectLocal(C.kind) };
-    q('.cw-reset').onclick = () => { C.ref = null; C.learnT = performance.now(); say('Learning the normal view again') };
+    q('.cw-reset').onclick = () => { C.ref = null; C.learnT = performance.now(); C.rref = null; C.rrefWant = true; say('Learning the normal view again') };
+    q('.cw-roib').onclick = () => roiMode(true);
+    q('.cw-xs').value = load('cwXs', 'low'); C.xs = q('.cw-xs').value;
+    q('.cw-xs').onchange = e => { C.xs = e.target.value; save('cwXs', C.xs) };
+    C.roi = load('cwRoi', null);
     q('.cw-tunebtn').onclick = () => { const t = q('.cw-tune'); t.hidden = !t.hidden; if (!t.hidden) tuneUI() };
     C.el = el; C.unit = unit;
+    roiWire();
     emailStatus();
     C.pair = load('cwPair', '') || String(Math.floor(1000 + Math.random() * 9000)); save('cwPair', C.pair);
     q('.cw-pcode').textContent = C.pair;
@@ -279,7 +320,7 @@
   }
 
   function start(stream, label) {
-    C.stream = stream; C.src = label;
+    C.stream = stream; C.src = label; xReset(); q('.cw-x').hidden = false;
     const v = q('video'); v.srcObject = stream; v.play().catch(() => {});
     q('.cw-vwrap').classList.add('on'); q('.cw-stop').disabled = false; q('.cw-reset').disabled = false;
     q('.cw-src').textContent = 'Source: ' + label;
@@ -302,6 +343,7 @@
     C.stream = null; C.call = null; C.peer = null; C.lost = 0;
     if (!C.el) return;
     const v = q('video'); if (v) v.srcObject = null;
+    q('.cw-x').hidden = true;
     q('.cw-vwrap').classList.remove('on', 'alert'); q('.cw-recon').hidden = true; q('.cw-stop').disabled = true; q('.cw-reset').disabled = true; q('.cw-src').textContent = '';
     C.el.querySelectorAll('.cw-chk').forEach(c => { c.className = 'cw-chk'; c.querySelector('small').textContent = 'Waiting for feed' });
     if (user) say('Camera disconnected');
@@ -360,6 +402,11 @@
       }
     } else if (!m && !lost) { cond.frozen = stalled }
     C.metrics = m || {};
+    const healthy = m && !lost && !cond.covered && !cond.frozen && !cond.moved;
+    const pl = healthy ? plumeStats(v) : null;
+    xUpdate(pl, now, healthy);
+    cond.mismatch = healthy && C.xs !== 'off' && C.pE >= T.xPlume && C.oc != null && C.oc < T.xLow * LIM;
+    cond.nodata = healthy && C.xs === 'off' && C.pE >= T.xPlume;
     for (const k of Object.keys(TYPES)) step(k, cond[k], now);
     render(now, learning);
     if (C.tuneOpen) tuneValues();
@@ -370,23 +417,25 @@
     const active = s.since ? s.e > 0.3 : s.e > 0.6;
     if (active) { if (!s.since) s.since = now; s.offSince = 0 }
     else { s.since = 0; if (!s.offSince) s.offSince = now }
-    if (active && !s.open && now - s.since >= T.hold * 1000 && now - s.lastClose > T.cooldown * 1000) raise(k, s, now);
+    const hold = TYPES[k].x ? T.xHold : T.hold;
+    if (active && !s.open && now - s.since >= hold * 1000 && now - s.lastClose > T.cooldown * 1000) raise(k, s, now);
     if (s.open && !active && now - s.offSince >= T.clear * 1000) { clearInc(s.open, now); s.open = null; s.lastClose = now }
   }
   function render(now, learning) {
     const pill = q('.cw-pill'), wrap = q('.cw-vwrap');
-    const order = ['lost', 'covered', 'frozen', 'moved', 'flame'];
+    const order = ['lost', 'covered', 'frozen', 'moved', 'flame', 'mismatch', 'nodata'];
     const open = order.find(k => C.st[k] && C.st[k].open);
     const pend = order.find(k => C.st[k] && C.st[k].since && !C.st[k].open);
     let cls = 'ok', txt = 'Monitoring · OK';
     if (open) { cls = 'bad'; txt = TYPES[open].label + ' · alert raised' }
-    else if (pend) { const sec = Math.min(T.hold, Math.floor((now - C.st[pend].since) / 1000)); cls = 'warn'; txt = `${TYPES[pend].label}? ${sec}s of ${T.hold}s` }
+    else if (pend) { const hd = TYPES[pend].x ? T.xHold : T.hold, sec = Math.min(hd, Math.floor((now - C.st[pend].since) / 1000)); cls = 'warn'; txt = `${TYPES[pend].label}? ${sec}s of ${hd}s` }
     else if (learning) { cls = 'learn'; txt = 'Learning the normal view…' }
     pill.className = 'cw-pill ' + cls; pill.querySelector('span').textContent = txt;
     q('.cw-recon').hidden = !(C.st.lost && C.st.lost.open);
     wrap.classList.toggle('alert', !!open);
     C.el.querySelectorAll('.cw-chk').forEach(c => {
-      const k = c.dataset.k, s = C.st[k] || {}, sm = c.querySelector('small');
+      const k = c.dataset.k, sm = c.querySelector('small');
+      const s = k === 'mismatch' ? ((C.st.mismatch && (C.st.mismatch.open || C.st.mismatch.since)) ? C.st.mismatch : (C.st.nodata || {})) : (C.st[k] || {});
       const lost = C.st.lost && C.st.lost.open;
       if (lost) { c.className = 'cw-chk bad'; sm.textContent = 'No video'; return }
       if (s.open) { c.className = 'cw-chk bad'; sm.textContent = 'Alert raised' }
@@ -396,18 +445,120 @@
     });
   }
 
+  /* ---------- camera vs OCEMS cross-check ---------- */
+  // Plume index: share of pixels in the marked area above the stack that are grey-ish (low colour)
+  // and moving over the last ~2 seconds. Clear sky or a static background scores near 0.
+  const rc = document.createElement('canvas'); let rx = null;
+  function plumeStats(v) {
+    const roi = C.roi || { x: 0.3, y: 0.05, w: 0.4, h: 0.45 };
+    const vw = v.videoWidth, vh = v.videoHeight; if (!vw || !vh) return null;
+    const sx = roi.x * vw, sy = roi.y * vh, sw = Math.max(4, roi.w * vw), sh = Math.max(4, roi.h * vh);
+    const w = 80, h = Math.max(8, Math.min(120, Math.round(80 * sh / sw)));
+    if (rc.width !== w || rc.height !== h) { rc.width = w; rc.height = h; rx = null; C.rbuf = []; C.rref = null }
+    rx = rx || rc.getContext('2d', { willReadFrequently: true });
+    rx.drawImage(v, sx, sy, sw, sh, 0, 0, w, h);
+    const d = rx.getImageData(0, 0, w, h).data, n = w * h, L = new Float32Array(n), S = new Float32Array(n);
+    for (let i = 0, p = 0; i < n; i++, p += 4) { const r = d[p], g = d[p + 1], b = d[p + 2], mx = Math.max(r, g, b), mn = Math.min(r, g, b); L[i] = 0.299 * r + 0.587 * g + 0.114 * b; S[i] = mx ? (mx - mn) / mx : 0 }
+    C.rbuf = C.rbuf || []; C.rbuf.push(L); if (C.rbuf.length > 10) C.rbuf.shift();
+    // clear-view reference for this area: averaged over the first frames after the area is marked
+    if (C.rrefWant) { C.rrefAcc = C.rrefAcc || { s: new Float32Array(n), k: 0 }; if (C.rrefAcc.s.length !== n) C.rrefAcc = { s: new Float32Array(n), k: 0 }; for (let i = 0; i < n; i++) C.rrefAcc.s[i] += L[i]; if (++C.rrefAcc.k >= 5) { C.rref = C.rrefAcc.s.map(v => v / 5); C.rrefWant = false; C.rrefAcc = null } }
+    if (C.rbuf.length < 5) return { idx: 0, type: '' };
+    const ref = C.rref && C.rref.length === n ? C.rref : null;
+    const k = C.rbuf.length; let cnt = 0, lum = 0;
+    for (let i = 0; i < n; i++) {
+      let m = 0; for (let j = 0; j < k; j++) m += C.rbuf[j][i]; m /= k;
+      let vv = 0; for (let j = 0; j < k; j++) { const e = C.rbuf[j][i] - m; vv += e * e }
+      if (S[i] < T.xSat && (Math.sqrt(vv / k) > T.xStd || (ref && Math.abs(ref[i] - L[i]) > T.xRef))) { cnt++; lum += L[i] }
+    }
+    const idx = Math.min(100, (cnt / n) * 100 * T.xGain), ml = cnt ? lum / cnt : 0;
+    return { idx, type: cnt < n * 0.02 ? '' : ml < 110 ? 'dark smoke' : ml > 175 ? 'white plume, could be steam' : 'grey plume' };
+  }
+  function xReset() { C.xh = []; C.pE = 0; C.pType = ''; C.oc = null; C.xLast = 0; C.rbuf = []; C.rref = null; C.rrefWant = true; C.xT0 = performance.now() }
+  function xUpdate(pl, now, healthy) {
+    if (pl) { C.pE = 0.8 * (C.pE || 0) + 0.2 * pl.idx; C.pType = pl.type }
+    else if (!healthy) C.pE = 0.9 * (C.pE || 0);
+    if (now - (C.xLast || 0) < 1000) return;
+    C.xLast = now;
+    const t = (now - C.xT0) / 1000, nz = (Math.random() - 0.5) * 2.4;
+    C.oc = C.xs === 'off' ? null : C.xs === 'track' ? Math.max(4, 10 + 1.2 * C.pE + nz) : Math.max(4, 16 + 3 * Math.sin(t / 17) + nz);
+    const flag = !!((C.st.mismatch && C.st.mismatch.open) || (C.st.nodata && C.st.nodata.open));
+    C.xh.push({ p: C.pE, o: C.oc, f: flag }); if (C.xh.length > 180) C.xh.shift();
+    const set = (c, v) => { const e = q(c); if (e) e.textContent = v };
+    set('.cw-xp', healthy ? Math.round(C.pE) + ' / 100' : 'paused');
+    set('.cw-xpt', healthy ? (C.pType || (C.pE < 8 ? 'no visible plume' : 'faint plume')) : 'camera check failing');
+    set('.cw-xo', C.oc == null ? 'no data' : C.oc.toFixed(1) + ' mg/Nm³');
+    const msgEl = q('.cw-xmsg');
+    if (msgEl) {
+      const rule = `Rule: plume index ${T.xPlume}+ for ${T.xHold} s while OCEMS is below ${Math.round(T.xLow * 100)}% of the limit, or sends no data. In production the hold would be about 10 minutes.`;
+      const sm = C.st.mismatch || {}, sn = C.st.nodata || {};
+      msgEl.innerHTML = (sm.open || sn.open) ? `<b>${TYPES[sm.open ? 'mismatch' : 'nodata'].label}.</b> The camera and OCEMS disagree. ${rule}` : (sm.since || sn.since) ? `<b style="color:#8a5200">Checking:</b> the camera shows a plume but OCEMS does not reflect it. ${rule}` : rule;
+    }
+    drawChart();
+    drawRoi();
+  }
+  function drawChart() {
+    const c = q('.cw-xc'); if (!c || c.offsetParent === null) return;
+    const dpr = window.devicePixelRatio || 1, W2 = c.clientWidth, H2 = c.clientHeight;
+    if (c.width !== Math.round(W2 * dpr)) { c.width = Math.round(W2 * dpr); c.height = Math.round(H2 * dpr) }
+    const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W2, H2);
+    const L = 34, Rr = 40, Tt = 10, B = 20, pw = W2 - L - Rr, ph = H2 - Tt - B, N = 180;
+    const X = i => L + pw * (i + (N - C.xh.length)) / (N - 1), Y = v => Tt + ph * (1 - Math.min(100, Math.max(0, v)) / 100);
+    x.font = '11px Inter,system-ui,sans-serif'; x.fillStyle = '#8a998f'; x.strokeStyle = '#eef2ef'; x.lineWidth = 1;
+    [0, 25, 50, 75, 100].forEach(v => { x.beginPath(); x.moveTo(L, Y(v)); x.lineTo(L + pw, Y(v)); x.stroke(); x.textAlign = 'right'; x.fillText(v, L - 6, Y(v) + 4); x.textAlign = 'left'; x.fillText(v, L + pw + 6, Y(v) + 4) });
+    x.textAlign = 'left'; x.fillText('3 min ago', L, H2 - 5); x.textAlign = 'right'; x.fillText('now', L + pw, H2 - 5);
+    C.xh.forEach((h, i) => { if (h.f) { x.fillStyle = 'rgba(215,38,61,.10)'; x.fillRect(X(i) - pw / N / 2, Tt, pw / N + 1, ph) } });
+    x.strokeStyle = '#d7263d'; x.setLineDash([5, 4]); x.beginPath(); x.moveTo(L, Y(LIM)); x.lineTo(L + pw, Y(LIM)); x.stroke(); x.setLineDash([]);
+    const line = (key, col) => { x.strokeStyle = col; x.lineWidth = 2; x.beginPath(); let pen = false; C.xh.forEach((h, i) => { const v = h[key]; if (v == null) { pen = false; return } pen ? x.lineTo(X(i), Y(v)) : x.moveTo(X(i), Y(v)); pen = true }); x.stroke() };
+    line('p', '#8a5a2b'); line('o', '#0b7a42');
+  }
+  // marked plume area, drawn over the video
+  function vidRect() {
+    const v = q('video'), r = v.getBoundingClientRect(), ar = (v.videoWidth || 16) / (v.videoHeight || 9);
+    let w = r.width, h = r.width / ar; if (h > r.height) { h = r.height; w = h * ar }
+    return { x: (r.width - w) / 2, y: (r.height - h) / 2, w, h, r };
+  }
+  function drawRoi(tmp) {
+    const c = q('.cw-roic'); if (!c) return;
+    const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    if (c.width !== Math.round(r.width * dpr)) { c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr) }
+    const x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, r.width, r.height);
+    const roi = tmp || C.roi || (C.stream ? { x: 0.3, y: 0.05, w: 0.4, h: 0.45, def: 1 } : null); if (!roi || !C.stream) return;
+    const vr = vidRect();
+    const bx = vr.x + roi.x * vr.w, by = vr.y + roi.y * vr.h, bw = roi.w * vr.w, bh = roi.h * vr.h;
+    x.strokeStyle = '#ffd400'; x.lineWidth = 2; x.setLineDash([7, 5]); x.strokeRect(bx, by, bw, bh); x.setLineDash([]);
+    x.font = '600 11px Inter,system-ui,sans-serif'; const lab = roi.def ? 'Plume area (default)' : 'Plume area';
+    const tw = x.measureText(lab).width + 10; x.fillStyle = '#ffd400'; x.fillRect(bx, Math.max(0, by - 18), tw, 18); x.fillStyle = '#1c2a23'; x.fillText(lab, bx + 5, Math.max(0, by - 18) + 13);
+  }
+  function roiMode(on) {
+    const c = q('.cw-roic'); if (!c) return;
+    c.classList.toggle('draw', on); C.roiDraw = on;
+    if (on) say('Drag a box over the area just above the stack outlet');
+  }
+  function roiWire() {
+    const c = q('.cw-roic'); let st = null;
+    const pt = e => { const vr = vidRect(), r = c.getBoundingClientRect(); return { x: Math.min(1, Math.max(0, (e.clientX - r.left - vr.x) / vr.w)), y: Math.min(1, Math.max(0, (e.clientY - r.top - vr.y) / vr.h)) } };
+    c.addEventListener('pointerdown', e => { if (!C.roiDraw) return; st = pt(e); c.setPointerCapture(e.pointerId); e.preventDefault() });
+    c.addEventListener('pointermove', e => { if (!st) return; const p = pt(e); drawRoi({ x: Math.min(st.x, p.x), y: Math.min(st.y, p.y), w: Math.abs(p.x - st.x), h: Math.abs(p.y - st.y) }) });
+    c.addEventListener('pointerup', e => { if (!st) return; const p = pt(e); const roi = { x: Math.min(st.x, p.x), y: Math.min(st.y, p.y), w: Math.abs(p.x - st.x), h: Math.abs(p.y - st.y) }; st = null; roiMode(false);
+      if (roi.w > 0.03 && roi.h > 0.03) { C.roi = roi; save('cwRoi', roi); C.rbuf = []; C.rref = null; C.rrefWant = true; say('Plume area saved. Its current look is taken as the clear view.') } drawRoi() });
+  }
+
   /* ---------- incidents ---------- */
   function snapshot() {
     const v = q('video'); if (!v || !v.videoWidth) return '';
     const c = document.createElement('canvas'); const w = 480, h = Math.round(w * v.videoHeight / v.videoWidth);
     c.width = w; c.height = h; const x = c.getContext('2d'); x.drawImage(v, 0, 0, w, h);
+    if (C.roi) { x.strokeStyle = '#ffd400'; x.setLineDash([6, 4]); x.lineWidth = 2; x.strokeRect(C.roi.x * w, C.roi.y * h, C.roi.w * w, C.roi.h * h); x.setLineDash([]) }
     x.fillStyle = 'rgba(0,0,0,.55)'; x.fillRect(0, h - 22, w, 22); x.fillStyle = '#fff'; x.font = '600 12px monospace';
     x.fillText(`CAM 1 · ${C.unit ? C.unit.id : ''} · ${new Date().toLocaleString('en-IN')}`, 8, h - 7);
     return c.toDataURL('image/jpeg', 0.72);
   }
   function raise(k, s, now) {
     const t = TYPES[k], d = new Date();
-    const inc = { id: 'cw' + Date.now(), k, label: t.label, desc: t.desc, at: d, held: T.hold, img: k === 'lost' ? '' : snapshot(), mail: C.email ? 'sending' : 'off', ack: false, cleared: null };
+    let desc = t.desc;
+    if (k === 'mismatch') desc = `A plume (index ${Math.round(C.pE)} of 100, ${C.pType || 'plume'}) has been visible above the stack for ${T.xHold} seconds while OCEMS reports ${C.oc.toFixed(1)} mg/Nm³ against a limit of ${LIM}. OCEMS values in this demo are illustrative.`;
+    if (k === 'nodata') desc = `A plume (index ${Math.round(C.pE)} of 100) has been visible for ${T.xHold} seconds while OCEMS is sending no data. OCEMS values in this demo are illustrative.`;
+    const inc = { id: 'cw' + Date.now(), k, label: t.label, desc, at: d, held: TYPES[k].x ? T.xHold : T.hold, img: k === 'lost' ? '' : snapshot(), mail: C.email ? 'sending' : 'off', ack: false, cleared: null };
     s.open = inc; C.inc.unshift(inc); C.inc = C.inc.slice(0, 12);
     chime(); drawInc(); say(`${t.label} at ${C.unit ? C.unit.id : 'stack camera'}. Alert raised.`);
     publish(inc);
@@ -456,6 +607,8 @@
       <tr><td>Difference from normal view</td><td><b data-m="view"></b></td><td>Moved if above</td><td><input data-t="moved" type="number" step="0.05"></td></tr>
       <tr><td>Flame-coloured share</td><td><b data-m="flame"></b></td><td>Flame if extra share above</td><td><input data-t="flame" type="number" step="0.0005"></td></tr>
       <tr><td colspan="2">Hold time and repeat gap (seconds)</td><td>Hold / cooldown</td><td><input data-t="hold" type="number" step="1"> <input data-t="cooldown" type="number" step="1"></td></tr>
+      <tr><td>Plume: movement / colour limit</td><td><b data-m="pidx"></b></td><td>Moving if change above / grey if colour below</td><td><input data-t="xStd" type="number" step="0.5"> <input data-t="xSat" type="number" step="0.05"></td></tr>
+      <tr><td colspan="2">Cross-check: plume index and seconds to flag</td><td>Index / seconds / OCEMS share of limit</td><td><input data-t="xPlume" type="number" step="1"> <input data-t="xHold" type="number" step="1"> <input data-t="xLow" type="number" step="0.05"></td></tr>
       </tbody></table><div class="cw-foot"><button class="cw-btn cw-tdef">Restore defaults</button><button class="cw-btn cw-tclr">Clear alert history</button></div>`;
     q('.cw-tune').querySelectorAll('[data-t]').forEach(inp => { inp.value = T[inp.dataset.t]; inp.onchange = () => { const v = parseFloat(inp.value); if (!isNaN(v)) { T[inp.dataset.t] = v; save('cwTune', pick()) } } });
     q('.cw-tdef').onclick = () => { Object.assign(T, DEF); save('cwTune', {}); tuneUI() };
@@ -472,6 +625,7 @@
     set('diff', m.diff != null && m.diff < 90 ? m.diff.toFixed(3) : '–', C.st.frozen && C.st.frozen.since);
     set('view', m.view != null ? m.view.toFixed(2) : '–', C.st.moved && C.st.moved.since);
     set('flame', m.flame != null ? (m.flame * 100).toFixed(2) + '%' : '–', C.st.flame && C.st.flame.since);
+    set('pidx', C.pE != null ? Math.round(C.pE) + ' / 100' : '–', C.pE >= T.xPlume);
   }
 
   /* ---------- public API ---------- */
