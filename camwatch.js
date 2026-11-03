@@ -33,6 +33,14 @@
 .cw-vwrap video{width:100%;height:100%;object-fit:contain;display:block;background:#0f1a15}
 .cw-idle{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#d7e3dc;text-align:center;padding:16px}
 .cw-idle .ic{font-size:30px;opacity:.7}
+.cw-pair{display:flex;gap:18px;align-items:center;text-align:left;max-width:560px}
+.cw-qr{background:#fff;border-radius:10px;padding:8px;flex:none;width:138px;height:138px;display:grid;place-items:center}
+.cw-qr svg,.cw-qr img{width:122px;height:122px;display:block}
+.cw-ptxt{display:flex;flex-direction:column;gap:6px}
+.cw-ptxt .s{max-width:none}
+.cw-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#f0a020;margin-right:7px;animation:cwp 1.4s infinite}
+@keyframes cwp{50%{opacity:.25}}
+@media(max-width:620px){.cw-pair{flex-direction:column;text-align:center;gap:10px}.cw-qr{width:118px;height:118px}.cw-qr svg,.cw-qr img{width:102px;height:102px}.cw-idle .cw-links,.cw-idle .cw-code{display:none}}
 .cw-idle .t{font-size:15px;font-weight:600}
 .cw-idle .s{font-size:12.5px;opacity:.75;max-width:420px}
 .cw-code{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
@@ -128,10 +136,15 @@
         <div class="cw-vwrap">
           <video playsinline muted autoplay></video>
           <div class="cw-idle">
-            <div class="ic">◉</div>
-            <div class="t">Camera not connected</div>
-            <div class="s">Enter the pairing code shown on the stack camera to view its live feed. The feed is checked continuously for a covered lens, a frozen picture, a moved camera and visible flame.</div>
-            <div class="cw-code"><input class="cw-codein" inputmode="numeric" maxlength="8" placeholder="Code" aria-label="Pairing code"><button class="cw-btn pri cw-go">Connect to stack camera</button></div>
+            <div class="cw-pair">
+              <div class="cw-qr" title="Scan with the phone that will act as the stack camera"></div>
+              <div class="cw-ptxt">
+                <div class="t">Connect the stack camera</div>
+                <div class="s">Scan this code with the phone camera, open the link, and tap <b>Start camera</b>. The feed appears here on its own.</div>
+                <div class="s cw-pairst"><span class="cw-dot"></span>Waiting for the camera · code <b class="cw-pcode"></b></div>
+              </div>
+            </div>
+            <div class="cw-code"><input class="cw-codein" inputmode="numeric" maxlength="8" placeholder="Code" aria-label="Pairing code"><button class="cw-btn pri cw-go">Connect with code</button></div>
             <div class="cw-links"><a class="cw-own">Use this device's camera</a><a class="cw-share">Use a shared window</a></div>
             <div class="s cw-msg" style="min-height:16px"></div>
           </div>
@@ -158,16 +171,20 @@
     </div>`;
     const q = s => el.querySelector(s);
     q('.cw-codein').value = load('cwCode', '');
-    q('.cw-go').onclick = () => connectRemote(q('.cw-codein').value.trim());
+    q('.cw-go').onclick = () => { stopPairing(); connectRemote(q('.cw-codein').value.trim()) };
     q('.cw-codein').onkeydown = e => { if (e.key === 'Enter') connectRemote(q('.cw-codein').value.trim()) };
-    q('.cw-own').onclick = () => connectLocal('camera');
-    q('.cw-share').onclick = () => connectLocal('screen');
-    q('.cw-stop').onclick = () => { stop(true); };
+    q('.cw-own').onclick = () => { stopPairing(); connectLocal('camera') };
+    q('.cw-share').onclick = () => { stopPairing(); connectLocal('screen') };
+    q('.cw-stop').onclick = () => { stop(true); startPairing() };
     q('.cw-recon').onclick = () => { if (C.kind === 'remote') connectRemote(C.code); else connectLocal(C.kind) };
     q('.cw-reset').onclick = () => { C.ref = null; C.learnT = performance.now(); say('Learning the normal view again') };
     q('.cw-tunebtn').onclick = () => { const t = q('.cw-tune'); t.hidden = !t.hidden; if (!t.hidden) tuneUI() };
     C.el = el; C.unit = unit;
     emailStatus();
+    C.pair = load('cwPair', '') || String(Math.floor(1000 + Math.random() * 9000)); save('cwPair', C.pair);
+    q('.cw-pcode').textContent = C.pair;
+    drawQR();
+    startPairing();
     return el;
   }
   const q = s => C.el && C.el.querySelector(s);
@@ -178,6 +195,51 @@
     const s = q('.cw-mailst'); if (s) s.innerHTML = C.email ? '<span class="cw-tag g">Email alerts on</span>' : '<span class="cw-tag n">Email not set up</span>';
   }
 
+  /* ---------- QR pairing: the laptop picks the code, the phone opens stackcam.html?code=XXXX ---------- */
+  function camUrl() { const u = new URL('stackcam.html', location.href); u.search = '?code=' + C.pair; return u.href }
+  function loadQRLib() {
+    if (window.qrcode) return Promise.resolve();
+    return new Promise((ok, no) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js'; s.onload = ok; s.onerror = no; document.head.appendChild(s) });
+  }
+  async function drawQR() {
+    const box = q('.cw-qr'); if (!box) return;
+    try { await loadQRLib(); const qr = qrcode(0, 'M'); qr.addData(camUrl()); qr.make(); box.innerHTML = qr.createSvgTag(4, 0) }
+    catch (e) { box.innerHTML = '<div style="color:#1c2a23;font-size:11px;text-align:center">QR unavailable.<br>Open stackcam.html on the phone.</div>' }
+  }
+  function stopPairing() {
+    C.pairing = false; clearInterval(C.pairTimer); C.pairTimer = null;
+    if (C.pairPeer && C.pairPeer !== C.peer) { try { C.pairPeer.destroy() } catch (e) {} }
+    C.pairPeer = null;
+  }
+  async function startPairing() {
+    if (C.pairing || C.stream) return;
+    C.pairing = true; C.pairStart = Date.now();
+    const st = q('.cw-pairst'); if (st) st.innerHTML = '<span class="cw-dot"></span>Waiting for the camera · code <b class="cw-pcode">' + C.pair + '</b>';
+    try { await loadPeer() } catch (e) { C.pairing = false; return }
+    const ice = await iceServers();
+    if (!C.pairing) return;
+    const peer = new Peer(undefined, peerOpts(ice)); C.pairPeer = peer;
+    peer.on('error', () => {});
+    peer.on('call', call => {
+      if (C.stream) { try { call.close() } catch (e) {} return }
+      C.call = call; call.answer();
+      call.on('stream', st2 => {
+        if (C.stream) return;
+        clearInterval(C.pairTimer); C.pairing = false; C.peer = peer; C.pairPeer = null;
+        C.kind = 'remote'; C.code = C.pair;
+        start(st2, 'Stack camera · scanned code ' + C.pair); watchPc(call);
+      });
+      call.on('close', () => feedLost()); call.on('error', () => feedLost());
+    });
+    peer.on('open', () => {
+      const ping = () => {
+        if (!C.pairing || C.stream) return;
+        if (Date.now() - C.pairStart > 15 * 60e3) { stopPairing(); const s2 = q('.cw-pairst'); if (s2) { s2.innerHTML = 'Pairing paused. <a style="color:#9fd4b4;text-decoration:underline;cursor:pointer">Resume</a>'; s2.querySelector('a').onclick = startPairing } return }
+        try { const c = peer.connect(PREFIX + C.pair, { reliable: true }); c.on('open', () => c.send({ hello: 'control-room' })) } catch (e) {}
+      };
+      ping(); C.pairTimer = setInterval(ping, 4000);
+    });
+  }
   async function connectRemote(code) {
     code = (code || '').replace(/\s+/g, '').toUpperCase();
     if (!code) { msg('Enter the code shown on the stack camera.'); return }
