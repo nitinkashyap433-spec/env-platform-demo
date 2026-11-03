@@ -62,7 +62,6 @@ label{font-size:12px;color:#9fb3a8;display:block;margin-bottom:5px}
 
   <div class="foot">Environmental Intelligence Platform · Rajasthan State Pollution Control Board<br>Concept demonstration · not an official system</div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 const RELAY='https://rspcb-relay.pgpsm11023.workers.dev', PREFIX='rspcb-eip-cam-';
 const $=id=>document.getElementById(id);
@@ -83,7 +82,8 @@ async function keepAwake(){try{if('wakeLock' in navigator){wake=await navigator.
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&stream)keepAwake()});
 async function start(){
   $('go').disabled=true;status('wait','Starting camera…');
-  try{stream=await getCam()}catch(e){status('err','Camera not allowed','Allow camera access for this page in the browser settings, then try again.');$('go').disabled=false;return}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){status('err','Camera not available here','Open this link in Safari or Chrome directly, not inside WhatsApp, Gmail or Teams.');$('go').disabled=false;return}
+  try{stream=await getCam()}catch(e){status('err','Camera not allowed',(e&&e.name==='NotAllowedError'?'Camera permission was refused. ':'')+'In Safari tap the "aA" button in the address bar, then Website Settings, then Camera: Allow. Reload and try again.');$('go').disabled=false;return}
   $('v').srcObject=stream;$('ph').style.display='none';$('live').style.display='block';
   clearInterval(osdT);osdT=setInterval(()=>{$('osd').textContent='CAM 1 · '+new Date().toLocaleTimeString('en-IN')},1000);
   $('flip').disabled=false;$('stop').disabled=false;keepAwake();
@@ -91,8 +91,13 @@ async function start(){
   const fixed=$('codeIn').value.replace(/\s+/g,'').toUpperCase();save('scCode',fixed);
   await openPeer(fixed||newCode(),!fixed);
 }
+const LIBS=['https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js','https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'];
+function loadLib(i){i=i||0;if(window.Peer)return Promise.resolve();if(i>=LIBS.length)return Promise.reject(new Error('lib'));
+  return new Promise((ok,no)=>{const s=document.createElement('script');s.src=LIBS[i];const t=setTimeout(()=>{s.onload=s.onerror=null;no()},12000);
+    s.onload=()=>{clearTimeout(t);window.Peer?ok():no()};s.onerror=()=>{clearTimeout(t);no()};document.head.appendChild(s)}).catch(()=>loadLib(i+1))}
 async function openPeer(c,auto){
   code=c;$('code').textContent=code;status('wait','Connecting…');
+  try{await loadLib()}catch(e){status('err','Could not load the connection library','Check the internet connection on this phone, then tap Stop and Start camera again.');return}
   const servers=await ice();
   try{peer&&peer.destroy()}catch(e){}
   peer=new Peer(PREFIX+code,Object.assign({debug:1,config:{iceServers:servers}},load('cwSig',{})));
@@ -127,7 +132,10 @@ function stop(){
   $('v').srcObject=null;$('ph').style.display='grid';$('live').style.display='none';$('osd').textContent='';
   $('go').disabled=false;$('flip').disabled=true;$('stop').disabled=true;$('code').textContent='····';status('','Stopped');
 }
-$('go').onclick=start;$('flip').onclick=flip;$('stop').onclick=stop;
-if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)status('err','Camera not available','Open this page over https in Chrome or Safari.');
+$('go').addEventListener('click',()=>{start().catch(e=>{status('err','Something went wrong',String(e&&e.message||e));$('go').disabled=false})});
+$('flip').onclick=flip;$('stop').onclick=stop;
+if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)status('err','Camera not available here','Open this link in Safari or Chrome directly, not inside WhatsApp, Gmail or Teams.');
+else status('','Ready · tap Start camera');
+loadLib().catch(()=>{});
 </script>
 </body></html>

@@ -82,9 +82,12 @@
   function injectCss() { if (document.getElementById('cw-css')) return; const s = document.createElement('style'); s.id = 'cw-css'; s.textContent = css; document.head.appendChild(s) }
 
   /* ---------- helpers ---------- */
-  function loadPeer() {
+  function loadPeer(i) {
+    i = i || 0;
     if (window.Peer) return Promise.resolve();
-    return new Promise((ok, no) => { const s = document.createElement('script'); s.src = PEERJS; s.onload = ok; s.onerror = () => no(new Error('Could not load the connection library')); document.head.appendChild(s) });
+    const srcs = [PEERJS, 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'];
+    if (i >= srcs.length) return Promise.reject(new Error('Could not load the connection library. Check the internet connection.'));
+    return new Promise((ok, no) => { const s = document.createElement('script'); s.src = srcs[i]; const t = setTimeout(no, 12000); s.onload = () => { clearTimeout(t); window.Peer ? ok() : no() }; s.onerror = () => { clearTimeout(t); no() }; document.head.appendChild(s) }).catch(() => loadPeer(i + 1));
   }
   let iceCache = null;
   async function iceServers() {
