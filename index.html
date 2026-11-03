@@ -3411,7 +3411,7 @@ function eipBuild(){
     if(tabs.length>1){const bar=document.createElement('div');bar.className='eip-tabs';
       tabs.forEach(([lbl],i)=>{const b=document.createElement('button');b.innerHTML=lbl;b.onclick=()=>eipShow(sec,i);bar.appendChild(b)});box.appendChild(bar)}
     tabs.forEach(([lbl,src],i)=>{const p=document.createElement('div');p.className='eip-pane';p.dataset.i=i;
-      if(src==='__own__')own.forEach(n=>p.appendChild(n));else{const f=document.createElement('iframe');f.className='eip-frame';f.dataset.src=src;f.title=lbl.replace(/&amp;/g,'&');p.appendChild(f)}
+      if(src==='__own__')own.forEach(n=>p.appendChild(n));else{const f=document.createElement('iframe');f.className='eip-frame';f.dataset.src=src;f.allow='camera; microphone; display-capture; autoplay; screen-wake-lock; fullscreen';f.title=lbl.replace(/&amp;/g,'&');p.appendChild(f)}
       box.appendChild(p)});
     eipShow(sec,0,null,sec==='home');
   });

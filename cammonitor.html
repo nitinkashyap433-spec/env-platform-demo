@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stack Camera Monitor · test page</title>
+<style>
+:root{--line:#e3eae5;--ink:#1c2a23;--muted:#6a7a70}
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6f4;color:var(--ink);font-family:Inter,Segoe UI,system-ui,sans-serif;font-size:14px}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 6px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.mt{margin-top:14px}
+.card-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.card-h h2{font-size:16px;margin:0}
+.hint{font-size:12px;color:var(--muted)}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#10201a;color:#fff;border-radius:10px;padding:10px 16px;font-size:13.5px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
+</style>
+<script src="camwatch.js"></script>
+</head><body>
+<main>
+  <h1>Stack camera monitor · test page</h1>
+  <p class="sub">The same panel that appears in Industry 360, on its own page for testing and tuning. Connect a camera, then cover the lens, show a lighter flame, turn the camera or pause the feed.</p>
+  <div id="slot"></div>
+</main>
+<div id="toast"></div>
+<script>
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600)}
+CamWatch.attach(document.getElementById('slot'),{id:'RJ-BLT-001',name:'Textile dyeing unit BLT-001',ro:'Balotra'});
+</script>
+</body></html>

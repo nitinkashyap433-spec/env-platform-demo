@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b2a1c">
+<title>Stack Camera · EIP demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0b1712;color:#e6efe9;font-family:Inter,Segoe UI,system-ui,-apple-system,sans-serif}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 28px;display:flex;flex-direction:column;gap:14px;min-height:100%}
+.top{display:flex;align-items:center;gap:10px}
+.top img{width:36px;height:36px;border-radius:50%;background:#fff;padding:2px}
+.top b{font-size:16px}.top small{display:block;font-size:12px;color:#9fb3a8}
+.tag{margin-left:auto;font-size:11px;font-weight:600;background:#ffe600;color:#1c2a23;border-radius:10px;padding:2px 8px}
+.vid{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9}
+.vid video{width:100%;height:100%;object-fit:cover;display:block}
+.vid .ph{position:absolute;inset:0;display:grid;place-items:center;color:#7f948a;font-size:14px;text-align:center;padding:16px}
+.live{position:absolute;left:10px;top:10px;font-size:11px;font-weight:700;background:#d7263d;color:#fff;border-radius:4px;padding:2px 7px;display:none}
+.osd{position:absolute;right:10px;bottom:8px;font:600 12px ui-monospace,monospace;color:#fff;text-shadow:0 1px 2px #000}
+.card{background:#13241c;border:1px solid #23392d;border-radius:12px;padding:16px}
+.code{font:800 44px/1 ui-monospace,Consolas,monospace;letter-spacing:8px;text-align:center;margin:6px 0 4px;color:#fff}
+.lbl{font-size:12px;color:#9fb3a8;text-align:center}
+.st{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600}
+.st i{width:10px;height:10px;border-radius:50%;background:#7f948a;flex:none}
+.st.wait i{background:#f0a020}.st.on i{background:#1f9d55;box-shadow:0 0 0 4px rgba(31,157,85,.25)}.st.err i{background:#d7263d}
+.sub{font-size:12.5px;color:#9fb3a8;margin-top:6px;line-height:1.45}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+button,select,input{font:inherit}
+.btn{flex:1;min-width:120px;border:0;border-radius:10px;padding:13px 14px;font-size:15px;font-weight:600;background:#0b7a42;color:#fff;cursor:pointer}
+.btn.sec{background:#1d3328;color:#e6efe9;border:1px solid #33503f}
+.btn:disabled{opacity:.45}
+select,input{width:100%;background:#0f1d16;color:#e6efe9;border:1px solid #33503f;border-radius:9px;padding:10px}
+label{font-size:12px;color:#9fb3a8;display:block;margin-bottom:5px}
+.foot{font-size:11.5px;color:#6f857a;text-align:center;margin-top:auto;line-height:1.5}
+</style>
+</head><body>
+<div class="wrap">
+  <div class="top"><img src="images/logo.png" alt=""><div><b>Stack camera</b><small>Stack 1 · final outlet</small></div><span class="tag">Concept demo</span></div>
+
+  <div class="vid"><video id="v" playsinline muted autoplay></video><div class="ph" id="ph">Camera is off. Press Start camera.</div><div class="live" id="live">LIVE</div><div class="osd" id="osd"></div></div>
+
+  <div class="card">
+    <div class="lbl">Pairing code · enter this in the control room</div>
+    <div class="code" id="code">····</div>
+    <div class="st" id="st" style="justify-content:center;margin-top:8px"><i></i><span>Not started</span></div>
+    <div class="sub" id="sub" style="text-align:center"></div>
+  </div>
+
+  <div class="row">
+    <button class="btn" id="go">Start camera</button>
+    <button class="btn sec" id="flip" disabled>Switch camera</button>
+    <button class="btn sec" id="stop" disabled>Stop</button>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div style="flex:1;min-width:140px"><label for="qual">Picture quality</label><select id="qual"><option value="360">Standard (saves data)</option><option value="540" selected>Good</option><option value="720">High</option></select></div>
+      <div style="flex:1;min-width:140px"><label for="codeIn">Fixed code (optional)</label><input id="codeIn" inputmode="numeric" maxlength="8" placeholder="Auto"></div>
+    </div>
+    <div class="sub">Keep this page open and the screen on. Video goes straight to the control room and is not recorded anywhere.</div>
+  </div>
+
+  <div class="foot">Environmental Intelligence Platform · Rajasthan State Pollution Control Board<br>Concept demonstration · not an official system</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const RELAY='https://rspcb-relay.pgpsm11023.workers.dev', PREFIX='rspcb-eip-cam-';
+const $=id=>document.getElementById(id);
+const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let stream=null,peer=null,calls=[],facing=load('scFacing','environment'),wake=null,osdT=null,code='';
+const qs=new URLSearchParams(location.search);
+$('codeIn').value=qs.get('code')||load('scCode','');
+$('qual').value=load('scQual','540');
+function status(cls,t,sub){$('st').className='st '+cls;$('st').querySelector('span').textContent=t;$('sub').textContent=sub||''}
+function newCode(){return String(Math.floor(1000+Math.random()*9000))}
+async function ice(){try{const r=await fetch(RELAY+'/turn',{cache:'no-store'});const d=await r.json();if(d&&d.iceServers)return d.iceServers}catch(e){}return[{urls:['stun:stun.cloudflare.com:3478','stun:stun.l.google.com:19302']}]}
+async function getCam(){
+  const h=+$('qual').value;
+  return navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},height:{ideal:h},width:{ideal:Math.round(h*16/9)},frameRate:{ideal:15,max:20}}});
+}
+async function keepAwake(){try{if('wakeLock' in navigator){wake=await navigator.wakeLock.request('screen')}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&stream)keepAwake()});
+async function start(){
+  $('go').disabled=true;status('wait','Starting camera…');
+  try{stream=await getCam()}catch(e){status('err','Camera not allowed','Allow camera access for this page in the browser settings, then try again.');$('go').disabled=false;return}
+  $('v').srcObject=stream;$('ph').style.display='none';$('live').style.display='block';
+  clearInterval(osdT);osdT=setInterval(()=>{$('osd').textContent='CAM 1 · '+new Date().toLocaleTimeString('en-IN')},1000);
+  $('flip').disabled=false;$('stop').disabled=false;keepAwake();
+  save('scQual',$('qual').value);
+  const fixed=$('codeIn').value.replace(/\s+/g,'').toUpperCase();save('scCode',fixed);
+  await openPeer(fixed||newCode(),!fixed);
+}
+async function openPeer(c,auto){
+  code=c;$('code').textContent=code;status('wait','Connecting…');
+  const servers=await ice();
+  try{peer&&peer.destroy()}catch(e){}
+  peer=new Peer(PREFIX+code,Object.assign({debug:1,config:{iceServers:servers}},load('cwSig',{})));
+  peer.on('open',()=>status('wait','Waiting for the control room…','Enter code '+code+' on the Stack camera panel in Industry 360.'));
+  peer.on('error',e=>{
+    if(e.type==='unavailable-id'){if(auto){openPeer(newCode(),true)}else status('err','Code already in use','Another camera is using this code. Clear the fixed code or choose a different one.');return}
+    if(e.type==='network'||e.type==='server-error'||e.type==='socket-error')status('err','Connection problem','Check the internet connection. Retrying…');
+    else status('err','Connection problem',String(e.type||e.message||e));
+  });
+  peer.on('disconnected',()=>{status('wait','Reconnecting…');setTimeout(()=>{try{peer&&!peer.destroyed&&peer.reconnect()}catch(e){}},1500)});
+  peer.on('connection',conn=>{
+    conn.on('open',()=>{
+      if(!stream)return;
+      const call=peer.call(conn.peer,stream);calls.push(call);
+      status('on','Streaming to the control room','Code '+code+' · keep this page open');
+      call.on('close',()=>{calls=calls.filter(x=>x!==call);if(!calls.length&&stream)status('wait','Waiting for the control room…','Enter code '+code+' on the Stack camera panel in Industry 360.')});
+    });
+  });
+}
+async function flip(){
+  facing=facing==='environment'?'user':'environment';save('scFacing',facing);
+  if(!stream)return;
+  try{const ns=await getCam();const nt=ns.getVideoTracks()[0];
+    calls.forEach(c=>{const s=c.peerConnection&&c.peerConnection.getSenders().find(x=>x.track&&x.track.kind==='video');s&&s.replaceTrack(nt)});
+    stream.getTracks().forEach(t=>t.stop());stream=ns;$('v').srcObject=ns}catch(e){status('err','Could not switch camera')}
+}
+function stop(){
+  calls.forEach(c=>{try{c.close()}catch(e){}});calls=[];
+  try{peer&&peer.destroy()}catch(e){}peer=null;
+  if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;
+  try{wake&&wake.release()}catch(e){}wake=null;clearInterval(osdT);
+  $('v').srcObject=null;$('ph').style.display='grid';$('live').style.display='none';$('osd').textContent='';
+  $('go').disabled=false;$('flip').disabled=true;$('stop').disabled=true;$('code').textContent='····';status('','Stopped');
+}
+$('go').onclick=start;$('flip').onclick=flip;$('stop').onclick=stop;
+if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)status('err','Camera not available','Open this page over https in Chrome or Safari.');
+</script>
+</body></html>

@@ -1093,6 +1093,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 }
 @media(max-width:340px){.rvcards{grid-template-columns:1fr!important}}
 </style>
+<script src="camwatch.js"></script>
 </head>
 <body>
 
@@ -1660,6 +1661,7 @@ function renderHome(){
   if(deemed.length)A.push({sev:'med',t:`${deemed.length} consent application${deemed.length>1?'s':''} near deadline`,d:'Deemed-approval risk within 7 days · most await site inspection',go:'consent'});
   if(ROLE==='HQ'||ROLE==='Bikaner')A.push({sev:'med',t:`${fires.length} crop-fire detections overnight`,d:'Sri Ganganagar and Hanumangarh · ground checks pending',go:'map'});
   if(poorFc.length)A.push({sev:'info',t:`AQI may turn Very Poor in ${[...new Set(poorFc.map(s=>s.n.replace(/ station.*/,'')))].length} cities`,d:[...new Set(poorFc.map(s=>s.n.replace(/ station.*/,'')))].slice(0,4).join(', ')+' · next 48 hours',go:'map'});
+  {const ca=(window.CamWatch?CamWatch.alerts():[]).filter(a=>Date.now()-new Date(a.at)<12*3600e3&&(ROLE==='HQ'||inRole(a.ro)));if(ca.length){const a=ca[0];A.unshift({sev:'high',t:`${a.label} at ${a.unit}`,d:`Stack camera · ${new Date(a.at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} · ${ca.length>1?ca.length+' camera alerts today':'Regional Office '+a.ro}`,go:'fac',id:a.unit})}}
   $('#heroLine').innerHTML=`<b>${A.length} issues</b> need attention today${A[0]?`. The most urgent: ${esc(A[0].t.charAt(0).toLowerCase()+A[0].t.slice(1))}.`:'.'}`;
   $('#alerts').innerHTML=A.map(a=>`<button class="prio sev-${a.sev}" data-go="${a.go}" ${a.id?`data-id="${a.id}"`:''}><span class="pbar"></span><span class="ptxt"><span class="pt">${esc(a.t)}</span><span class="pd">${esc(a.d)}</span></span><span class="chev">›</span></button>`).join('');
   const oc=roleFac.filter(f=>f.ocems);const avgAvail=oc.length?oc.reduce((a,f)=>a+f.m.avail,0)/oc.length:0;
@@ -1891,6 +1893,7 @@ function renderFac(id){
     </div>
     <div style="display:flex;gap:18px;align-items:center">${ring(f.score)}<div style="min-width:290px">${COMPS.map(c=>`<div class="comp"><span>${c.label}</span><div class="bg"><span style="width:${f.parts[c.k]/Math.max(1,W[c.k]/Object.values(W).reduce((a,b)=>a+b,0)*100)*100}%;background:${c.color}"></span></div><b style="text-align:right">${f.parts[c.k].toFixed(0)}</b></div>`).join('')}</div></div></div>
   </div>
+  ${f.ocems?'<div id="camSlot"></div>':''}
   ${f.ocems?`<div class="card mt"><div class="card-h"><h2>OCEMS: ${S.media.toLowerCase()} ${S.param}, last 7 days (hourly)</h2><span class="legend"><span><i style="background:#eef1f7"></i>Night (10 pm–6 am)</span><span><i style="background:#d7263d;border-radius:50%"></i>Above limit</span><span><i style="background:repeating-linear-gradient(45deg,#c9cfcb 0 2px,#fafafa 2px 5px)"></i>No data</span>${f.m.flatFlag?'<span><i style="background:rgba(122,79,214,.3)"></i>Frozen values</span>':''}</span></div>${ocemsChart(f)}<div class="src">Source: OCEMS live feed · ${S.unit} · checks run automatically every hour</div></div>`:''}
   <div class="grid g3 mt">
     <div class="card"><div class="card-h"><h2>Automatic data checks</h2></div>${checks(f)}</div>
@@ -1908,6 +1911,7 @@ function renderFac(id){
       ${labFacRow(f)}
     </div>
   </div>`;
+  if(f.ocems&&window.CamWatch)CamWatch.attach($('#camSlot'),{id:f.id,name:f.name,ro:f.ro});
   if(facMap){facMap.remove();facMap=null}
   facMap=L.map('facmap',{zoomControl:true,attributionControl:false,scrollWheelZoom:true}).setView(f.ll,13);
   streetBase().addTo(facMap);
@@ -5357,6 +5361,7 @@ function placeOverlay(){if(!EMBED||!EVIEW)return;const h=Math.max(200,EVIEW.y1-E
 window.addEventListener('message',e=>{if(e.data&&e.data.eipView){EVIEW=e.data.eipView;placeOverlay()}});
 {const _m=modal;modal=function(h){_m(h);placeOverlay()};const _t=toast;toast=function(m){placeOverlay();_t(m)}}
 
+window.addEventListener('storage',e=>{if(e.key==='eipCamAlerts'){try{renderHome()}catch(x){}}});
 /* ============ init ============ */
 initPlan();initConsent();renderHome();
 {const p=parseHash();if(p){OWNER=p.v;goLocal(p.v,p.o)}else if(EMBED){OWNER='home'}}
