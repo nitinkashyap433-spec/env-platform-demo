@@ -935,6 +935,24 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
   dim.addEventListener('click',()=>sb.classList.remove('show'));
   sb.addEventListener('click',e=>{if(e.target.closest('.nav-link')&&innerWidth<=992)sb.classList.remove('show')})});
 </script>
+<style id="mobile-fix2">
+@media (max-width:992px){
+ .navbar>.container-fluid{display:flex!important;align-items:center}
+ .navbar .navbar-brand{white-space:normal!important;min-width:0!important;flex:1 1 auto!important;display:flex!important;align-items:center;gap:8px;margin-right:0!important;overflow:hidden}
+ .navbar .header-title{min-width:0;display:block!important}
+ .navbar .eip-name{font-size:15px!important;line-height:1.2!important;white-space:normal!important}
+ .navbar .logo img{max-height:38px!important}
+ .navbar .header-controls{flex:0 0 auto!important;margin-left:6px!important}
+ .navbar .user-profile span{display:none!important}
+ html,body{overflow-x:hidden;max-width:100%}
+}
+@media (max-width:480px){
+ .navbar .user-profile{display:none!important}
+ .navbar .eip-name{font-size:14px!important}
+ .navbar .a11y-open{padding:6px 9px!important}
+ .mobile-menu-btn{font-size:1.4rem!important;padding:0 4px!important}
+}
+</style>
 </head>
 
 <body>

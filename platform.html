@@ -1069,6 +1069,30 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </style>
 <style id="tiles-css">.tilebar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:-4px}.tile.editing{cursor:grab;position:relative;border-style:dashed;border-color:#9cc9ae}.tile.drag{opacity:.4}.tile.over{box-shadow:0 0 0 3px #ffe600}.tile .tx{position:absolute;top:8px;right:8px;border:none;background:#fdecea;color:#b42318;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:12px}.tile .tdrag{position:absolute;top:10px;right:40px;font-size:11px;color:#7a877f}.maplink{font-size:13px;font-weight:600;color:var(--g700);margin-left:10px;text-decoration:none}.maplink:hover{text-decoration:underline}</style>
 <style id="fwd-css">.stage.clickable{cursor:pointer;border-radius:8px;transition:background .15s}.stage.clickable:hover{background:#f2f8f4}.stg-more{font-size:12px;color:var(--g700);font-weight:600;margin-left:4px;opacity:.7}.stage.clickable:hover .stg-more{opacity:1}.fwd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.fwd-grid label,.fwd-l{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted);margin-top:8px}.fwd-grid select,.fwd-l input{border:1px solid var(--line);border-radius:7px;padding:7px 9px;font:inherit;font-size:14px;color:var(--ink)}</style>
+<style id="mob-modals">
+@media(max-width:600px){
+ .modal-bg{padding:10px!important}
+ .modal{padding:16px 14px!important;border-radius:12px}
+ .fwd-grid{grid-template-columns:1fr!important;gap:0!important}
+ .modal .btn-row{gap:6px}
+ .modal .btn-row .btn{flex:1 1 auto;justify-content:center;text-align:center}
+ .modal table{display:block;overflow-x:auto;max-width:100%}
+ .modal table th,.modal table td{min-width:80px}
+ .modal table td:first-child,.modal table th:first-child{min-width:170px}
+ .modal h2,.modal h3{word-break:break-word}
+ #toast{left:10px!important;right:10px!important;transform:none!important;max-width:none!important;text-align:center}
+}
+@media(max-width:480px){
+ .hero{padding:18px 16px!important}
+ .hero-l{flex-direction:column;align-items:flex-start!important;gap:12px!important}
+ .hero-l>div{min-width:0;max-width:100%}
+ .hero-logo{width:56px!important;height:56px!important}
+ .hero-h{font-size:24px!important}
+ .hero-ro{max-width:100%}
+ .rvcards{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:340px){.rvcards{grid-template-columns:1fr!important}}
+</style>
 </head>
 <body>
 
@@ -1691,6 +1715,13 @@ function tileDnD(){let src=null;document.querySelectorAll('#tiles .tile[draggabl
   el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('over')});
   el.addEventListener('dragleave',()=>el.classList.remove('over'));
   el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('over');const dst=el.dataset.k;if(!src||src===dst)return;const o=tileOrder().filter(x=>x!==src);o.splice(o.indexOf(dst),0,src);tileSave(o)})})}
+
+/* touch support for re-ordering tiles (iPhone / Android do not fire HTML drag events) */
+{const _dnd=tileDnD;tileDnD=function(){_dnd();document.querySelectorAll('#tiles .tile[draggable] .tdrag').forEach(h=>{const el=h.closest('.tile');let over=null;
+  h.style.touchAction='none';
+  h.addEventListener('touchstart',e=>{el.classList.add('drag');e.preventDefault()},{passive:false});
+  h.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];const u=document.elementFromPoint(t.clientX,t.clientY);const d=u&&u.closest('#tiles .tile[draggable]');if(over&&over!==d)over.classList.remove('over');over=d&&d!==el?d:null;if(over)over.classList.add('over')},{passive:false});
+  h.addEventListener('touchend',()=>{el.classList.remove('drag');if(over){over.classList.remove('over');const src=el.dataset.k,dst=over.dataset.k;const o=tileOrder().filter(x=>x!==src);o.splice(o.indexOf(dst),0,src);over=null;tileSave(o)}})})}}
 /* ============ BIG MAP ============ */
 let bigMap=null,LAY={},bufLayer=null,base={};
 function facPopup(f){const m=f.m;return `<b>${esc(f.name)}</b><br><span class="muted">${f.id} · ${f.sector}</span><br>${catChip(f.cat)} ${consentChip(f)}<br>Risk score <b>${f.score}</b>${f.reasons.length?'<br><span class="small">'+f.reasons.slice(0,3).join(' · ')+'</span>':''}<br><button class="btn sm primary" style="margin-top:6px" data-go="fac" data-id="${f.id}">Open Industry 360</button>`}
