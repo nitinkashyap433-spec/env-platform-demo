@@ -503,6 +503,17 @@ function amendCard(h){const {P,am}=h;
   return `<div class="ans"><div class="who">Rules &amp; Regulations Assistant <span class="m hy">Library record</span></div>
   <div class="aisum"><div class="lab">From the library catalogue</div><p>The library holds <b>${am.length} amendment${am.length>1?'s':''}</b> to the <b>${esc(P.title)}</b>:</p><ul>${am.map(a=>`<li>${esc(a.title)}${a.year?' ('+a.year+')':''}</li>`).join('')}</ul>
   <p style="color:var(--muted);font-size:13px">This counts only the amendment notifications loaded in this library. The principal text here is ${esc(P.status)}. Check the official gazette for any notified after that.</p></div></div>`}
+function libStats(q){const ql=q.toLowerCase();
+  if(!/\b(how many|count|number of|total)\b/.test(ql)||!/\b(orders?|circulars?|notifications?|documents?|docs|guidelines?|rules|acts?)\b/.test(ql))return null;
+  if(!/\b(library|we have|do you have|available|loaded|in total|total|there|database|repository)\b/.test(ql))return null;
+  const yr=(ql.match(/\b(20[0-2]\d|19\d\d)\b/)||[])[1];const all=Object.values(DOCS);const rs=all.filter(d=>d.rspcb),law=all.filter(d=>!d.rspcb);
+  const by=g=>rs.filter(d=>d.group===g&&(!yr||String(d.year)===yr));const grp=[...new Set(rs.map(d=>d.group))];
+  const fl=rs.filter(d=>d.later&&d.later.length).length,same=rs.filter(d=>!(d.later&&d.later.length)&&d.sameTopic&&d.sameTopic.length).length,ocr=rs.filter(d=>d.ocr).length;
+  const yrs=rs.map(d=>d.year).filter(Boolean).sort((a,b)=>a-b);
+  return `<div class="ans"><div class="who">Rules &amp; Regulations Assistant <span class="m hy">Library record</span></div><div class="aisum"><div class="lab">From the library catalogue</div>
+  <p>The library holds <b>${all.length} documents</b>${yr?`. For <b>${yr}</b>, the RSPCB documents are`:':'}</p><ul>${yr?'':`<li>${law.length} Acts, Rules and amendments (central legislation and guidelines)</li>`}${grp.map(g=>`<li>${by(g).length} ${esc(g.replace(/^RSPCB /,'RSPCB '))}</li>`).join('')}</ul>
+  ${yr?'':`<p>The RSPCB documents run from ${yrs[0]} to ${yrs[yrs.length-1]}. ${fl} are flagged as changed by a later order, ${same} have a newer order on the same topic, and ${ocr} are scanned copies read by text recognition.</p>`}
+  <p style="color:var(--muted);font-size:13px">RSPCB documents are those published on the Board's public website. Scanned orders that could not be read are not included.</p></div></div>`}
 const LBL={kw:['Keyword','kw'],sem:['Meaning','sem'],hy:['Hybrid','hy']};
 async function ask(){
   const q=$('#qin').value.trim();if(!q)return;$('#qin').value='';
@@ -513,6 +524,7 @@ async function ask(){
   let R=null;
   if($('#cmp').checked){const cs=await Promise.all(['kw','sem','hy'].map(async m=>{const r=await search(q,m);const l=LBL[m];return card(r,l[0]+(m!=='kw'&&!SEM.ready?' (smart search not ready)':''),l[1])}));html=`<div class="cols">${cs.join('')}</div>`}
   const AH=!$('#cmp').checked&&amendHistory(q);if(AH){box.lastElementChild.outerHTML=amendCard(AH);return}
+  const LS=!$('#cmp').checked&&libStats(q);if(LS){box.lastElementChild.outerHTML=LS;return}
   if(!$('#cmp').checked){R=await search(q,MODE);R.count=/\b(how many|list (all|the)|which (all|are the)|number of|name all|all the)\b/i.test(q);const l=LBL[R.mode]||LBL.kw;html=await card(R,l[0],l[1])}
   box.lastElementChild.outerHTML=html;
   const slot=box.querySelector('[data-ai]');if(slot&&R&&!R.none&&R.list.length)aiSummary(slot,q,R);else if(slot)slot.remove();
