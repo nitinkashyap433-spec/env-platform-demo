@@ -845,6 +845,12 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--g50)}
 .seg button.on{background:#fff;color:var(--g700);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .prio{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid #eef2ef;padding:12px 4px;cursor:pointer;font-family:inherit;color:var(--ink)}
 .prio:last-child{border-bottom:none}
+.home-main>.card:last-child{display:flex;flex-direction:column}
+.alertwrap{position:relative;flex:1;min-height:0}
+#alerts{max-height:430px;overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:#c9d6ce transparent}
+#alerts::-webkit-scrollbar{width:6px}#alerts::-webkit-scrollbar-thumb{background:#c9d6ce;border-radius:4px}
+.alertwrap.more::after{content:'';position:absolute;left:0;right:6px;bottom:0;height:34px;background:linear-gradient(rgba(255,255,255,0),#fff);pointer-events:none}
+.pcount{display:inline-block;font-size:12px;font-weight:700;background:#fde8e6;color:#b42318;border-radius:10px;padding:1px 8px;margin-left:6px;vertical-align:2px}
 .prio:hover{background:var(--g50)}
 .prio .pbar{width:4px;align-self:stretch;border-radius:3px;flex-shrink:0}
 .prio.sev-high .pbar{background:var(--red)}.prio.sev-med .pbar{background:#e69500}.prio.sev-info .pbar{background:var(--blue)}
@@ -1147,8 +1153,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
           <div class="maplegend" id="homeLegend"></div>
         </div>
         <div class="card">
-          <div class="card-h"><h2>Today's priorities</h2><span class="hint">Click to act</span></div>
-          <div id="alerts"></div>
+          <div class="card-h"><h2>Today's priorities <span class="pcount" id="pcount"></span></h2><span class="hint" id="phint">Click to act</span></div>
+          <div class="alertwrap"><div id="alerts"></div></div>
         </div>
       </div>
       <div class="tilebar mt" id="tileBar"></div><div class="grid g3 mt" id="tiles"></div>
@@ -1642,6 +1648,7 @@ function setHomeLayer(){
     comp:'<span><i style="background:#7a4fd6;border-radius:50%"></i>Open complaint</span><span class="muted">From the grievance portal, last 40 days</span>'}[homeMode];
   $('#homeLegend').innerHTML=lg;
 }
+function prioFade(){const el=$('#alerts');if(!el)return;const w=el.parentNode;const more=el.scrollHeight-el.scrollTop-el.clientHeight>4;w.classList.toggle('more',more);const h=$('#phint');if(h)h.textContent=el.scrollHeight>el.clientHeight+4?'Scroll for more · click to act':'Click to act';if(!el.dataset.f){el.dataset.f=1;el.addEventListener('scroll',prioFade,{passive:true})}}
 function renderHome(){
   const roleFac=FAC.filter(f=>inRole(f.ro));
   const h=new Date().getHours();
@@ -1666,7 +1673,9 @@ function renderHome(){
   if(poorFc.length)A.push({sev:'info',t:`AQI may turn Very Poor in ${[...new Set(poorFc.map(s=>s.n.replace(/ station.*/,'')))].length} cities`,d:[...new Set(poorFc.map(s=>s.n.replace(/ station.*/,'')))].slice(0,4).join(', ')+' · next 48 hours',go:'map'});
   {const ca=(window.CamWatch?CamWatch.alerts():[]).filter(a=>Date.now()-new Date(a.at)<12*3600e3&&(ROLE==='HQ'||inRole(a.ro)));if(ca.length){const a=ca[0];A.unshift({sev:'high',t:`${a.label} at ${a.unit}`,d:`Stack camera · ${new Date(a.at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} · ${ca.length>1?ca.length+' camera alerts today':'Regional Office '+a.ro}`,go:'fac',id:a.unit})}}
   $('#heroLine').innerHTML=`<b>${A.length} issues</b> need attention today${A[0]?`. The most urgent: ${esc(A[0].t.charAt(0).toLowerCase()+A[0].t.slice(1))}.`:'.'}`;
+  {const pc=$('#pcount');if(pc)pc.textContent=A.length}
   $('#alerts').innerHTML=A.map(a=>`<button class="prio sev-${a.sev}" data-go="${a.go}" ${a.id?`data-id="${a.id}"`:''}><span class="pbar"></span><span class="ptxt"><span class="pt">${esc(a.t)}</span><span class="pd">${esc(a.d)}</span></span><span class="chev">›</span></button>`).join('');
+  setTimeout(prioFade,0);
   const oc=roleFac.filter(f=>f.ocems);const avgAvail=oc.length?oc.reduce((a,f)=>a+f.m.avail,0)/oc.length:0;
   const beyond=appsR.filter(a=>a.age>SLA[a.cat]).length;
   const flg=roleFac.filter(f=>f.flagged);const byCat=c=>flg.filter(f=>f.cat===c).length;

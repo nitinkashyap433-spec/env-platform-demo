@@ -3443,30 +3443,30 @@ document.querySelectorAll('.nav-link[data-tab]').forEach(l=>l.addEventListener('
 </script>
 <style>
 #eip-areas{margin:22px 0 10px}
-#eip-areas .ah{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 2px 12px}
-#eip-areas h3{font-size:20px;font-weight:700;color:#103c26;margin:0}
-#eip-areas .asub{color:#5d6b63;font-size:14px;margin:4px 0 0;max-width:760px}
-#eip-areas .legend{display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:#44524a}
-#eip-areas .legend span{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e1e8e3;border-radius:20px;padding:4px 10px}
-.pb{display:inline-block;min-width:26px;text-align:center;font-size:11px;font-weight:700;border-radius:6px;padding:2px 6px;color:#fff}
+#eip-areas .ah{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 12px}
+#eip-areas h3{font-size:19px;font-weight:700;color:#103c26;margin:0}
+#eip-areas .legend{display:flex;flex-wrap:wrap;gap:6px;font-size:12px;color:#44524a}
+#eip-areas .legend span{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e1e8e3;border-radius:20px;padding:3px 9px;cursor:help}
+.pb{display:inline-block;min-width:24px;text-align:center;font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 5px;color:#fff}
 .pb.p1{background:#1e8a4c}.pb.p2{background:#2f6fb3}.pb.p3{background:#c98a12}.pb.p4{background:#8a948e}
-#eip-areas .agrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-@media(max-width:1100px){#eip-areas .agrid{grid-template-columns:1fr}}
-#eip-areas .acard{background:#fff;border:1px solid #e1e8e3;border-radius:14px;padding:16px 16px 10px;box-shadow:0 1px 2px rgba(16,60,38,.04)}
-#eip-areas .acard .at{display:flex;align-items:center;gap:10px;margin-bottom:2px}
-#eip-areas .acard .at i{width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:#e8f3ec;color:#0b6b3a;font-size:15px}
-#eip-areas .acard h4{font-size:16px;font-weight:700;margin:0;color:#1c2a23}
-#eip-areas .acard .aq{color:#5d6b63;font-size:13px;margin:4px 0 10px 44px}
-#eip-areas .mbar{display:flex;height:6px;border-radius:4px;overflow:hidden;margin:0 0 8px 44px;background:#eef2ef}
-#eip-areas .mbar i{display:block;height:100%}
-#eip-areas .mrow{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:start;padding:9px 6px;border-top:1px solid #f0f3f1;border-radius:8px}
-#eip-areas .mrow.go{cursor:pointer}#eip-areas .mrow.go:hover{background:#f4f8f5}
-#eip-areas .mrow b{font-size:14px;color:#1c2a23;font-weight:600}
-#eip-areas .mrow .tf{font-size:12.5px;color:#5d6b63;margin-top:2px;line-height:1.45}
-#eip-areas .mrow .tf em{font-style:normal;color:#0b6b3a}
-#eip-areas .mrow .nx{font-size:11px;color:#8a948e;white-space:nowrap;padding-top:2px}
-#eip-areas .mrow .nx.on{color:#0b6b3a;font-weight:600}
-#eip-areas .anote{font-size:12px;color:#6b7a71;margin:10px 2px 0}
+#eip-areas .agrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:stretch}
+@media(max-width:1250px){#eip-areas .agrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){#eip-areas .agrid{grid-template-columns:1fr}}
+#eip-areas .acard{background:#fff;border:1px solid #e1e8e3;border-radius:14px;padding:14px 12px 10px;box-shadow:0 1px 2px rgba(16,60,38,.04);display:flex;flex-direction:column}
+#eip-areas .acard .at{display:flex;align-items:center;gap:10px;margin:0 2px 10px}
+#eip-areas .acard .at i{width:32px;height:32px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:#e8f3ec;color:#0b6b3a;font-size:14px;flex-shrink:0}
+#eip-areas .acard h4{font-size:15px;font-weight:700;margin:0;color:#1c2a23;line-height:1.25}
+#eip-areas .acard .ac{margin-left:auto;font-size:11.5px;color:#8a948e;white-space:nowrap}
+#eip-areas .mrow{display:flex;align-items:center;gap:9px;padding:8px 8px;border-radius:9px;border:1px solid transparent;margin-top:2px}
+#eip-areas .mrow.go{cursor:pointer}#eip-areas .mrow.go:hover,#eip-areas .mrow.go:focus-visible{background:#f2f8f4;border-color:#d6e7dc;outline:none}
+#eip-areas .mrow b{font-size:13.5px;color:#1c2a23;font-weight:600;flex:1;line-height:1.3}
+#eip-areas .mrow .nx{font-size:15px;color:#9aa69f}
+#eip-areas .mrow.go:hover .nx{color:#0b6b3a}
+#eip-areas .mrow.pl b{color:#7c8781;font-weight:500}
+#eip-areas .mrow.pl .nx{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}
+#eip-tip{position:fixed;z-index:9999;max-width:300px;background:#103c26;color:#eef6f1;font-size:12.5px;line-height:1.45;border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.18);pointer-events:none;opacity:0;transition:opacity .12s}
+#eip-tip.on{opacity:1}#eip-tip .k{display:block;color:#9fd3b4;font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-top:6px}#eip-tip .k:first-child{margin-top:0}
+@media(hover:none){#eip-tip{display:none}}
 </style>
 <script>
 (function(){
@@ -3476,19 +3476,19 @@ const AREAS=[
  {ic:'fa-industry',t:'Existing industries',q:'Is every operating unit complying, and where should officers go next?',m:[
   ['fac',1,'Industry 360','One file per unit spread across MIS-2 screens','One page per unit with consent, OCEMS, lab results, inspections and complaints'],
   ['plan',1,'Inspection planner','Inspections chosen from lists and memory','A ranked list of units to inspect, with the reason for each'],
-  ['water',1,'OCEMS vs lab check (CETPs)','OCEMS readings and lab results are never compared','Automatic flags where the sensor and the lab disagree'],
+  ['water',1,'OCEMS vs lab check','OCEMS readings and lab results are never compared','Automatic flags where the sensor and the lab disagree'],
   ['fac',2,'Stack camera tamper check','Camera feeds are watched only when someone opens them','Alerts when a camera is blocked, frozen or moved'],
   ['grievance',1,'Grievance management','Complaints closed one by one','Repeat complaints grouped by unit and area, with time to close']]},
  {ic:'fa-file-signature',t:'New applications &amp; EODB',q:'How quickly and predictably does an industry get its consent?',m:[
-  ['consent',1,'Consent pipeline &amp; renewals','Applications sit in MIS-2 with no view of delays','Deadline alerts, deemed-approval risk and renewal reminders'],
-  ['eodb',1,'EODB analytics &amp; industry feedback','Time taken and applicant experience are not measured','Stage-wise time from MIS-2 timestamps plus a one-click rating after each decision']]},
+  ['consent',1,'Consent pipeline','Applications sit in MIS-2 with no view of delays','Deadline alerts, deemed-approval risk and renewal reminders'],
+  ['eodb',1,'EODB &amp; industry feedback','Time taken and applicant experience are not measured','Stage-wise time from MIS-2 timestamps plus a one-click rating after each decision']]},
  {ic:'fa-gears',t:'Internal efficiency',q:'How much officer time goes into searching, tracking and chasing?',m:[
-  ['knowledge',1,'Rules &amp; regulations assistant','Officers search PDFs and compendiums by hand','Answers with citations, and a warning when an order was changed later'],
-  ['ngt',2,'NGT &amp; legal case tracker','Case status lives in files and email','Hearing calendar, compliance deadlines and replies due'],
+  ['knowledge',1,'Regulations assistant','Officers search PDFs and compendiums by hand','Answers with citations, and a warning when an order was changed later'],
+  ['ngt',2,'NGT &amp; legal cases','Case status lives in files and email','Hearing calendar, compliance deadlines and replies due'],
   ['lab',2,'Laboratory &amp; samples','Sample registers partly digital','Sample-to-report tracking and turnaround time'],
   ['programme',2,'Programme tracker','Progress compiled for each review meeting','One live view of targets, spend and slippage']]},
  {ic:'fa-wind',t:'Environmental risk &amp; prediction',q:'Where is the environment getting worse, and what is coming next?',m:[
-  ['air',1,'Air quality &amp; AQI forecast','AQI is seen after the fact','A 3-day forecast by city, to act before bad days'],
+  ['air',1,'Air quality &amp; forecast','AQI is seen after the fact','A 3-day forecast by city, to act before bad days'],
   ['map',2,'GIS maps &amp; hotspots','Layers kept in separate maps','Priority zones combining industry, complaints and air data'],
   ['groundwater',3,'Groundwater','Readings in periodic reports','District trends and over-extraction alerts'],
   ['wastehub',3,'Waste management','ULB data arrives in monthly progress reports','One waste view by type and district, as reporting goes digital'],
@@ -3499,15 +3499,22 @@ window.EIP_AREAS=AREAS;
 function open(t){if(!t)return;const l=document.querySelector('.nav-link[data-tab="'+t+'"]');if(l)l.click();else if(window.switchTab)switchTab(t);window.scrollTo(0,0)}
 function build(){const home=document.getElementById('home');if(!home||document.getElementById('eip-areas'))return;
  const d=document.createElement('section');d.id='eip-areas';
- d.innerHTML=`<div class="ah"><div><h3>What the platform covers</h3><p class="asub">Four areas of the Board's work. Each item shows where its data stands today. P1 items can go live first because the data is already digital.</p></div>
- <div class="legend">${[1,2,3,4].map(k=>`<span title="${P[k][1]}"><b class="pb p${k}">${P[k][0]}</b>${['Digital, needs a view','Scattered','On paper','Not collected'][k-1]}</span>`).join('')}</div></div>
- <div class="agrid">${AREAS.map(a=>{const n=[1,2,3,4].map(k=>a.m.filter(x=>x[1]===k).length);
-  return `<div class="acard"><div class="at"><i class="fas ${a.ic}"></i><h4>${a.t}</h4></div><div class="aq">${a.q}</div>
-  <div class="mbar" title="Share of items by data readiness">${n.map((c,k)=>c?`<i style="width:${c/a.m.length*100}%;background:${COL[k+1]}"></i>`:'').join('')}</div>
-  ${a.m.map(([t,p,name,now,fut])=>`<div class="mrow${t?' go':''}" ${t?`data-go="${t}" role="button" tabindex="0"`:''}><span class="pb p${p}" title="${P[p][1]}">P${p}</span><div><b>${name}</b><div class="tf">Today: ${now}.<br><em>With the platform:</em> ${fut}.</div></div><span class="nx${t?' on':''}">${t?'Open ›':'Planned'}</span></div>`).join('')}</div>`}).join('')}</div>
- <p class="anote">P levels describe data readiness, not importance. Lower-numbered items need less fieldwork to go live and are proposed for the first phase.</p>`;
- d.addEventListener('click',e=>{const r=e.target.closest('[data-go]');if(r)open(r.dataset.go)});
+ d.innerHTML=`<div class="ah"><h3>What the platform covers</h3>
+ <div class="legend">${[1,2,3,4].map(k=>`<span data-tip="${k}"><b class="pb p${k}">${P[k][0]}</b>${['Digital, needs a view','Scattered','On paper','Not collected'][k-1]}</span>`).join('')}</div></div>
+ <div class="agrid">${AREAS.map((a,ai)=>`<div class="acard"><div class="at" data-q="${ai}"><i class="fas ${a.ic}"></i><h4>${a.t}</h4><span class="ac">${a.m.length}</span></div>
+  ${a.m.map(([t,p,name],mi)=>`<div class="mrow${t?' go':' pl'}" data-m="${ai}.${mi}" ${t?`data-go="${t}" role="button" tabindex="0"`:''}><span class="pb p${p}">P${p}</span><b>${name}</b><span class="nx">${t?'›':'Later'}</span></div>`).join('')}</div>`).join('')}</div>`;
+ d.addEventListener('click',e=>{const r=e.target.closest('[data-go]');if(r){hide();open(r.dataset.go)}});
  d.addEventListener('keydown',e=>{const r=e.target.closest('[data-go]');if(r&&(e.key==='Enter'||e.key===' ')){e.preventDefault();open(r.dataset.go)}});
+ const tip=document.createElement('div');tip.id='eip-tip';document.body.appendChild(tip);
+ function hide(){tip.classList.remove('on')}
+ function show(el,html){tip.innerHTML=html;const r=el.getBoundingClientRect();tip.classList.add('on');const w=tip.offsetWidth,h=tip.offsetHeight;
+  let x=Math.min(innerWidth-w-10,Math.max(10,r.left));let y=r.bottom+6;if(y+h>innerHeight-10)y=r.top-h-6;tip.style.left=x+'px';tip.style.top=y+'px'}
+ d.addEventListener('mouseover',e=>{const m=e.target.closest('[data-m]'),q=e.target.closest('[data-q]'),l=e.target.closest('[data-tip]');
+  if(m){const [ai,mi]=m.dataset.m.split('.').map(Number);const x=AREAS[ai].m[mi];show(m,`<span class="k">Today</span>${x[3]}.<span class="k">With the platform</span>${x[4]}.`)}
+  else if(q){show(q,AREAS[+q.dataset.q].q)}
+  else if(l){show(l,P[+l.dataset.tip][1]+'<span class="k">Note</span>P levels describe data readiness, not importance. P1 items can go live first.')}
+  else hide()});
+ d.addEventListener('mouseleave',hide);addEventListener('scroll',hide,{passive:true});
  home.appendChild(d)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();
 })();
