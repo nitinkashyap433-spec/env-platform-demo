@@ -239,7 +239,7 @@
             opacity: 0.9;
         }
 
-        /* 🌈 Unique colorful gradients */
+        /*  Unique colorful gradients */
         .stat-card.avg {
             background: linear-gradient(135deg, #0b6b3a, #00c9a7, #7fffd4);
         }
@@ -384,6 +384,8 @@ html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
 .control-panel,.chart-container{border-radius:12px!important;border:1px solid var(--eip-line)!important;box-shadow:var(--eip-shadow)!important}
 .header h1{font-size:28px!important;font-weight:600!important}
 </style>
+<script>if(window.top!==window)document.documentElement.classList.add('inframe')</script>
+<style>html.inframe nav.navbar,html.inframe .footer,html.inframe footer,html.inframe header,html.inframe .header-subtitle,html.inframe .header-org{display:none!important}</style>
 </head>
 
 <body>
@@ -391,7 +393,7 @@ html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
     <div class="header">
         <div class="dashboard-container">
             <h1>
-                <div class="header-icon">📊</div>
+                <div class="header-icon"></div>
                 <div>
                     <div>Air Quality Index Dashboard</div>
                     <div class="header-subtitle">Real-time AQI monitoring with 3-7 day predictions</div>
@@ -403,7 +405,7 @@ html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
     <!-- Dashboard -->
     <div class="dashboard-container">
         <div class="control-panel">
-            <h3>📅 Date Selection & Analysis</h3>
+            <h3> Date Selection & Analysis</h3>
             <div class="date-controls">
                 <div class="date-input-group">
                     <label>Select Date</label>
@@ -453,7 +455,7 @@ html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
         <div class="chart-grid">
             <!-- Current AQI Chart -->
             <div class="chart-container">
-                <h3><span>📊</span> Current AQI</h3>
+                <h3><span></span> Current AQI</h3>
                 <div class="chart-wrapper">
                     <canvas id="currentAqiChart"></canvas>
                 </div>
@@ -467,7 +469,7 @@ html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
 
             <!-- Prediction Chart -->
             <div class="chart-container">
-                <h3><span>🔮</span> AQI Predictions (3-7 Days)</h3>
+                <h3><span></span> AQI Predictions (3-7 Days)</h3>
                 <div class="chart-wrapper">
                     <canvas id="predictionChart"></canvas>
                 </div>
@@ -520,7 +522,7 @@ html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
         flatpickr('#selectedDate', {
             mode: 'single',
             dateFormat: 'Y-m-d',
-            minDate: "today", // ✅ prevents selecting previous dates
+            minDate: "today", //  prevents selecting previous dates
             onChange: function (selectedDates, dateStr, instance) {
                 selectedDate = dateStr;
                 generatePrediction();
@@ -567,12 +569,12 @@ html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
             let html = '';
 
             // Show selected date
-            html += `<div class="date-tag">📌 ${selectedDate}</div>`;
+            html += `<div class="date-tag"> ${selectedDate}</div>`;
 
             // Show prediction dates if available
             if (predictionDates.length > 1) {
                 for (let i = 1; i < predictionDates.length; i++) {
-                    html += `<div class="date-tag prediction">🔮 ${predictionDates[i]}</div>`;
+                    html += `<div class="date-tag prediction"> ${predictionDates[i]}</div>`;
                 }
             }
 

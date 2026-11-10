@@ -1152,8 +1152,8 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
                 <div id="air" class="tab-content">
                     <div class="dashboard-title d-flex align-items-center justify-content-between">
                         <div>
-                            <h2>Air Quality Monitoring</h2>
-                            <p class="text-muted">Real-time air pollution data and analysis across Rajasthan</p>
+                            <h2>Air quality</h2>
+                            
                         </div>
 
                     </div>
@@ -1246,7 +1246,7 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
                 <div id="water" class="tab-content">
                     <div class="dashboard-title">
                         <h2>Water Quality Monitoring</h2>
-                        <p class="text-muted">Surface and groundwater quality tracking across Rajasthan</p>
+                        
                     </div>
 
                     <div class="row mb-4">
@@ -1409,7 +1409,7 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
                 <div id="waste" class="tab-content">
                     <div class="dashboard-title">
                         <h2>Waste Management</h2>
-                        <p class="text-muted">Municipal solid waste tracking and management across Rajasthan</p>
+                        
                     </div>
 
                     <div class="row mb-4">
@@ -1741,7 +1741,7 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
                 <!-- Biomedical Waste Dashboard -->
                 <div id="biomedical" class="tab-content">
                     <div class="dashboard-title">
-                        <h2>Biomedical Waste Management</h2>
+                        <h2>Biomedical waste</h2>
                         <p class="text-muted">Tracking and monitoring of biomedical waste from healthcare facilities</p>
                     </div>
 
@@ -2175,7 +2175,7 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
                 <div id="grievance" class="tab-content">
                     <div class="dashboard-title">
                         <h2>Grievance Response System</h2>
-                        <p class="text-muted">Tracking and resolution of public complaints and grievances</p>
+                        
                     </div>
 
                     <div class="row mb-4">
@@ -3470,7 +3470,7 @@ document.querySelectorAll('.nav-link[data-tab]').forEach(l=>l.addEventListener('
 </style>
 <script>
 (function(){
-const P={1:['P1','Data is already digital (MIS-2, OCEMS, CAAQMS). It only needs a usable view.'],2:['P2','Data exists but sits in different systems or files.'],3:['P3','Data is mostly on paper or in monthly reports.'],4:['P4','Data is not collected yet.']};
+const P={1:['P1','Data is already in MIS-2, OCEMS or CAAQMS.'],2:['P2','Data is spread across systems and files.'],3:['P3','Data is mostly on paper or in monthly reports.'],4:['P4','Data is not collected yet.']};
 const COL={1:'#1e8a4c',2:'#2f6fb3',3:'#c98a12',4:'#8a948e'};
 const AREAS=[
  {ic:'fa-industry',t:'Existing industries',q:'Is every operating unit complying, and where should officers go next?',m:[
@@ -3499,9 +3499,9 @@ window.EIP_AREAS=AREAS;
 function open(t){if(!t)return;const l=document.querySelector('.nav-link[data-tab="'+t+'"]');if(l)l.click();else if(window.switchTab)switchTab(t);window.scrollTo(0,0)}
 function build(){const home=document.getElementById('home');if(!home||document.getElementById('eip-areas'))return;
  const d=document.createElement('section');d.id='eip-areas';
- d.innerHTML=`<div class="ah"><h3>What the platform covers</h3>
- <div class="legend">${[1,2,3,4].map(k=>`<span data-tip="${k}"><b class="pb p${k}">${P[k][0]}</b>${['Digital, needs a view','Scattered','On paper','Not collected'][k-1]}</span>`).join('')}</div></div>
- <div class="agrid">${AREAS.map((a,ai)=>`<div class="acard"><div class="at" data-q="${ai}"><i class="fas ${a.ic}"></i><h4>${a.t}</h4><span class="ac">${a.m.length}</span></div>
+ d.innerHTML=`<div class="ah"><h3>Modules</h3>
+ <div class="legend">${[1,2,3,4].map(k=>`<span data-tip="${k}"><b class="pb p${k}">${P[k][0]}</b>${['Data ready','Data scattered','Data on paper','No data yet'][k-1]}</span>`).join('')}</div></div>
+ <div class="agrid">${AREAS.map((a,ai)=>`<div class="acard"><div class="at" data-q="${ai}"><i class="fas ${a.ic}"></i><h4>${a.t}</h4></div>
   ${a.m.map(([t,p,name],mi)=>`<div class="mrow${t?' go':' pl'}" data-m="${ai}.${mi}" ${t?`data-go="${t}" role="button" tabindex="0"`:''}><span class="pb p${p}">P${p}</span><b>${name}</b><span class="nx">${t?'›':'Later'}</span></div>`).join('')}</div>`).join('')}</div>`;
  d.addEventListener('click',e=>{const r=e.target.closest('[data-go]');if(r){hide();open(r.dataset.go)}});
  d.addEventListener('keydown',e=>{const r=e.target.closest('[data-go]');if(r&&(e.key==='Enter'||e.key===' ')){e.preventDefault();open(r.dataset.go)}});
@@ -3510,9 +3510,9 @@ function build(){const home=document.getElementById('home');if(!home||document.g
  function show(el,html){tip.innerHTML=html;const r=el.getBoundingClientRect();tip.classList.add('on');const w=tip.offsetWidth,h=tip.offsetHeight;
   let x=Math.min(innerWidth-w-10,Math.max(10,r.left));let y=r.bottom+6;if(y+h>innerHeight-10)y=r.top-h-6;tip.style.left=x+'px';tip.style.top=y+'px'}
  d.addEventListener('mouseover',e=>{const m=e.target.closest('[data-m]'),q=e.target.closest('[data-q]'),l=e.target.closest('[data-tip]');
-  if(m){const [ai,mi]=m.dataset.m.split('.').map(Number);const x=AREAS[ai].m[mi];show(m,`<span class="k">Today</span>${x[3]}.<span class="k">With the platform</span>${x[4]}.`)}
+  if(m){const [ai,mi]=m.dataset.m.split('.').map(Number);const x=AREAS[ai].m[mi];show(m,`<span class="k">Now</span>${x[3]}.<span class="k">After</span>${x[4]}.`)}
   else if(q){show(q,AREAS[+q.dataset.q].q)}
-  else if(l){show(l,P[+l.dataset.tip][1]+'<span class="k">Note</span>P levels describe data readiness, not importance. P1 items can go live first.')}
+  else if(l){show(l,P[+l.dataset.tip][1]+' P1 modules can start first.')}
   else hide()});
  d.addEventListener('mouseleave',hide);addEventListener('scroll',hide,{passive:true});
  home.appendChild(d)}

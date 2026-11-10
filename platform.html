@@ -1147,13 +1147,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       </div>
       <div class="grid home-main mt">
         <div class="card" style="padding:0;overflow:hidden">
-          <div class="card-h" style="padding:16px 18px 0"><h2>Rajasthan at a glance <a href="#" data-go="map" class="maplink">Open full map ›</a></h2>
+          <div class="card-h" style="padding:16px 18px 0"><h2>Rajasthan map <a href="#" data-go="map" class="maplink">Open full map ›</a></h2>
             <div class="seg" id="mapMode"><button data-m="zones" class="on">Priority zones</button><button data-m="aqi">Air quality</button><button data-m="comp">Complaints</button></div></div>
           <div id="minimap" class="homemap"></div>
           <div class="maplegend" id="homeLegend"></div>
         </div>
         <div class="card">
-          <div class="card-h"><h2>Today's priorities <span class="pcount" id="pcount"></span></h2><span class="hint" id="phint">Click to act</span></div>
+          <div class="card-h"><h2>Today's priorities <span class="pcount" id="pcount"></span></h2><span class="hint" id="phint"></span></div>
           <div class="alertwrap"><div id="alerts"></div></div>
         </div>
       </div>
@@ -1175,7 +1175,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
           <label><input type="checkbox" data-layer="cetps" checked><span class="sw" style="background:#1f5fa8;border-radius:2px"></span>CETPs</label>
           <label style="margin-top:6px"><input type="checkbox" id="flaggedOnly"><b>Show only flagged units</b></label>
           <h3>Area check</h3>
-          <div class="small muted" style="margin-bottom:6px">Pick a radius, then click anywhere on the map to see what lies within it.</div>
+          <div class="small muted" style="margin-bottom:6px">Pick a radius, then click the map</div>
           <div class="flt"><select id="bufR"><option value="0">Off</option><option value="2">2 km</option><option value="5" selected>5 km</option><option value="10">10 km</option></select><button class="btn sm" id="bufClear">Clear</button></div>
           <div id="bufOut" class="small" style="margin-top:8px"></div>
           <h3>Base map</h3>
@@ -1201,8 +1201,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
         </div>
         <div>
           <div class="card">
-            <div class="card-h"><h2>How the score is built</h2><button class="btn sm" id="wReset">Reset</button></div>
-            <div class="small muted" style="margin-bottom:6px">Drag to change what matters most. The ranking updates instantly.</div>
+            <div class="card-h"><h2>Score breakdown</h2><button class="btn sm" id="wReset">Reset</button></div>
+            <div class="small muted" style="margin-bottom:6px">Drag to reorder weights</div>
             <div class="weights" id="weights"></div>
           </div>
           <div class="card mt" id="schCard"><div class="card-h"><h2>Inspection schedule compliance</h2><span class="hint">as per RSPCB order, 24.08.2023</span></div><div id="schBody"></div></div>
@@ -1225,21 +1225,21 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
       <div class="grid g5" id="ckpis"></div>
       <div class="grid g-6040 mt">
         <div class="card">
-          <div class="card-h"><h2>Where pending applications are stuck</h2><span class="hint">Bar = applications at stage · days vs norm</span></div>
+          <div class="card-h"><h2>Pending by stage</h2><span class="hint">Avg days vs norm</span></div>
           <div id="funnel"></div>
           <div class="callout mt" id="funnelNote"></div>
           <div class="src">Source: online consent system (stage timestamps) · refreshed daily</div>
         </div>
         <div class="card">
-          <div class="card-h"><h2>Why applications go back to applicants</h2></div>
+          <div class="card-h"><h2>Reasons for return</h2></div>
           <div id="queries"></div>
-          <div class="small muted mt">A clearer checklist for the top two items would cut most query loops at the source.</div>
+          
           <div class="src">Source: query letters issued in the last 6 months</div>
         </div>
       </div>
       <div class="grid g2 mt">
         <div class="card">
-          <div class="card-h"><h2>How old the backlog is, by Regional Office</h2><span class="hint">Pending applications by age</span></div>
+          <div class="card-h"><h2>Backlog age by regional office</h2><span class="hint">Pending applications by age</span></div>
           <table class="heat" id="heat"></table>
           <div class="src">Days counted from complete submission</div>
         </div>
@@ -1648,7 +1648,7 @@ function setHomeLayer(){
     comp:'<span><i style="background:#7a4fd6;border-radius:50%"></i>Open complaint</span><span class="muted">From the grievance portal, last 40 days</span>'}[homeMode];
   $('#homeLegend').innerHTML=lg;
 }
-function prioFade(){const el=$('#alerts');if(!el)return;const w=el.parentNode;const more=el.scrollHeight-el.scrollTop-el.clientHeight>4;w.classList.toggle('more',more);const h=$('#phint');if(h)h.textContent=el.scrollHeight>el.clientHeight+4?'Scroll for more · click to act':'Click to act';if(!el.dataset.f){el.dataset.f=1;el.addEventListener('scroll',prioFade,{passive:true})}}
+function prioFade(){const el=$('#alerts');if(!el)return;const w=el.parentNode;const more=el.scrollHeight-el.scrollTop-el.clientHeight>4;w.classList.toggle('more',more);const h=$('#phint');if(h)h.textContent=el.scrollHeight>el.clientHeight+4?'':'';if(!el.dataset.f){el.dataset.f=1;el.addEventListener('scroll',prioFade,{passive:true})}}
 function renderHome(){
   const roleFac=FAC.filter(f=>inRole(f.ro));
   const h=new Date().getHours();
@@ -1662,7 +1662,7 @@ function renderHome(){
   const near=ro=>{const c=CLUSTERS.find(c=>c.ro===ro);return c?c.c:null};
   const poorFc=STATIONS.filter(s=>s.fc[1]>200&&(ROLE==='HQ'||km(s.ll,near(ROLE))<60));
   const A=[];
-  if(inRole('Balotra'))A.push({sev:'high',t:`Night-time effluent spikes at ${STAR.id}`,d:`Balotra · COD above limit most nights · ${STAR.complaints} complaints nearby`,go:'fac',id:STAR.id});
+  if(inRole('Balotra'))A.push({sev:'high',t:`Night-time effluent spikes at ${STAR.id}`,d:`Balotra · COD above limit most nights · ${STAR.complaints} complaint${STAR.complaints===1?'':'s'} nearby`,go:'fac',id:STAR.id});
   if(expiredOp.length)A.push({sev:'high',t:`${expiredOp.length} unit${expiredOp.length>1?'s':''} running on expired consent`,d:'OCEMS data still flowing after expiry',go:'consent'});
   if(integ.length)A.push({sev:'high',t:`${integ.length} unit${integ.length>1?'s':''} with OCEMS data-integrity flags`,d:'Frozen values, night-only spikes or data gaps',go:'plan'});
   {const rl=RIVERS2.luni,sm=rvSummary(rl,RH-1);if(inRole('Balotra'))A.splice(1,0,{sev:'high',t:`Luni below Balotra is in ${pcls(sm.worst.b)[1]}`,d:`CETP Balotra overloaded at night · ${sm.untreated.toFixed(1)} MLD untreated reaching the river`,go:'river'})}
@@ -1672,7 +1672,7 @@ function renderHome(){
   if(ROLE==='HQ'||ROLE==='Bikaner')A.push({sev:'med',t:`${fires.length} crop-fire detections overnight`,d:'Sri Ganganagar and Hanumangarh · ground checks pending',go:'map'});
   if(poorFc.length)A.push({sev:'info',t:`AQI may turn Very Poor in ${[...new Set(poorFc.map(s=>s.n.replace(/ station.*/,'')))].length} cities`,d:[...new Set(poorFc.map(s=>s.n.replace(/ station.*/,'')))].slice(0,4).join(', ')+' · next 48 hours',go:'map'});
   {const ca=(window.CamWatch?CamWatch.alerts():[]).filter(a=>Date.now()-new Date(a.at)<12*3600e3&&(ROLE==='HQ'||inRole(a.ro)));if(ca.length){const a=ca[0];A.unshift({sev:'high',t:`${a.label} at ${a.unit}`,d:`Stack camera · ${new Date(a.at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} · ${ca.length>1?ca.length+' camera alerts today':'Regional Office '+a.ro}`,go:'fac',id:a.unit})}}
-  $('#heroLine').innerHTML=`<b>${A.length} issues</b> need attention today${A[0]?`. The most urgent: ${esc(A[0].t.charAt(0).toLowerCase()+A[0].t.slice(1))}.`:'.'}`;
+  $('#heroLine').innerHTML=`<b>${A.length} issues</b> today${A[0]?` · Top issue: ${esc(A[0].t)}`:''}`;
   {const pc=$('#pcount');if(pc)pc.textContent=A.length}
   $('#alerts').innerHTML=A.map(a=>`<button class="prio sev-${a.sev}" data-go="${a.go}" ${a.id?`data-id="${a.id}"`:''}><span class="pbar"></span><span class="ptxt"><span class="pt">${esc(a.t)}</span><span class="pd">${esc(a.d)}</span></span><span class="chev">›</span></button>`).join('');
   setTimeout(prioFade,0);
@@ -1813,10 +1813,10 @@ function renderCoverage(){
   const L=curList();const flaggedTot=L.filter(f=>f.flagged||daysToExpiry(f)<0).length;
   const sel=L.filter(f=>PICK.has(f.id));const n=sel.length;
   $('#planCount').textContent=n+' selected';
-  if(!n){$('#coverage').innerHTML='Select units, or use <b>Select</b> to pick the top-ranked ones.';$('#planByRO').innerHTML='';return}
+  if(!n){$('#coverage').innerHTML='No units selected';$('#planByRO').innerHTML='';return}
   const hit=sel.filter(f=>f.flagged||daysToExpiry(f)<0).length;
   const randExp=flaggedTot/L.length*n;
-  $('#coverage').innerHTML=`These <b>${n}</b> inspections reach <b>${hit}</b> of the <b>${flaggedTot}</b> units that currently show a problem. A routine rotation of the same size would reach about <b>${Math.round(randExp)}</b>.`;
+  $('#coverage').innerHTML=`<b>${n}</b> inspections cover <b>${hit}</b> of <b>${flaggedTot}</b> flagged units · fixed rotation: about <b>${Math.round(randExp)}</b>`;
   const by={};sel.forEach(f=>by[f.ro]=(by[f.ro]||0)+1);
   $('#planByRO').innerHTML='<div class="muted" style="margin-bottom:4px">By Regional Office</div>'+Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([r,c])=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #eef2ef"><span>${r}</span><b>${c}</b></div>`).join('');
 }
@@ -1840,7 +1840,7 @@ function renderConsent(){
   const maxN=Math.max(...st.map(s=>s.n),1);const bn=st.slice().sort((a,b)=>(b.avg/b.norm)-(a.avg/a.norm))[0];
   $('#funnel').innerHTML=st.map(s=>`<div class="stage clickable ${s===bn?'bottleneck':''}" onclick="stageOpen('${s.k}')" title="See where these ${s.n} applications are sitting"><div style="font-weight:600">${s.name}</div><div><div class="bar" style="width:${Math.max(6,s.n/maxN*100)}%">${s.n}</div></div><div class="days">avg <b>${s.avg.toFixed(0)}</b> d · norm ${s.norm} d${s===bn?' <span class="chip bad">Bottleneck</span>':''} <span class="stg-more">Details ›</span></div></div>`).join('');
   const roSlow=ROS.map(r=>{const xs=A.filter(a=>a.ro===r&&a.st===bn.k);return[r,xs.reduce((t,a)=>t+a.inStage,0)/Math.max(1,xs.length),xs.length]}).filter(x=>x[2]>0).sort((a,b)=>b[1]-a[1]);
-  $('#funnelNote').innerHTML=`<b>${bn.name}</b> is the slowest stage, at ${bn.avg.toFixed(0)} days against a norm of ${bn.norm}. ${roSlow.length>1?`It is slowest in ${roSlow.slice(0,2).map(x=>x[0]).join(' and ')}, which suggests an inspection staffing gap there rather than a state-wide problem.`:''}`;
+  $('#funnelNote').innerHTML=`Slowest: <b>${bn.name}</b>, ${bn.avg.toFixed(0)} d vs norm ${bn.norm}${roSlow.length>1?` · worst in ${roSlow.slice(0,2).map(x=>x[0]).join(', ')}`:''}`;
   const qmax=QREASONS[0][1];
   $('#queries').innerHTML=QREASONS.map(([q,v])=>`<div style="margin:9px 0"><div style="display:flex;justify-content:space-between" class="small"><span>${q}</span><b>${v}%</b></div><div style="height:8px;background:var(--grey-bg);border-radius:4px;margin-top:4px"><div style="height:100%;width:${v/qmax*100}%;background:var(--g500);border-radius:4px"></div></div></div>`).join('');
   const B=[[0,15,'0–15 d'],[16,30,'16–30 d'],[31,60,'31–60 d'],[61,999,'60+ d']];
@@ -1883,7 +1883,7 @@ function checks(f){
   const C=[
    [m.lowAvail?'bad':'ok','Data availability',`${m.avail.toFixed(1)}% of hourly readings received (target 85%+)`],
    [m.exceed?'bad':'ok','Exceedances',m.exceed?`${m.exceed} hours above the ${S.param} limit in 7 days${m.last24?`, ${m.last24} in the last 24 h`:''}`:'No readings above the limit'],
-   [m.nightFlag?'bad':'ok','Night vs day pattern',m.nightFlag?`Night readings average ${m.ratio.toFixed(1)}× daytime, with ${m.nightEx} night hours above limit. Typical of discharge timed for when no one is watching.`:`Night readings ${m.ratio.toFixed(2)}× daytime – no unusual pattern`],
+   [m.nightFlag?'bad':'ok','Night vs day pattern',m.nightFlag?`Night ${m.ratio.toFixed(1)}× daytime · ${m.nightEx} night hours above limit`:`Night ${m.ratio.toFixed(2)}× daytime · normal`],
    [m.flatFlag?'warn':'ok','Frozen values',m.flatFlag?`Same value repeated for ${m.flat} hours in a row. Real analysers always fluctuate, so this suggests a stuck sensor or substituted data.`:'Readings fluctuate normally']
   ];
   return C.map(c=>`<div class="check"><span class="ic ${c[0]}">${c[0]==='ok'?'✓':'!'}</span><div><div class="ct">${c[1]}</div><div class="cd">${c[2]}</div></div></div>`).join('');
@@ -1916,7 +1916,7 @@ function renderFac(id){
     <div class="card"><div class="card-h"><h2>Surroundings (2 km)</h2><span class="hint">${nearC.length} complaints · nearest CETP ${near[1].toFixed(1)} km</span></div><div class="minimap" id="facmap" style="height:300px"></div><div class="src">Complaints from grievance portal · CETP and station locations illustrative</div></div>
     <div class="card"><div class="card-h"><h2>Context</h2></div>
       <div class="check"><span class="ic ${nearC.length>=3?'bad':nearC.length?'warn':'ok'}">${nearC.length}</span><div><div class="ct">Open complaints within 2 km</div><div class="cd">${nearC.length?nearC.map(c=>c.type).filter((v,i,a)=>a.indexOf(v)===i).join(' · '):'None'}</div></div></div>
-      <div class="check"><span class="ic ${near[0].outlet>near[0].limit?'bad':'ok'}">C</span><div><div class="ct">${near[0].n} (${near[1].toFixed(1)} km)</div><div class="cd">Outlet COD ${near[0].outlet} mg/L vs norm ${near[0].limit}${near[0].outlet>near[0].limit?'. The CETP itself is failing, so member units need closer checks.':''}</div></div></div>
+      <div class="check"><span class="ic ${near[0].outlet>near[0].limit?'bad':'ok'}">C</span><div><div class="ct">${near[0].n} (${near[1].toFixed(1)} km)</div><div class="cd">Outlet COD ${near[0].outlet} mg/L vs norm ${near[0].limit}${near[0].outlet>near[0].limit?' · CETP failing':''}</div></div></div>
       <div class="check"><span class="ic ${st[0].aqi>200?'warn':'ok'}">A</span><div><div class="ct">${st[0].n} (${st[1].toFixed(0)} km)</div><div class="cd">AQI ${st[0].aqi} · ${aqiBand(st[0].aqi)[1]}</div></div></div>
       <div class="check"><span class="ic ${f.pastViol>=2?'bad':f.pastViol?'warn':'ok'}">${f.pastViol}</span><div><div class="ct">Violations in last 5 years</div><div class="cd">Last inspected ${f.lastInsp} days ago</div></div></div>
       ${(()=>{const cs=NGT.filter(c=>c.units.includes(f.id));return cs.length?`<div class="check"><span class="ic ${cs.some(atRisk)?'bad':'warn'}">${cs.length}</span><div><div class="ct">Named in legal proceedings</div><div class="cd">${cs.map(c=>`<a href="#" onclick="go('ngt',{case:'${c.id}'});return false">${caseRef(c)}</a>${c.nh&&daysTo(c.nh)>=0?` · hearing in ${daysTo(c.nh)} d`:''}`).join('<br>')}</div></div></div>`:''})()}
@@ -2022,25 +2022,25 @@ function renderWater(sel){
   const nightsOver=Math.min(7,new Set(S.hours.filter((t,i)=>S.inflow[i]>c.cap).map(t=>new Date(t.getTime()-8*3600e3).toDateString())).size);
   $('#waterBody').innerHTML=`<h1>Water &amp; CETPs</h1><p class="sub">Follow effluent from each unit through the common treatment plant to the river, and see where treatment breaks down.</p>
   <div class="grid g5">${kpiRow([['CETPs monitored',CETPS.length,'live inlet and outlet feeds'],['Outlet above norm',failing,'of '+CETPS.length+' CETPs this week',failing?'var(--red)':''],['Overloaded CETPs',overC,'inflow above design capacity'],['Member units',totMem,'connected to CETPs'],['River stretches',RIVERS.length,'Jojari, Bandi, Luni']])}</div>
-  <div class="card mt"><div class="card-h"><h2>CETP performance</h2><span class="hint">Click a CETP to see its week</span></div>
+  <div class="card mt"><div class="card-h"><h2>CETP performance</h2><span class="hint">Click a CETP</span></div>
    <table><thead><tr><th>CETP</th><th class="num">Design (MLD)</th><th class="num">Avg inflow</th><th class="num">Hours overloaded</th><th class="num">Outlet COD (24 h avg)</th><th class="num">Hours above norm</th><th>Status</th></tr></thead><tbody>${CETPS.map(x=>{const avg=x.series.inflow.reduce((a,b)=>a+b,0)/168;return `<tr class="click ${x.n===curCetp?'selrow':''}" onclick="renderWater('${x.n}')"><td><b>${x.n}</b><div class="small muted">${x.members.length} member units</div></td><td class="num">${x.cap}</td><td class="num">${avg.toFixed(1)}</td><td class="num" style="${x.overHrs?'color:var(--red);font-weight:600':''}">${x.overHrs}</td><td class="num">${x.outlet}</td><td class="num" style="${x.outEx?'color:var(--red);font-weight:600':''}">${x.outEx}</td><td>${x.outEx>12?'<span class="chip bad">Failing</span>':x.overHrs?'<span class="chip warn">Stressed</span>':'<span class="chip ok">Normal</span>'}</td></tr>`}).join('')}</tbody></table>
    <div class="src">Source: CETP OCEMS (inlet and outlet analysers, flow meter) · COD in mg/L, norm ${c.limit}</div></div>
   <div class="grid g-6040 mt">
-   <div class="card"><div class="card-h"><h2>${c.n}: inflow against design capacity</h2>${legendHTML([['#1f5fa8','Inflow (MLD)',1],['#d7263d','Design capacity',1],['#eef1f7','Night']])}</div>
+   <div class="card"><div class="card-h"><h2>${c.n}: inflow vs capacity</h2>${legendHTML([['#1f5fa8','Inflow (MLD)',1],['#d7263d','Design capacity',1],['#eef1f7','Night']])}</div>
     ${lineChart({labels:S.hours,series:[{vals:S.inflow,color:'#1f5fa8'}],limit:c.cap,limitLabel:'design '+c.cap+' MLD',night:true,h:190,max:Math.max(...S.inflow,c.cap*1.3)})}
     <div class="card-h" style="margin-top:14px"><h2>Outlet COD</h2>${legendHTML([['#0b6b3a','Outlet COD',1],['#d7263d','Norm',1]])}</div>
     ${lineChart({labels:S.hours,series:[{vals:S.outC,color:'#0b6b3a'}],limit:c.limit,limitLabel:'norm '+c.limit+' mg/L',night:true,h:190})}
-    <div class="callout mt">${c.overHrs?`Inflow went above design capacity on <b>${nightsOver} of 7 nights</b>, and outlet quality failed in the hours that followed. The plant is being overloaded at night, not just running poorly.`:`Inflow stayed within design capacity all week, so the plant is not being overloaded.`}</div>
+    <div class="callout mt">${c.overHrs?`Over capacity on <b>${nightsOver} of 7 nights</b> · outlet failed after each`:`Within capacity all week`}</div>
    </div>
-   <div class="card"><div class="card-h"><h2>Who drives the night-time load</h2><span class="hint">Share of inflow, 12–5 am</span></div>
+   <div class="card"><div class="card-h"><h2>Night-time load by unit</h2><span class="hint">Share of inflow, 12–5 am</span></div>
     ${c.nightShare.slice(0,8).map(([f,sh])=>`<div style="margin:9px 0"><div class="small" style="display:flex;justify-content:space-between;gap:8px"><a href="#" data-go="fac" data-id="${f.id}">${f.id}</a><span class="muted" style="flex:1">${f.m&&f.m.nightFlag?'<span class="chip bad">Night spikes</span>':''}</span><b>${Math.round(sh*100)}%</b></div><div style="height:8px;background:var(--grey-bg);border-radius:4px;margin-top:3px"><div style="height:100%;width:${sh/c.nightShare[0][1]*100}%;background:${f.m&&f.m.nightFlag?'var(--red)':'var(--g500)'};border-radius:4px"></div></div></div>`).join('')}
-    ${c.members.length?`<div class="callout mt">The top 3 units send <b>${topPct}%</b> of the night-time load. Checking these three will do more for the CETP than inspecting all ${c.members.length} members.</div>`:''}
+    ${c.members.length?`<div class="callout mt">Top 3 units: <b>${topPct}%</b> of night-time load (of ${c.members.length} members)</div>`:''}
     <div class="src">Unit flows estimated from each unit's effluent meter and OCEMS</div>
    </div>
   </div>
-  <div class="card mt"><div class="card-h"><h2>River stretches, upstream to downstream</h2>${legendHTML([['#2f8f5b','Within bathing criterion'],['#e69500','Above criterion'],['#d7263d','More than 10× criterion']])}</div>
+  <div class="card mt"><div class="card-h"><h2>River stretches</h2>${legendHTML([['#2f8f5b','Within bathing criterion'],['#e69500','Above criterion'],['#d7263d','More than 10× criterion']])}</div>
    <div class="grid g3">${RIVERS.map(r=>`<div><div style="font-weight:600;margin-bottom:8px">${r.n} river <span class="muted small">via ${r.via}</span></div><div class="river">${r.pts.map((p,i)=>{const col=p[1]<=3?'#2f8f5b':p[1]<=30?'#e69500':'#d7263d';return `<div class="rp"><span class="rdot" style="background:${col}"></span><div><div class="small" style="font-weight:600">${p[0]}</div><div class="small muted">BOD <b style="color:${col}">${p[1]}</b> mg/L · TDS ${p[2].toLocaleString('en-IN')} mg/L</div></div></div>`}).join('')}</div></div>`).join('')}</div>
-   <div class="callout mt">On all three rivers, quality is fine upstream and collapses just below the textile clusters. CETP discharge improves it only slightly, so the problem is untreated or bypassed effluent, not the rivers themselves.</div>
+   <div class="callout mt">All three rivers: clean upstream, poor below the textile clusters</div>
    <div class="src">Source: water quality monitoring network (monthly samples) · bathing criterion BOD 3 mg/L · illustrative</div></div>`;
 }
 
@@ -2063,17 +2063,17 @@ function renderWaste(){
   let body='';
   if(wasteTab==='bmw'){
     body=`<div class="grid g5">${kpiRow([['Healthcare facilities tracked',HCF.length,'reporting monthly'],['Facilities flagged',flagged.length,'reporting or collection mismatch','var(--red)'],['Waste unaccounted for',(missKg/1000).toFixed(1)+' t','per month, reported but not collected'],['Collection vehicles',VEH.length,'GPS-tracked'],['Route exceptions',vehIss.length,'missed or unauthorised stops this week']])}</div>
-    <div class="grid g-6040 mt"><div class="card"><div class="card-h"><h2>Does reported waste reach the treatment facility?</h2><span class="hint">Last month, kg</span></div>
+    <div class="grid g-6040 mt"><div class="card"><div class="card-h"><h2>Reported vs collected waste</h2><span class="hint">Last month, kg</span></div>
      <div style="max-height:400px;overflow:auto"><table><thead><tr><th>Facility</th><th>District</th><th class="num">Beds</th><th class="num">Reported</th><th class="num">Collected</th><th>Check</th></tr></thead><tbody>${HCF.slice().sort((a,b)=>(b.flag?1:0)-(a.flag?1:0)||b.gapPct-a.gapPct).map(h=>`<tr><td><b>${h.id}</b><div class="small muted">${h.cbwtf}</div></td><td class="small">${h.dist}</td><td class="num">${h.beds}</td><td class="num">${h.rep.toLocaleString('en-IN')}</td><td class="num" style="${h.flag.startsWith('Collected')?'color:var(--red);font-weight:600':''}">${h.col.toLocaleString('en-IN')}</td><td>${h.flag?`<span class="chip bad">${h.flag.startsWith('Collected')?'Gap '+h.gapPct+'%':'Under-reporting?'}</span>`:'<span class="chip ok">Matches</span>'}</td></tr>`).join('')}</tbody></table></div>
-     <div class="callout mt">${div.length} facilities handed over much less waste than they reported, about <b>${(missKg/1000).toFixed(1)} tonnes</b> a month in total. That waste may be going to municipal bins or informal recyclers. ${flagged.length-div.length} more report far less waste than their bed count would suggest.</div>
+     <div class="callout mt"><b>${div.length} facilities</b> handed over less than reported · <b>${(missKg/1000).toFixed(1)} t</b>/month unaccounted · ${flagged.length-div.length} more under-report for their bed count</div>
      <div class="src">Facility monthly returns matched against treatment-facility barcode scans · expected generation ~0.35–0.6 kg per bed per day</div></div>
     <div><div class="card"><div class="card-h"><h2>Treatment facilities</h2><span class="hint">Received vs capacity, kg/day</span></div>${CBWTF.map(c=>`<div style="margin:10px 0"><div class="small" style="display:flex;justify-content:space-between"><b>${c.n}</b><span>${c.recv.toLocaleString('en-IN')} / ${c.cap.toLocaleString('en-IN')}</span></div><div class="small muted">${c.d.join(', ')}</div><div style="height:8px;background:var(--grey-bg);border-radius:4px;margin-top:4px"><div style="height:100%;width:${c.recv/c.cap*100}%;background:var(--g500);border-radius:4px"></div></div></div>`).join('')}</div>
      <div class="card mt"><div class="card-h"><h2>Vehicle route checks</h2><span class="hint">This week</span></div><table><thead><tr><th>Vehicle</th><th class="num">Stops</th><th>Exception</th></tr></thead><tbody>${vehIss.map(v=>`<tr><td><b>${v.id}</b><div class="small muted">${v.cbwtf}</div></td><td class="num">${v.done}/${v.sched}</td><td class="small">${v.miss?`<span class="chip warn">${v.miss} missed</span> `:''}${v.un?`<span class="chip bad">${v.un} unauthorised stop${v.un>1?'s':''}</span>`:''}</td></tr>`).join('')}</tbody></table><div class="src">From vehicle GPS against scheduled collection points</div></div></div></div>`;
   } else {
     const mx=Math.max(...ULBS.map(u=>u.gap));
     body=`<div class="grid g5">${kpiRow([['Waste generated',totGen.toLocaleString('en-IN')+' TPD','across '+ULBS.length+' cities'],['Processed',Math.round(totProc/totGen*100)+'%','of waste generated'],['Unprocessed',Math.round(totGen-totProc).toLocaleString('en-IN')+' TPD','goes to dumpsites','var(--red)'],['Legacy waste',ULBS.reduce((t,u)=>t+u.legacy,0).toFixed(1)+' lakh t','at old dumpsites'],['Avg remediated',Math.round(ULBS.reduce((t,u)=>t+u.rem,0)/ULBS.length)+'%','of legacy waste']])}</div>
-    <div class="grid g-6040 mt"><div class="card"><div class="card-h"><h2>Where the processing gap is largest</h2><span class="hint">Unprocessed waste, tonnes per day</span></div>${ULBS.map(u=>`<div class="stage" style="grid-template-columns:120px 1fr 70px"><div style="font-weight:600">${u.n}</div><div><div class="bar" style="width:${u.gap/mx*100}%;background:${u.proc<.5?'var(--red)':'#e69500'}">${u.gap}</div></div><div class="small muted">${Math.round(u.proc*100)}% done</div></div>`).join('')}
-     <div class="callout mt">The three largest cities account for <b>${Math.round(ULBS.slice(0,3).reduce((t,u)=>t+u.gap,0)/ULBS.reduce((t,u)=>t+u.gap,0)*100)}%</b> of the state's unprocessed waste. New processing capacity there closes most of the gap.</div><div class="src">Source: urban local body monthly returns under the Solid Waste Management Rules · illustrative</div></div>
+    <div class="grid g-6040 mt"><div class="card"><div class="card-h"><h2>Processing gap by city</h2><span class="hint">Unprocessed waste, tonnes per day</span></div>${ULBS.map(u=>`<div class="stage" style="grid-template-columns:120px 1fr 70px"><div style="font-weight:600">${u.n}</div><div><div class="bar" style="width:${u.gap/mx*100}%;background:${u.proc<.5?'var(--red)':'#e69500'}">${u.gap}</div></div><div class="small muted">${Math.round(u.proc*100)}% done</div></div>`).join('')}
+     <div class="callout mt">Top 3 cities: <b>${Math.round(ULBS.slice(0,3).reduce((t,u)=>t+u.gap,0)/ULBS.reduce((t,u)=>t+u.gap,0)*100)}%</b> of unprocessed waste</div><div class="src">Source: urban local body monthly returns under the Solid Waste Management Rules · illustrative</div></div>
     <div class="card"><div class="card-h"><h2>City scorecard</h2></div><table><thead><tr><th>City</th><th class="num">Collected</th><th class="num">Segregated</th><th class="num">Processed</th><th class="num">Dumpsite cleared</th></tr></thead><tbody>${ULBS.map(u=>{const c=v=>v>=.8?'var(--g700)':v>=.5?'var(--amber)':'var(--red)';return `<tr><td><b>${u.n}</b></td><td class="num" style="color:${c(u.col)}">${Math.round(u.col*100)}%</td><td class="num" style="color:${c(u.seg)}">${Math.round(u.seg*100)}%</td><td class="num" style="color:${c(u.proc)}">${Math.round(u.proc*100)}%</td><td class="num" style="color:${c(u.rem/100)}">${u.rem}%</td></tr>`}).join('')}</tbody></table></div></div>`;
   }
   $('#wasteBody').innerHTML=`<h1>${window.WASTE_PICK==='bmw'?'Bio-medical waste movement tracking':window.WASTE_PICK==='msw'?'Municipal solid waste tracking':'Waste &amp; BMW tracking'}</h1><p class="sub">${window.WASTE_PICK==='bmw'?'Match what each health facility reports against what the CBWTF actually collects, and check collection vehicle routes.':'Follow waste from where it is generated to where it is treated, and find where it goes missing.'}</p>${tabs}${body}`;
@@ -2097,10 +2097,10 @@ function renderGriev(){
   <div class="grid g-6040 mt"><div class="card"><div class="card-h"><h2>Complaint register</h2><div class="flt">${sel('ro',ROS,gFilt.ro,'All offices')}${sel('type',[...new Set(COMP.map(c=>c.type))],gFilt.type,'All types')}${sel('st',['New','Assigned','Site visit done','Reply awaited'],gFilt.st,'All statuses')}</div></div>
    <div style="max-height:470px;overflow:auto"><table><thead><tr><th>ID</th><th>Complaint</th><th>Likely source</th><th class="num">Days</th><th>Status</th><th></th></tr></thead><tbody>${GL.map(c=>`<tr><td class="small"><b>${c.id}</b><div class="muted">${c.ch}</div></td><td><div style="font-weight:500">${c.type}</div><div class="small muted">${c.ro}</div></td><td class="small"><a href="#" data-go="fac" data-id="${c.unit.id}">${c.unit.id}</a><div class="muted">${c.dist.toFixed(1)} km · score ${c.unit.score}</div></td><td class="num" style="${c.days>15?'color:var(--red);font-weight:600':''}">${c.days}</td><td><span class="chip ${stChip(c.status)}">${c.status}</span></td><td>${c.status==='New'?`<button class="btn sm" onclick="grvAssign('${c.id}')">Assign</button>`:''}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">No complaints match these filters</td></tr>'}</tbody></table></div>
    <div class="src">Channels merged: Rajasthan Sampark portal, helpline, email, walk-in · likely source = nearest registered unit</div></div>
-  <div><div class="card" style="padding:0;overflow:hidden"><div class="card-h" style="padding:14px 16px 0"><h2>Where complaints cluster</h2></div><div id="grievmap" style="height:250px;margin-top:10px"></div></div>
+  <div><div class="card" style="padding:0;overflow:hidden"><div class="card-h" style="padding:14px 16px 0"><h2>Complaint clusters</h2></div><div id="grievmap" style="height:250px;margin-top:10px"></div></div>
    <div class="card mt"><div class="card-h"><h2>Clusters</h2></div>${CL.slice(0,5).map(c=>`<div class="check"><span class="ic ${c.station?'warn':'bad'}">${c.n}</span><div><div class="ct">${c.ro}: mostly "${c.top.toLowerCase()}"</div><div class="cd">Units nearby: ${c.units.slice(0,3).map(u=>`<a href="#" data-go="fac" data-id="${u}">${u}</a>`).join(', ')}${c.station?'':' · <b style="color:var(--red)">no air station within 5 km</b>'}</div></div></div>`).join('')}</div></div></div>
-  <div class="card mt"><div class="card-h"><h2>How each office closes complaints</h2><span class="hint">Last 30 days</span></div><table><thead><tr><th>Regional Office</th><th class="num">Closed</th><th class="num">Avg days</th><th class="num">Closed late</th><th class="num">Closed without a site visit</th></tr></thead><tbody>${CLOSED.sort((a,b)=>b.avg-a.avg).map(c=>`<tr><td><b>${c.ro}</b></td><td class="num">${c.n}</td><td class="num" style="${c.avg>15?'color:var(--red);font-weight:600':''}">${c.avg.toFixed(1)}</td><td class="num">${c.late}%</td><td class="num" style="${c.noVisit>25?'color:var(--amber);font-weight:600':''}">${c.noVisit}%</td></tr>`).join('')}</tbody></table>
-   <div class="callout mt">Closing a complaint without visiting the site is the quickest way to look fast. Tracking it next to closing time shows which offices are actually resolving complaints.</div></div>`;
+  <div class="card mt"><div class="card-h"><h2>Closure by office</h2><span class="hint">Last 30 days</span></div><table><thead><tr><th>Regional Office</th><th class="num">Closed</th><th class="num">Avg days</th><th class="num">Closed late</th><th class="num">Closed without a site visit</th></tr></thead><tbody>${CLOSED.sort((a,b)=>b.avg-a.avg).map(c=>`<tr><td><b>${c.ro}</b></td><td class="num">${c.n}</td><td class="num" style="${c.avg>15?'color:var(--red);font-weight:600':''}">${c.avg.toFixed(1)}</td><td class="num">${c.late}%</td><td class="num" style="${c.noVisit>25?'color:var(--amber);font-weight:600':''}">${c.noVisit}%</td></tr>`).join('')}</tbody></table>
+   </div>`;
   if(grievMap){grievMap.remove();grievMap=null}
   grievMap=L.map('grievmap',{zoomControl:false,attributionControl:false}).setView([26.5,74.2],6);streetBase().addTo(grievMap);
   CL.forEach(c=>L.circle(c.ll,{radius:5000+c.n*500,color:c.station?'#e69500':'#b42318',weight:2,dashArray:'4 3',fillOpacity:.12}).bindTooltip(`${c.ro}: ${c.n} complaints`).addTo(grievMap));
@@ -2217,25 +2217,25 @@ function renderNGT(sel){
   $('#ngtBody').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><h1>NGT &amp; legal cases</h1><button class="btn primary" onclick="ngtExportDlg()" style="margin-top:6px">&#8681; Export report (PDF)</button></div><p class="sub">Every case the Board is party to, with its next hearing, the directions issued and whether they have been complied with.</p>
   <div class="grid g5">${kpiRow([['Active cases',active,'NGT, High Court and Supreme Court'],['Hearings in next 14 days',wk,'across all forums'],['Directions overdue',odirs,'compliance not reported in time',odirs?'var(--red)':''],['Hearings at risk',risk.length,'hearing soon with a direction pending',risk.length?'var(--red)':''],['Compensation recovered','₹'+ecR.toFixed(1)+' cr','of ₹'+ecI.toFixed(1)+' cr imposed']])}</div>
   <div class="grid g-6040 mt">
-   <div class="card"><div class="card-h"><h2>Hearings at risk</h2><span class="hint">Hearing within 14 days and a direction not yet complied</span></div>
+   <div class="card"><div class="card-h"><h2>Hearings at risk</h2><span class="hint">Next 14 days · direction open</span></div>
     ${risk.length?risk.slice(0,6).map(c=>`<button class="prio sev-${daysTo(c.nh)<=7?'high':'med'}" onclick="ngtOpen('${c.id}')"><span class="pbar"></span><span class="ptxt"><span class="pt">${esc(caseRef(c))} · ${esc(c.title.length>70?c.title.slice(0,68)+'…':c.title)}</span><span class="pd">${esc(c.forum)} · ${ngtRiskLine(c)}</span></span><span class="chev">›</span></button>`).join(''):'<div class="small muted">No hearings at risk in the next 14 days.</div>'}
-    <div class="callout mt">${risk.length?`Filing compliance before these hearings avoids adverse orders. The nearest is <b>${esc(caseRef(risk[0]))}</b> in <b>${daysTo(risk[0].nh)} days</b>, with ${overdueDirs(risk[0]).length||'a partly complied'} direction${overdueDirs(risk[0]).length>1?'s':''} still open.`:'No immediate exposure.'}</div>
+    <div class="callout mt">${risk.length?`Nearest: <b>${esc(caseRef(risk[0]))}</b> in <b>${daysTo(risk[0].nh)} days</b> · ${overdueDirs(risk[0]).length||'1 partly complied'} direction${overdueDirs(risk[0]).length>1?'s':''} open`:'No hearings at risk'}</div>
    </div>
    <div class="card"><div class="card-h"><h2>Next 30 days</h2><span class="hint">Hearings per day</span></div>
     <div class="calg">${['M','T','W','T','F','S','S'].map(x=>`<div class="calh">${x}</div>`).join('')}${'<div></div>'.repeat((days[0].getDay()+6)%7)}${cal.map(x=>`<div class="cald ${x.cs.length?'has':''} ${x.cs.some(atRisk)?'risk':''}" title="${x.cs.map(c=>caseRef(c)).join(', ')}" ${x.cs.length?`onclick="ngtOpen('${x.cs[0].id}')"`:''}><span>${x.d.getDate()}</span>${x.cs.length?`<b>${x.cs.length}</b>`:''}</div>`).join('')}</div>
     <div class="legend mt"><span><i style="background:#cfe0f3"></i>Hearing</span><span><i style="background:#f6c9c4"></i>Hearing at risk</span></div>
     <div class="card-h mt" style="margin-bottom:6px"><h2>Register health</h2></div>
-    <div class="check"><span class="ic ${stale?'warn':'ok'}">${stale}</span><div><div class="ct">Hearing date not updated</div><div class="cd">Next hearing is in the past. Usually the outcome of the last hearing was never entered.</div></div></div>
+    <div class="check"><span class="ic ${stale?'warn':'ok'}">${stale}</span><div><div class="ct">Hearing date not updated</div><div class="cd">Next hearing date has passed · outcome not entered</div></div></div>
     <div class="check"><span class="ic ${nonod?'warn':'ok'}">${nonod}</span><div><div class="ct">No nodal officer assigned</div><div class="cd">No one is accountable for filing compliance.</div></div></div>
     <div class="check"><span class="ic ${nodate+nocoun?'warn':'ok'}">${nodate+nocoun}</span><div><div class="ct">Missing hearing date or counsel</div><div class="cd">${nodate} without a date · ${nocoun} without counsel</div></div></div>
    </div>
   </div>
   <div class="grid g2 mt">
-   <div class="card"><div class="card-h"><h2>Are directions being complied with?</h2>${legendHTML([['#2f8f5b','Complied'],['#e5b800','In progress / partly'],['#d7263d','Overdue']])}</div>
+   <div class="card"><div class="card-h"><h2>Direction compliance</h2>${legendHTML([['#2f8f5b','Complied'],['#e5b800','In progress / partly'],['#d7263d','Overdue']])}</div>
     ${bySub.map(x=>{const t=x.c+x.p+x.o||1;return `<div class="stage" style="grid-template-columns:190px 1fr 60px"><div><b style="font-weight:600">${SUBJ[x.k].label}</b><div class="small muted">${x.n} case${x.n>1?'s':''}</div></div><div style="display:flex;height:22px;border-radius:5px;overflow:hidden;background:var(--grey-bg)"><span style="width:${x.c/t*100}%;background:#2f8f5b"></span><span style="width:${x.p/t*100}%;background:#e5b800"></span><span style="width:${x.o/t*100}%;background:#d7263d"></span></div><div class="small" style="text-align:right">${x.o?`<b style="color:var(--red)">${x.o} overdue</b>`:'on track'}</div></div>`}).join('')}
-    ${rivTop?`<div class="callout mt">River pollution cases carry <b>${rivOShare}%</b> of all overdue directions. Most sit on the <b>${RIVNAME[rivTop.r]}</b>, where the same treatment plants keep failing. <a href="#" onclick="go('river',{river:'${rivTop.r}'});return false">Open the ${RIVNAME[rivTop.r]} in River monitor →</a></div>`:''}
+    ${rivTop?`<div class="callout mt">River cases: <b>${rivOShare}%</b> of overdue directions, mostly on the <b>${RIVNAME[rivTop.r]}</b> · <a href="#" onclick="go('river',{river:'${rivTop.r}'});return false">Open river →</a></div>`:''}
    </div>
-   <div class="card"><div class="card-h"><h2>Where the cases are</h2><span class="hint">Cases by district, with overdue directions</span></div>
+   <div class="card"><div class="card-h"><h2>Cases by district</h2><span class="hint">With overdue directions</span></div>
     ${(()=>{const by={};L.forEach(c=>{by[c.district]=by[c.district]||{n:0,o:0};by[c.district].n++;by[c.district].o+=overdueDirs(c).length});const arr=Object.entries(by).sort((a,b)=>b[1].n-a[1].n).slice(0,9);const mx=arr[0]?arr[0][1].n:1;
       return arr.map(([d,v])=>`<div style="margin:8px 0;cursor:pointer" onclick="ngtF.district='${d}';renderNGT()"><div class="small" style="display:flex;justify-content:space-between"><span>${d}</span><span>${v.n} case${v.n>1?'s':''}${v.o?` · <b style="color:var(--red)">${v.o} overdue</b>`:''}</span></div><div style="height:8px;background:var(--grey-bg);border-radius:4px;margin-top:3px"><div style="height:100%;width:${v.n/mx*100}%;background:var(--g500);border-radius:4px"></div></div></div>`).join('')})()}
     <div class="small muted mt">${FORUMS.map(([f])=>`${f.replace('Rajasthan High Court','HC').replace('NGT ','NGT ')}: <b>${L.filter(c=>c.forum===f).length}</b>`).join(' · ')}</div>
@@ -2325,7 +2325,7 @@ function ngtExport(){const D=$('#exD').value,Fo=$('#exF').value,S=$('#exS').valu
   <div class="hd">${logo?`<img src="${logo}">`:''}<div><h1>NGT &amp; Legal Case Status Report</h1><div class="s">Rajasthan State Pollution Control Board · राजस्थान राज्य प्रदूषण नियंत्रण मंडल</div></div><div class="rt">Generated ${e(stamp)}<br>by Admin User<br>Environmental Intelligence Platform</div></div>
   <div class="sc"><b>Report scope:</b> ${e(scope)}</div>
   <div class="kp">${kp.map(k=>`<div><b>${e(k[1])}</b><span>${e(k[0])}</span></div>`).join('')}</div>
-  <h2>Case summary (sorted by next hearing)</h2><table><thead><tr><th>#</th><th>Case</th><th>Title / subject</th><th>District</th><th>Next hearing</th><th class="n">Directions complied</th><th class="n">EC recovered / imposed</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+  <h2>Case summary</h2><table><thead><tr><th>#</th><th>Case</th><th>Title / subject</th><th>District</th><th>Next hearing</th><th class="n">Directions complied</th><th class="n">EC recovered / imposed</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
   ${full?`<h2 class="pb">Case-wise directions and compliance</h2>${det}`:''}
   <div class="ft"><span>Downloaded from the Environmental Intelligence Platform (concept demo) on ${e(stamp)}. All case data shown is illustrative.</span><span>For official use</span></div>
   <script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`;
@@ -2404,26 +2404,26 @@ function renderEODB(){
   ['Queries per application',qpa.toFixed(1),'each query restarts the applicant\'s clock'],
   ['Industry rating',avgR?avgR.toFixed(1)+' / 5':'—',`${R_.length} ratings · ${D.length?pct(R_.length/D.length):'0%'} responded`]])}</div>
  <div class="grid g-6040 mt">
-  <div class="card"><div class="card-h"><h2>Where the time goes</h2><span class="hint">Median days per stage, decided applications</span></div>
+  <div class="card"><div class="card-h"><h2>Time by stage</h2><span class="hint">Median days</span></div>
    <div style="display:flex;height:34px;border-radius:8px;overflow:hidden;margin:4px 0 10px">${stMed.map(([k,l,m],i)=>m?`<div title="${l}: ${m.toFixed(0)} days" style="width:${m/tot*100}%;background:${COLS[i]};color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center">${m>=3?m.toFixed(0)+'d':''}</div>`:'').join('')}</div>
    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 14px">${stMed.map(([k,l,m,b],i)=>`<div class="small"><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${COLS[i]};vertical-align:-1px"></i> ${l}<div><b>${m.toFixed(0)} days</b> <span class="muted">· norm ${b}</span></div></div>`).join('')}</div>
-   <p class="small" style="margin:12px 0 0;background:#fff8e6;border:1px solid #f0dca8;border-radius:8px;padding:8px 10px"><b>${slow[1]}</b> runs furthest over its norm: a median of ${slow[2].toFixed(0)} days against ${slow[3]}. That is the first stage to fix.</p></div>
+   <p class="small" style="margin:12px 0 0;background:#fff8e6;border:1px solid #f0dca8;border-radius:8px;padding:8px 10px">Furthest over norm: <b>${slow[1]}</b>, ${slow[2].toFixed(0)} d vs ${slow[3]}</p></div>
   <div class="card"><div class="card-h"><h2>By application type</h2></div><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Type</th><th style="text-align:right">Notified</th><th style="text-align:right">Median</th><th style="text-align:right">Within time</th></tr></thead><tbody>${byType.map(([l,lim,m,w,n])=>`<tr><td>${l}<div class="small muted">${n} decided</div></td><td style="text-align:right">${lim} d</td><td style="text-align:right"><b>${m} d</b></td><td style="text-align:right;color:${w<.8?'var(--amber)':'#1d6b40'}">${pct(w)}</td></tr>`).join('')}</tbody></table>
-   <p class="small muted" style="margin:10px 0 0">Notified timelines shown are illustrative. They would be read from the Board's current order on timelines.</p></div>
+   </div>
  </div>
- <div class="card mt"><div class="card-h"><h2>Regional offices</h2><span class="hint">Slowest first · click a row to open its pending list in the consent pipeline</span></div><div style="overflow-x:auto"><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Regional office</th><th style="text-align:right">Decided</th><th style="text-align:right">Median days</th><th style="text-align:right">Within time</th><th style="text-align:right">Queries / application</th><th style="text-align:right">Near deadline</th><th style="text-align:right">Rating</th></tr></thead>
+ <div class="card mt"><div class="card-h"><h2>Regional offices</h2><span class="hint">Slowest first</span></div><div style="overflow-x:auto"><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Regional office</th><th style="text-align:right">Decided</th><th style="text-align:right">Median days</th><th style="text-align:right">Within time</th><th style="text-align:right">Queries / application</th><th style="text-align:right">Near deadline</th><th style="text-align:right">Rating</th></tr></thead>
  <tbody>${ros.map(r=>`<tr style="cursor:pointer" onclick="go('consent')"><td><b>${esc(r.r)}</b></td><td style="text-align:right">${r.n}</td><td style="text-align:right">${r.med}</td><td style="text-align:right;color:${r.wi<.75?'var(--red)':r.wi<.85?'var(--amber)':'#1d6b40'}">${pct(r.wi)}</td><td style="text-align:right">${r.q.toFixed(1)}</td><td style="text-align:right">${r.risk||'—'}</td><td style="text-align:right">${r.rt?r.rt.toFixed(1):'—'}</td></tr>`).join('')}</tbody></table></div></div>
  <div class="grid g-6040 mt">
-  <div class="card"><div class="card-h"><h2>What industries say</h2><span class="hint">One-click rating after each decision</span></div>
+  <div class="card"><div class="card-h"><h2>Industry feedback</h2><span class="hint">1–5 rating</span></div>
    <div class="grid g2" style="gap:18px">
     <div>${dist.map(([s,c])=>`<div style="display:grid;grid-template-columns:34px 1fr 40px;gap:8px;align-items:center;margin:5px 0;font-size:13px"><span>${s} ★</span><div style="background:#eef2ef;border-radius:4px;height:12px"><div style="width:${c/dmax*100}%;height:100%;border-radius:4px;background:${s>=4?'#1e8a4c':s===3?'#e0a03a':'#c4452f'}"></div></div><span class="muted" style="text-align:right">${c}</span></div>`).join('')}</div>
     <div class="small"><div class="muted" style="margin-bottom:4px">Most common complaints</div>${bad.slice(0,3).map(([r,c])=>`<div style="margin:3px 0">${r} <b>${c}</b></div>`).join('')}<div class="muted" style="margin:10px 0 4px">Most common praise</div>${good.slice(0,2).map(([r,c])=>`<div style="margin:3px 0">${r} <b>${c}</b></div>`).join('')}</div></div>
    <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px">${EO_COMMENTS.slice(0,4).map(([s,t])=>`<div class="small" style="margin:6px 0"><b style="color:${s>=4?'#1d6b40':s===3?'#9a4d06':'#b42318'}">${'★'.repeat(s)}${'☆'.repeat(5-s)}</b> ${esc(t)}</div>`).join('')}</div></div>
-  <div class="card"><div class="card-h"><h2>How feedback is collected</h2><span class="hint">Shown to the applicant in MIS-2</span></div>
+  <div class="card"><div class="card-h"><h2>Feedback prompt</h2><span class="hint">In MIS-2</span></div>
    <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:#fbfcfb"><div class="small muted">Consent to Operate issued · RJ-PAL-0412</div><div style="font-weight:600;margin:6px 0">How was your experience with this application?</div><div style="font-size:22px;letter-spacing:4px;color:#e0a03a">★★★★☆</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${[...EO_REASONS_GOOD.slice(0,2),...EO_REASONS_BAD.slice(0,3)].map(r=>`<span class="small" style="border:1px solid var(--line);border-radius:14px;padding:2px 9px;background:#fff">${r}</span>`).join('')}</div></div>
-   <p class="small muted" style="margin:10px 0 0">One tap after the certificate is issued. Ratings go to HQ, not to the officer who handled the file.</p></div>
+   <p class="small muted" style="margin:10px 0 0">Ratings go to HQ, not the handling officer.</p></div>
  </div>
- <div class="card mt"><div class="card-h"><h2>Reform checklist</h2><span class="hint">Ease-of-doing-business reforms for consent management · status illustrative, to be confirmed with the Board</span></div><div class="grid g2" style="gap:6px 24px">${BRAP.map(([t,s])=>`<div class="small" style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #f0f3f1"><span>${t}</span><span class="rstag ${s==='Done'?'m':s==='Gap'?'f':''}" style="${s==='In progress'?'background:#fff4e0;color:#9a4d06':''}">${s}</span></div>`).join('')}</div></div>
+ <div class="card mt"><div class="card-h"><h2>Reform checklist</h2><span class="hint">Status illustrative</span></div><div class="grid g2" style="gap:6px 24px">${BRAP.map(([t,s])=>`<div class="small" style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #f0f3f1"><span>${t}</span><span class="rstag ${s==='Done'?'m':s==='Gap'?'f':''}" style="${s==='In progress'?'background:#fff4e0;color:#9a4d06':''}">${s}</span></div>`).join('')}</div></div>
  <div class="rvcaution mt">Application counts, timings, ratings and comments are illustrative. At implementation they would come from MIS-2 application timestamps and the feedback prompt added inside MIS-2.</div>`;
 }
 
@@ -2503,11 +2503,11 @@ function renderRiverS(){
  const o12=rs12(sel).filter(x=>x.st==='ok');const br12=o12.filter(rsBreach).length;const tr=rsTrend(sel);const l=rsLast(sel);
  const bySeason=[[3,4,5],[6,7,8],[9,10,11,0,1,2]].map(ms=>{const v=o12.filter(x=>ms.includes(x.d.getMonth())).map(x=>x.bod);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null});
  const ins=[];
- if(o12.length)ins.push(`Failed the bathing-water criteria in <b>${br12} of ${o12.length}</b> samples in the last 12 months.`);
- if(bySeason[0]&&bySeason[1])ins.push(`BOD averages <b>${bySeason[0].toFixed(1)}</b> mg/L in Apr–Jun against <b>${bySeason[1].toFixed(1)}</b> in the monsoon, when rain dilutes the flow.`);
- if(tr!==null)ins.push(`Last six months compared with the same months a year earlier: BOD ${tr>.1?'<b style="color:var(--red)">up '+Math.round(tr*100)+'%</b>':tr<-.1?'<b style="color:#1d6b40">down '+Math.round(-tr*100)+'%</b>':'about the same'}.`);
+ if(o12.length)ins.push(`Failed bathing criteria: <b>${br12} of ${o12.length}</b> samples (12 months)`);
+ if(bySeason[0]&&bySeason[1])ins.push(`BOD <b>${bySeason[0].toFixed(1)}</b> mg/L in Apr–Jun vs <b>${bySeason[1].toFixed(1)}</b> in monsoon`);
+ if(tr!==null)ins.push(`BOD vs a year ago: ${tr>.1?'<b style="color:var(--red)">up '+Math.round(tr*100)+'%</b>':tr<-.1?'<b style="color:#1d6b40">down '+Math.round(-tr*100)+'%</b>':'about the same'}`);
  const up=rv.stations.find(s=>s.pos==='u'&&rsLast(s)),dn=rv.stations.filter(s=>s.pos==='d'&&rsLast(s)).sort((a,b)=>rsLast(b).bod-rsLast(a).bod)[0];
- if(up&&dn&&rsLast(dn).bod>rsLast(up).bod*1.8)ins.push(`BOD rises from <b>${rsLast(up).bod}</b> at ${esc(up.name)} to <b>${rsLast(dn).bod}</b> at ${esc(dn.name)}. The stretch in between is where discharges should be checked.`);
+ if(up&&dn&&rsLast(dn).bod>rsLast(up).bod*1.8)ins.push(`BOD <b>${rsLast(up).bod}</b> at ${esc(up.name)} → <b>${rsLast(dn).bod}</b> at ${esc(dn.name)} · check discharges in between`);
  const nofs=rs12(sel).filter(x=>x.st==='noflow').length,ms=rs12(sel).filter(x=>x.st==='missed').length;
  if(nofs)ins.push(`No flow in ${nofs} month${nofs>1?'s':''}, so no sample could be taken.`);if(ms)ins.push(`<span style="color:var(--red)">${ms} scheduled sample${ms>1?'s were':' was'} not collected.</span>`);
  const cases=(typeof NGT!=='undefined'?NGT.filter(c=>c.river===rv.id):[]);
@@ -2520,20 +2520,20 @@ function renderRiverS(){
   ['Failing in latest sample',lastBreach.length,'bathing-water criteria (BOD, DO, coliform)','var(--red)'],
   ['Worst stretch',worst.c?worst.c[1]:'—',`${RS_DATA[worst.s.rid].name} at ${esc(worst.s.name)}`,worst.c?worst.c[2]:''],
   ['Samples still due',dueNow.length,`in the ${rsMonL(curMonth)} round`,dueNow.length?'var(--amber)':'']])}</div>
- <div class="card mt"><div class="card-h"><h2>All monitoring stations</h2><span class="hint">Click a station to see its history</span></div>
+ <div class="card mt"><div class="card-h"><h2>Monitoring stations</h2><span class="hint">Click a station</span></div>
  <div style="overflow-x:auto"><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>River</th><th>Station</th><th>Last sample</th><th style="text-align:right">BOD mg/L</th><th style="text-align:right">DO mg/L</th><th>Class (12 months)</th><th style="text-align:right">Fails</th><th>Trend</th></tr></thead><tbody>${rows}</tbody></table></div>
- <p class="small muted" style="margin:8px 0 0">Class follows the CPCB method: the highest BOD seen at the station in the last 12 months. Bathing-water criteria: BOD up to 3 mg/L, DO at least 5 mg/L, faecal coliform up to 2,500 MPN/100 ml. Trend compares the last six months with the same months a year earlier.</p></div>
+ <p class="src" style="margin:8px 0 0">Class follows the CPCB method: the highest BOD seen at the station in the last 12 months. Bathing-water criteria: BOD up to 3 mg/L, DO at least 5 mg/L, faecal coliform up to 2,500 MPN/100 ml. Trend compares the last six months with the same months a year earlier.</p></div>
  <div class="grid g-6040 mt" id="rsDetail">
   <div class="card"><div class="card-h"><h2>${rv.name} · ${esc(sel.name)}</h2><span class="hint">Monthly BOD, last 24 months</span></div>
    <div style="display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 10px">${rv.stations.map(s=>`<button class="btn sm${s===sel?' primary':''}" onclick="rsPick('${rv.id}','${s.code}')">${esc(s.name)}</button>`).join('')}</div>
    ${rsChart(sel)}</div>
-  <div class="card"><div class="card-h"><h2>What the samples show</h2></div><ul class="p2l">${ins.map(x=>`<li>${x}</li>`).join('')}</ul>
+  <div class="card"><div class="card-h"><h2>Sample trends</h2></div><ul class="p2l">${ins.map(x=>`<li>${x}</li>`).join('')}</ul>
    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">${rv.cetp?`<button class="btn sm" onclick="go('water',{cetp:'${rv.cetp}'})">${rv.cetp} performance</button>`:''}${cases.length?`<button class="btn sm" onclick="go('ngt',{case:'${cases[0].id}'})">${cases.length} NGT case${cases.length>1?'s':''} on this river</button>`:''}<button class="btn sm" onclick="go('map')">See on map</button></div></div>
  </div>
  <div class="grid g-6040 mt">
   <div class="card"><div class="card-h"><h2>Recent samples</h2><span class="hint">${esc(sel.code)}</span></div><div style="overflow-x:auto"><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Sampled</th><th style="text-align:right">BOD</th><th style="text-align:right">DO</th><th style="text-align:right">Faecal coliform</th><th style="text-align:right">TDS</th><th>Bathing criteria</th></tr></thead><tbody>${last6}</tbody></table></div></div>
-  <div class="card" style="background:#f6f9f7"><div class="card-h"><h2>Later option: live river sensors</h2><span class="rstag" style="background:#eef1ef;color:#5d6b63">P4 · future</span></div>
-   <p class="small" style="margin:0 0 10px">Monthly samples show the trend but miss what happens between visits, such as night-time discharges. Sensors at a few critical stations, linked with CETP and STP outfalls, would show the river hour by hour.</p>
+  <div class="card" style="background:#f6f9f7"><div class="card-h"><h2>Live river sensors (later)</h2><span class="rstag" style="background:#eef1ef;color:#5d6b63">P4 · future</span></div>
+   <p class="small" style="margin:0 0 10px">Hourly readings at a few critical stations, linked to CETP and STP outfalls.</p>
    <button class="btn sm" onclick="rsLive()">View the live corridor concept ›</button></div>
  </div>
  <div class="rvcaution mt">Stations, sample values and dates are illustrative. At implementation they would come from the Board's NWMP sampling records and lab reports.</div>`;
@@ -2782,7 +2782,7 @@ function renderRiverLive(keepScroll){
  if(RV.view==='state'){
   const all=Object.values(RIVERS2).map(r=>rvSummary(r,t));const worst=all.reduce((m,x)=>x.worst.b>m.worst.b?x:m,all[0]);const wr=Object.values(RIVERS2)[all.indexOf(worst)];
   $('#riverBody').innerHTML=head+`<div class="grid g5 mt">${kpiRow([['Rivers monitored',Object.keys(RIVERS2).length,'3 drainage systems'],['Plants failing right now',all.reduce((a,x)=>a+x.failing,0),'across all monitored stretches','var(--red)'],['Untreated discharge',all.reduce((a,x)=>a+x.untreated,0).toFixed(1)+' MLD','drains and bypassed plants','var(--red)'],['Worst station',worst.worst.b.toFixed(1)+' mg/L',`${wr.name} at ${esc(worst.worst.n)}`,pcls(worst.worst.b)[2]],['River NGT cases',NGT.filter(c=>c.river).length,`${NGT.filter(c=>c.river&&atRisk(c)).length} hearing${NGT.filter(c=>c.river&&atRisk(c)).length===1?'':'s'} at risk`]])}</div>
-  <div class="card mt" style="padding:0;overflow:hidden"><div class="card-h" style="padding:14px 18px 0"><h2>Rajasthan's monitored rivers</h2><span class="legend">${PCLS.map(p=>`<span><i style="background:${p[2]}"></i>${p[1]}</span>`).join('')}<span><i style="background:#d7263d;border-radius:50%"></i>Plant failing</span></span></div>
+  <div class="card mt" style="padding:0;overflow:hidden"><div class="card-h" style="padding:14px 18px 0"><h2>Monitored rivers</h2><span class="legend">${PCLS.map(p=>`<span><i style="background:${p[2]}"></i>${p[1]}</span>`).join('')}<span><i style="background:#d7263d;border-radius:50%"></i>Plant failing</span></span></div>
    <div id="rvStage" class="rvstage state"><div class="rvmapwrap">${stateMapSVG([0,0,MAPW,MAPH])}</div><div id="rvTip" class="rvtip"></div>
     <div class="rvside"><div class="small" style="font-weight:600;margin-bottom:6px">How to read this map</div><div class="small muted">Coloured segments are the monitored stretches, shaded by water quality. White dashes show the direction of flow. Red pulses mark plants that are failing now.</div>
     <div class="small" style="font-weight:600;margin:12px 0 6px">Basin link</div><div class="small muted">The Jojari (Jodhpur) and Bandi (Pali) both drain into the Luni. Their pollution arrives at Balotra before Balotra adds its own.</div></div></div>
@@ -2801,15 +2801,15 @@ function renderRiverLive(keepScroll){
   <div class="rvbar" style="margin-top:2px"><span class="legend">${Object.entries(ASTAT).map(([k,v])=>`<span><i style="background:${v[1]};border-radius:50%"></i>${v[0]}</span>`).join('')}<span>▲ Station (BOD mg/L)</span><span>S = STP · C = CETP · E = outfall · D = drain</span></span></div>
   ${caution}</div>
  <div class="grid g-6040 mt">
-  <div class="card"><div class="card-h"><h2>What is happening on the ${rv.name}</h2></div>${ins.map(x=>`<div class="check"><span class="ic bad">!</span><div class="cd" style="color:var(--ink);font-size:13.5px">${x}</div></div>`).join('')||'<div class="small muted">No issues on this stretch.</div>'}
+  <div class="card"><div class="card-h"><h2>${rv.name} summary</h2></div>${ins.map(x=>`<div class="check"><span class="ic bad">!</span><div class="cd" style="color:var(--ink);font-size:13.5px">${x}</div></div>`).join('')||'<div class="small muted">No issues on this stretch.</div>'}
    <div class="card-h" style="margin-top:14px"><h2>Water quality along the river</h2>${legendHTML([['#b42318','BOD (mg/L)',1],['#1f5fa8','Dissolved oxygen (0–9 mg/L)',1]])}</div>${rvProfile(rv,st)}<div class="src">Dashed lines mark where each plant or drain joins the river</div></div>
   <div class="card" id="rvAsset">${rvAssetPanel(rv,sel,t)}</div>
  </div>
  <div class="grid g2 mt">
-  <div class="card"><div class="card-h"><h2>Who is loading the river</h2><span class="hint">BOD load right now, kg/day</span></div>
+  <div class="card"><div class="card-h"><h2>Load by source</h2><span class="hint">BOD load right now, kg/day</span></div>
    <table><thead><tr><th>Source</th><th>km</th><th>Status</th><th class="num">Inflow</th><th class="num">BOD</th><th>Share of load</th></tr></thead><tbody>${rows.map(({a,ld})=>`<tr class="click" onclick="rvSelect('${a.id}')"><td><b>${esc(a.name)}</b><div class="small muted">${ATYPE[a.type].full}${a.cap?' · '+a.cap+' MLD':''}</div></td><td class="small">${a.km}</td><td><span class="chip" style="background:${ASTAT[a.st][1]}1f;color:${ASTAT[a.st][1]}">${a.st==='night'?(a.flow[t]>a.cap?'Overloaded now':'Night overloads'):ASTAT[a.st][0]}</span></td><td class="num">${a.flow[t].toFixed(1)}</td><td class="num">${a.bod[t]==null?'—':Math.round(a.bod[t])}</td><td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:8px;background:var(--grey-bg);border-radius:4px"><div style="height:100%;width:${ld/tot*100}%;background:${ASTAT[a.st][1]};border-radius:4px"></div></div><b class="small">${Math.round(ld/tot*100)}%</b></div></td></tr>`).join('')}${rv.trib?`<tr><td><b>Inflow from upstream</b><div class="small muted">Jojari and Bandi, via the Luni</div></td><td class="small">0</td><td><span class="chip grey">Upstream</span></td><td class="num">${rv.q0.toFixed(1)}</td><td class="num">${rv.c0.toFixed(1)}</td><td class="small muted">baseline</td></tr>`:''}</tbody></table>
    <div class="src">Load = flow × BOD. Plants with no data are estimated and shown with “—”.</div></div>
-  <div class="card"><div class="card-h"><h2>What to do next</h2><span class="hint">Generated from the readings above</span></div>
+  <div class="card"><div class="card-h"><h2>Next steps</h2><span class="hint">Auto-generated</span></div>
    ${acts.map(a=>`<button class="prio sev-${a.sev}" ${a.go?`onclick="${a.go}"`:`onclick="toast('Action created and assigned (demo)')"`}><span class="pbar"></span><span class="ptxt"><span class="pt">${esc(a.t)}</span><span class="pd">${a.d}</span></span><span class="chev">›</span></button>`).join('')}
    <div class="btn-row mt"><button class="btn primary" onclick="rvBrief('${rv.id}')">Generate river status brief</button></div></div>
  </div>`;
@@ -5253,39 +5253,39 @@ function renderLab(sel){
   $('#labBody').innerHTML=`${lbTabs()}<h1>Laboratory &amp; samples</h1><p class="sub">Every sample the Board collects, from the field to the lab report to the action it should trigger.</p>
   <div class="grid g5">${kpiRow([['Samples in progress',open.length,`${late.length} past the turnaround standard`,late.length?'var(--amber)':''],['Units where OCEMS reads low',low.length,'compared with the Board\'s own lab results',low.length?'var(--red)':''],['Exceedances with no action',noAct.length,'lab found a violation, no notice issued yet',noAct.length?'var(--red)':''],['Average time to report',dTot.toFixed(1)+' days','collection to signed report, last 60 days'],['Samples past holding time',hold.length,'BOD samples that reached the lab after 48 hours',hold.length?'var(--amber)':'']])}</div>
   <div class="grid g-6040 mt">
-   <div class="card"><div class="card-h"><h2>Does the OCEMS agree with the lab?</h2>${legendHTML([['#d7263d','OCEMS reads low'],['#e69500','OCEMS reads high'],['#2f8f5b','Agrees']])}</div>
-    <div class="small muted" style="margin-bottom:6px">Each dot is one inspection sample. It compares the Board's lab result with what the unit's own OCEMS reported at the same hour. Dots near the diagonal agree.</div>
+   <div class="card"><div class="card-h"><h2>OCEMS vs lab</h2>${legendHTML([['#d7263d','OCEMS reads low'],['#e69500','OCEMS reads high'],['#2f8f5b','Agrees']])}</div>
+    <div class="small muted" style="margin-bottom:6px">Lab result vs OCEMS at the same hour · on the diagonal = agree</div>
     ${lbScatter(U)}
-    ${story?`<div class="callout mt">At <b>${story.f.id}</b> the OCEMS has shown about <b>${Math.round((1-story.r)*100)}% less</b> than the lab on ${story.n} visits. The live feed says the unit is within limits while the samples say it is not. <a href="#" onclick="lbUnit('${story.f.id}');return false">See the comparison →</a></div>`:''}
+    ${story?`<div class="callout mt"><b>${story.f.id}</b>: OCEMS <b>${Math.round((1-story.r)*100)}% lower</b> than lab on ${story.n} visits · <a href="#" onclick="lbUnit('${story.f.id}');return false">Compare →</a></div>`:''}
    </div>
    <div class="card"><div class="card-h"><h2>Analysers to check</h2><span class="hint">At least 2 visits compared</span></div>
     ${low.slice(0,5).concat(high).map(u=>`<button class="prio sev-${u.low?'high':'med'}" onclick="lbUnit('${u.f.id}')"><span class="pbar"></span><span class="ptxt"><span class="pt">${esc(u.f.id)} · ${esc(SECTORS[u.f.sector].short)} · ${esc(u.f.clusterName)}</span><span class="pd">OCEMS reads ${u.low?Math.round((1-u.r)*100)+'% below':Math.round((u.r-1)*100)+'% above'} the lab on average · ${u.n} visits${u.low&&u.a.some(s=>s.ocems.lab>SECTORS[u.f.sector].limit&&s.ocems.v<=SECTORS[u.f.sector].limit)?' · violation hidden':''}</span></span><span class="chev">›</span></button>`).join('')||'<div class="small muted">No disagreement beyond the tolerance band.</div>'}
-    <div class="small muted mt">A reading consistently below the lab can mean a drifting analyser, a wrong calibration factor or a manipulated feed. Either way the live data cannot be relied on until it is checked.</div>
+    
    </div>
   </div>
   <div class="grid g2 mt">
-   <div class="card"><div class="card-h"><h2>Where samples wait</h2><span class="hint">Average days in each step, reports issued in the last 60 days</span></div>
+   <div class="card"><div class="card-h"><h2>Sample turnaround</h2><span class="hint">Avg days per step · last 60 days</span></div>
     ${['In transit to lab','Waiting to start analysis','Analysis','Waiting for sign-off'].map((t,i)=>`<div class="stage" style="grid-template-columns:170px 1fr 92px"><div style="font-weight:${i===bi?700:500}">${t}</div><div><div class="bar" style="width:${Math.max(6,dwell[i]/dmax*100)}%;background:${i===bi?'var(--red)':'#7fae95'}">${dwell[i].toFixed(1)}</div></div><div class="small muted">${Math.round(dwell[i]/dTot*100)}% of time</div></div>`).join('')}
-    <div class="callout mt">${bi===3?`Analysis itself is not the problem. Finished results wait <b>${dwell[3].toFixed(1)} days</b> for the lab head's sign-off, and longest at <b>${esc(qaWorst.l.short)}</b> (${qaWorst.qa.toFixed(1)} days). Digital sign-off with a 48-hour alert would cut the average report time by about ${Math.round(dwell[3]*0.6)} days.`:`Most of the delay is in <b>${['transit','the queue before analysis','analysis','sign-off'][bi]}</b>.`}</div>
+    <div class="callout mt">${bi===3?`Biggest delay: sign-off, <b>${dwell[3].toFixed(1)} days</b> · longest at <b>${esc(qaWorst.l.short)}</b> (${qaWorst.qa.toFixed(1)} d)`:`Biggest delay: <b>${['transit','queue before analysis','analysis','sign-off'][bi]}</b>`}</div>
    </div>
-   <div class="card"><div class="card-h"><h2>Lab workload</h2><span class="hint">Days of work already waiting, at each lab's normal pace</span></div>
+   <div class="card"><div class="card-h"><h2>Lab workload</h2><span class="hint">Days of backlog</span></div>
     ${WL.map(w=>`<div class="stage" style="grid-template-columns:150px 1fr 80px;cursor:pointer" onclick="lbF.lab='${w.l.id}';renderLab()"><div style="font-weight:500">${esc(w.l.short)}</div><div><div class="bar" style="width:${Math.max(5,w.days/wmx*100)}%;background:${w.days>10?'var(--red)':w.days>6?'#e69500':'#2f8f5b'}">${w.days.toFixed(1)}</div></div><div class="small muted">${w.p} samples</div></div>`).join('')}
-    ${alt&&over.days>8?`<div class="callout mt"><b>${esc(over.l.short)}</b> has ${over.days.toFixed(0)} days of work waiting. <b>${esc(alt.l.short)}</b> is ${Math.round(km(over.l.ll,alt.l.ll))} km away with spare capacity. ${movable.length} waiting samples are not time-critical and can be moved; BOD samples stay because of the 48-hour holding time.${movable.length?`<div class="btn-row" style="margin-top:8px"><button class="btn sm primary" onclick="lbMove('${over.l.id}','${alt.l.id}')">Send ${movable.length} samples to ${esc(alt.l.short)}</button></div>`:''}</div>`:''}
+    ${alt&&over.days>8?`<div class="callout mt"><b>${esc(over.l.short)}</b>: ${over.days.toFixed(0)} days of backlog · <b>${esc(alt.l.short)}</b> (${Math.round(km(over.l.ll,alt.l.ll))} km) has spare capacity · ${movable.length} samples can move (BOD stays, 48-h hold)${movable.length?`<div class="btn-row" style="margin-top:8px"><button class="btn sm primary" onclick="lbMove('${over.l.id}','${alt.l.id}')">Send ${movable.length} samples to ${esc(alt.l.short)}</button></div>`:''}</div>`:''}
    </div>
   </div>
   <div class="grid g2 mt">
-   <div class="card"><div class="card-h"><h2>Violations waiting for action</h2><span class="hint">Lab report shows an exceedance, no notice issued</span></div>
+   <div class="card"><div class="card-h"><h2>Violations pending action</h2><span class="hint">Exceedance, no notice yet</span></div>
     ${noAct.sort((a,b)=>a.ts[4]-b.ts[4]).slice(0,6).map(s=>{const d=Math.round(lbDays(s.ts[4],new Date()));const e=s.res.filter(r=>r.ex);return `<button class="prio sev-${d>14?'high':'med'}" onclick="lbOpen('${s.id}')"><span class="pbar"></span><span class="ptxt"><span class="pt">${esc(s.srcName)}</span><span class="pd">${s.id} · ${e.map(r=>`${r.p} ${r.v}${r.u?' '+r.u:''} (limit ${r.hi??'min '+r.lo})`).join(', ')} · reported ${d} days ago</span></span><span class="chev">›</span></button>`}).join('')||'<div class="small muted">Every exceedance has an action recorded.</div>'}
     ${noAct.length>6?`<div class="small muted mt">and ${noAct.length-6} more · <a href="#" onclick="lbF.st='noact';renderLab();return false">show all</a></div>`:''}
-    <div class="callout mt">A lab result is the Board's strongest evidence. Linking every exceedance to a notice within 7 days keeps it usable before the tribunal and stops cases from going cold.</div>
+    
    </div>
-   <div class="card"><div class="card-h"><h2>Can the results be trusted?</h2><span class="hint">Quality control, instruments and accreditation</span></div>
+   <div class="card"><div class="card-h"><h2>Quality control</h2><span class="hint">Quality control, instruments and accreditation</span></div>
     <div class="small muted" style="margin-bottom:4px">Central Lab: recovery of a known COD standard run with each batch</div>
     ${lbQCChart()}
-    <div class="check"><span class="ic ${LBQCRES?'ok':'bad'}">${LBQCRES?'✓':LB_HOLD.size}</span><div><div class="ct">Batch 27 recovered ${LB_QC[26].v}% of the standard</div><div class="cd">${LBQCRES?'Reports withdrawn and samples re-analysed.':`Beyond the action limit. ${LB_HOLD.size} reports issued from that batch should be held and re-checked. <a href="#" onclick="lbQC();return false">Hold and re-analyse</a>`}</div></div></div>
+    <div class="check"><span class="ic ${LBQCRES?'ok':'bad'}">${LBQCRES?'✓':LB_HOLD.size}</span><div><div class="ct">Batch 27 recovered ${LB_QC[26].v}% of the standard</div><div class="cd">${LBQCRES?'Reports withdrawn and samples re-analysed.':`Beyond action limit · ${LB_HOLD.size} reports to hold <a href="#" onclick="lbQC();return false">Hold and re-analyse</a>`}</div></div></div>
     <div class="check"><span class="ic ${calOver.length?'bad':'ok'}">${calOver.length}</span><div><div class="ct">Instruments past calibration</div><div class="cd">${calOver.map(c=>`${esc(c.i.n)} at ${esc(c.l.short)}, ${Math.round((TODAY-c.i.due)/DAY)} days overdue`).join('<br>')||'All within date'}</div></div></div>
-    <div class="check"><span class="ic ${nablSoon.length?'warn':'ok'}">${nablSoon.length}</span><div><div class="ct">NABL accreditation renewal due</div><div class="cd">${nablSoon.map(l=>`${esc(l.short)} in ${l.nabl} days. Results lose evidentiary weight if it lapses.`).join('<br>')||'None in the next 90 days'}</div></div></div>
-    <div class="check"><span class="ic ${hold.length?'warn':'ok'}">${hold.length}</span><div><div class="ct">BOD samples past 48-hour holding time</div><div class="cd">Mostly from ${[...new Set(hold.map(s=>s.ro))].slice(0,3).join(', ')||'—'}, where labs are far away. <a href="#" onclick="lbF.st='hold';renderLab();return false">See samples</a></div></div></div>
+    <div class="check"><span class="ic ${nablSoon.length?'warn':'ok'}">${nablSoon.length}</span><div><div class="ct">NABL accreditation renewal due</div><div class="cd">${nablSoon.map(l=>`${esc(l.short)} in ${l.nabl} days`).join('<br>')||'None in the next 90 days'}</div></div></div>
+    <div class="check"><span class="ic ${hold.length?'warn':'ok'}">${hold.length}</span><div><div class="ct">BOD samples past 48-hour holding time</div><div class="cd">Mostly from ${[...new Set(hold.map(s=>s.ro))].slice(0,3).join(', ')||'—'} · <a href="#" onclick="lbF.st='hold';renderLab();return false">See samples</a></div></div></div>
    </div>
   </div>
   <div class="card mt"><div class="card-h"><h2>Sample register</h2><div class="flt">${opt('lab',LABS.map(l=>[l.id,l.short]),'All labs')}${opt('type',Object.keys(LBP).map(t=>[t,t]),'All sample types')}${opt('st',[...LBSTAGES.map(s=>[s[0],s[1]]),['late','Past turnaround'],['noact','Exceedance, no action'],['hold','Past holding time']],'All stages')}${Object.values(lbF).some(x=>x)?`<button class="btn sm" onclick="lbF={lab:'',type:'',st:''};renderLab()">Clear</button>`:''}</div></div>
@@ -5306,9 +5306,9 @@ function lbOpen(id){
    <div class="card kpi" style="padding:10px 12px"><div class="lbl">Turnaround</div><div class="val" style="font-size:18px;${a>t?'color:var(--red)':''}">${a.toFixed(1)} days</div><div class="ctx">standard ${t} days</div></div>
    <div class="card kpi" style="padding:10px 12px"><div class="lbl">Result</div><div class="val" style="font-size:18px;${s.stage==='rep'&&s.exceed?'color:var(--red)':''}">${s.stage!=='rep'?'Pending':s.exceed?'Exceeds limit':'Within limits'}</div><div class="ctx">${s.stage==='rep'&&s.exceed?(s.act||'<b style="color:var(--red)">no action yet</b>'):'&nbsp;'}</div></div>
   </div>
-  ${LB_HOLD.has(s.id)&&!LBQCRES?`<div class="callout mt" style="background:var(--amber-bg);border-color:#f0d7a0">This report came from Central Lab batch 27, which failed its quality-control check. Hold it until the sample is re-analysed.</div>`:''}
+  ${LB_HOLD.has(s.id)&&!LBQCRES?`<div class="callout mt" style="background:var(--amber-bg);border-color:#f0d7a0">Batch 27 failed QC · hold until re-analysed</div>`:''}
   ${s.stage==='rep'||i>=3?`<h3 style="font-size:14px;margin:16px 0 6px">Results</h3><table><thead><tr><th>Parameter</th><th>Result</th><th>Limit</th><th>Status</th></tr></thead><tbody>${s.res.map(r=>`<tr><td>${r.p}</td><td><b>${r.v}</b> ${r.u}</td><td class="small">${r.lo!=null&&r.hi!=null?r.lo+' – '+r.hi:r.hi!=null?'max '+r.hi:'min '+r.lo} ${r.u}</td><td><span class="chip ${r.ex?'bad':'ok'}">${r.ex?'Exceeds':'OK'}</span></td></tr>`).join('')}</tbody></table>`:'<div class="small muted mt">Results appear here once analysis is complete.</div>'}
-  ${s.ocems&&s.stage==='rep'?`<div class="callout mt">The unit's OCEMS reported <b>${s.ocems.v} ${s.ocems.u}</b> ${s.ocems.p} at the hour of sampling, against <b>${s.ocems.lab}</b> in the lab (${Math.round((s.ocems.v/s.ocems.lab-1)*100)}%). ${Math.abs(s.ocems.v/s.ocems.lab-1)>.25?`<a href="#" onclick="lbUnit('${s.unit}');return false">Compare all visits →</a>`:'Within the expected tolerance.'}</div>`:''}
+  ${s.ocems&&s.stage==='rep'?`<div class="callout mt">OCEMS at sampling hour: <b>${s.ocems.v} ${s.ocems.u}</b> ${s.ocems.p} · lab <b>${s.ocems.lab}</b> (${Math.round((s.ocems.v/s.ocems.lab-1)*100)}%) · ${Math.abs(s.ocems.v/s.ocems.lab-1)>.25?`<a href="#" onclick="lbUnit('${s.unit}');return false">Compare all visits →</a>`:'within tolerance'}</div>`:''}
   <h3 style="font-size:14px;margin:16px 0 6px">Chain of custody</h3><div class="tl">${tl}</div>
   <div class="btn-row mt">${s.stage==='rep'&&s.exceed&&!s.act&&f?`<button class="btn primary" onclick="lbAct('${s.id}')">Draft show-cause notice</button>`:''}${s.stage==='rep'?`<button class="btn" onclick="toast('Signed report PDF with chain-of-custody record (demo)')">Download signed report</button>`:''}${s.stage==='qa'?`<button class="btn primary" onclick="lbSign('${s.id}')">Sign off and issue report</button>`:''}${f?`<button class="btn" onclick="closeModal();go('fac',{id:'${f.id}'})">Open Industry 360</button>`:''}</div>`);
 }
@@ -5326,7 +5326,7 @@ function lbUnit(id){
    <div class="card kpi" style="padding:10px 12px"><div class="lbl">OCEMS flags this week</div><div class="val" style="font-size:20px">${f.m?[f.m.flatFlag&&'Frozen value',f.m.nightFlag&&'Night spikes',f.m.lowAvail&&'Data gaps'].filter(Boolean).join(', ')||'None':'—'}</div><div class="ctx">${f.m?f.m.avail.toFixed(0)+'% data availability':''}</div></div>
   </div>
   <div style="margin-top:12px">${legendHTML([['#1f5fa8','Board lab result'],['#0b6b3a','OCEMS at the same hour']])}</div>${ch}
-  <div class="callout mt">${u.low?`The OCEMS has read lower than the lab on every visit. ${hidden?`On ${hidden} visit${hidden>1?'s':''} the lab found a violation that the live feed did not show. `:''}Ask for a third-party calibration check of the analyser, and take the next sample at night without notice.`:u.high?'The OCEMS reads higher than the lab. That points to calibration drift rather than concealment. Ask the unit to recalibrate within 15 days.':'Readings agree within tolerance.'}</div>
+  <div class="callout mt">${u.low?`OCEMS lower than lab on every visit${hidden?` · ${hidden} violation${hidden>1?'s':''} missed by live feed`:''}<br><b>Next:</b> third-party calibration check, unannounced night sample`:u.high?'OCEMS higher than lab · likely calibration drift<br><b>Next:</b> recalibration within 15 days':'Within tolerance'}</div>
   <div class="btn-row mt">${u.low||u.high?`<button class="btn primary" onclick="lbAudit('${f.id}')">Order analyser calibration audit</button>`:''}${u.low?`<button class="btn" onclick="toast('Unannounced night sampling added to next week\\'s inspection plan (demo)')">Schedule surprise night sample</button>`:''}<button class="btn" onclick="closeModal();go('fac',{id:'${f.id}'})">Open Industry 360</button></div>`);
 }
 function lbAudit(id){const f=FAC.find(x=>x.id===id);try{histFor(f).unshift({d:new Date(),t:'OCEMS calibration audit ordered',s:'Lab results disagree with OCEMS readings',isNew:true})}catch(e){}toast('Calibration audit ordered and the unit notified (demo)')}
@@ -5379,7 +5379,7 @@ function lmField(){
   const legal=s.type==='Stack'?'Sample taken in the presence of the occupier (Air Act, Section 26)':'Sample divided into two parts, sealed and signed by the occupier (Water Act, Section 21)';
   const last=LM.last&&SAMPLES.find(x=>x.id===LM.last);
   return `<div class="grid g-6040 mt">
-  ${lmCard(`<div class="card-h"><h2>Register a sample</h2><span class="hint">Field app · works offline, syncs when back in network</span></div>
+  ${lmCard(`<div class="card-h"><h2>Register a sample</h2><span class="hint">Field app · works offline</span></div>
    <div class="lf">
     <div><label>What are you sampling?</label><select onchange="LM.f.kind=this.value;renderLims()"><option value="unit" ${F.kind==='unit'?'selected':''}>Industrial unit</option><option value="river" ${F.kind==='river'?'selected':''}>River monitoring point</option><option value="gw" ${F.kind==='gw'?'selected':''}>Groundwater well</option></select></div>
     <div><label>${F.kind==='unit'?'Unit (type ID or name)':'Location'}</label>${F.kind==='unit'?`<input list="lmUnits" value="${esc(s.f.id)}" onchange="const u=FAC.find(x=>x.id===this.value.split(' ')[0]);if(u){LM.f.unit=u.id;renderLims()}"><datalist id="lmUnits">${FAC.filter(f=>SECTORS[f.sector].media).map(f=>`<option value="${f.id} · ${esc(f.name)}">`).join('')}</datalist>`:F.kind==='river'?`<select onchange="LM.f.river=+this.value;renderLims()">${LB_RIV.map((r,i)=>`<option value="${i}" ${i===F.river?'selected':''}>${esc(r[0])}</option>`).join('')}</select>`:`<select onchange="LM.f.gw=+this.value;renderLims()">${LB_GW.map((t,i)=>`<option value="${i}" ${i===F.gw?'selected':''}>Tube well near ${esc(t)}</option>`).join('')}</select>`}</div>
@@ -5395,7 +5395,7 @@ function lmField(){
    <div class="lf" style="margin-top:12px"><div><label>Seal number</label><input id="lmSeal" value="RSPCB-${s.ro.slice(0,3).toUpperCase()}-${String(48000+LBSEQ).slice(-5)}"></div><div><label>Send to</label><input value="${esc(lab.name)}" disabled></div></div>
    <label class="lmchk"><input type="checkbox" id="lmLegal" checked> ${legal}</label>
    <div class="btn-row mt"><button class="btn primary" onclick="lmRegister()">Register sample and print label</button><button class="btn" onclick="toast('Photos of sampling point and seal attached (demo)')">Attach photos</button></div>`)}
-  ${lmCard(`<div class="card-h"><h2>Sample label</h2><span class="hint">Printed on the field printer, stuck on the container</span></div>
+  ${lmCard(`<div class="card-h"><h2>Sample label</h2><span class="hint">Field printer</span></div>
    ${last?`<div class="lmlabel"><div class="qr">${lmQR('RSPCB|'+last.id+'|'+last.lab+'|'+last.seal)}</div><div><div class="lid">${last.id}</div><div class="small"><b>${esc(last.srcName)}</b></div><div class="small">${last.type} · ${esc(last.point)}</div><div class="small">${last.ts[0].toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · seal ${esc(last.seal)}</div><div class="small">${last.res.map(r=>r.p).join(', ')}</div><div class="small" style="margin-top:4px">To: <b>${esc(labById(last.lab).short)}</b></div></div></div>
    <div class="btn-row mt"><button class="btn sm" onclick="toast('Sent to field label printer (demo)')">Print again</button><button class="btn sm primary" onclick="LM.lab='${last.lab}';LM.role='recv';LM.sel='${last.id}';renderLims()">Next: receive it at ${esc(labById(last.lab).short)} →</button></div>`:'<div class="lmempty">The label appears here once the sample is registered. The QR code carries the sample ID, the lab and the seal number, so the lab can scan it on arrival.</div>'}
    <h3 style="font-size:14px;margin:18px 0 6px">Registered in this session</h3>
@@ -5431,7 +5431,7 @@ function lmRecv(){
    ${t>6&&s.res.some(r=>['BOD','TSS','TDS','Nitrate'].includes(r.p))?`<div class="lmwarn mt">Above 6°C. Cooled parameters may not be valid. Note it on the sample record.</div>`:''}
    <div class="btn-row mt"><button class="btn primary" onclick="lmAccept('${s.id}',${late})">${late?'Accept without BOD':'Accept and assign lab number'}</button><select id="lmRej" class="lmin" style="width:auto"><option>Seal broken or missing</option><option>Container leaking</option><option>Wrong preservative</option><option>Past holding time</option><option>Label unreadable</option></select><button class="btn" onclick="lmReject('${s.id}')">Reject</button></div>`}
   return `<div class="grid g-6040 mt">
-   ${lmCard(`<div class="card-h"><h2>Arriving at ${esc(lab.short)}</h2><span class="hint">${Q.length} samples in transit</span></div>
+   ${lmCard(`<div class="card-h"><h2>Incoming at ${esc(lab.short)}</h2><span class="hint">${Q.length} samples in transit</span></div>
     <div class="lmscan"><input class="lmin" id="lmScan" placeholder="Scan QR or type sample ID, e.g. ${Q[0]?Q[0].id:'S-4100'}" onkeydown="if(event.key==='Enter')lmScan()"><button class="btn" onclick="lmScan()">Find</button></div>
     <div style="max-height:470px;overflow:auto"><table><thead><tr><th>Sample</th><th>From</th><th>Collected</th><th></th></tr></thead><tbody>${Q.map(x=>`<tr class="click ${x.id===LM.sel?'lmon':''}" onclick="LM.sel='${x.id}';renderLims()"><td><b>${x.id}</b><div class="small muted">${x.type}</div></td><td class="small" style="max-width:240px">${esc(x.srcName)}<div class="muted">RO ${esc(x.ro)}</div></td><td class="small">${lmHrs(x)} h ago</td><td>${hb(x)}</td></tr>`).join('')||'<tr><td colspan="4" class="small muted">Nothing in transit to this lab.</td></tr>'}</tbody></table></div>`)}
    ${lmCard(`<div class="card-h"><h2>Check-in</h2></div>${right}`)}
@@ -5470,7 +5470,7 @@ function lmAna(){
      ${S.map(row).join('')}</tbody></table>
     <div class="btn-row mt"><button class="btn" onclick="lmFill()">Fill demo readings</button><button class="btn primary" ${insBad?'disabled style="opacity:.5;cursor:not-allowed"':''} onclick="lmSaveWS()">Save worksheet</button>${!qcOk?'<span class="small" style="color:var(--red);align-self:center">Quality check failed. Saving will flag these results for the lab head.</span>':''}</div>`)}
    ${lmCard(`<div class="card-h"><h2>My queue</h2></div>${order.map(t=>`<div class="stage" style="grid-template-columns:1fr 90px"><div><b style="font-weight:600">${t}</b><div class="small muted">${LM_METHOD[t]||''}</div></div><div class="small">${tests[t].length} samples</div></div>`).join('')}
-    <div class="callout mt">Each worksheet carries its own quality checks. A batch whose reference standard or duplicate fails is flagged automatically before anyone signs a report from it.</div>`)}
+    `)}
   </div>`;
 }
 function lmFill(){const W=LM.ws,p=W.p;const S=SAMPLES.filter(s=>s.lab===LM.lab&&(s.stage==='rec'||s.stage==='ana')&&lmNeed(s).includes(p)&&lmVal(s,p)==null).slice(0,12);
@@ -5528,7 +5528,7 @@ function lmReport(id){const s=SAMPLES.find(x=>x.id===id);const lab=labById(s.lab
    ${s.exceed?'<div class="small">* Exceeds the prescribed limit.</div>':''}${s.holdBreach?'<div class="small">BOD not reported: sample received after the 48-hour holding time.</div>':''}
    <div class="rsig"><div>Analysed by<br><b>${esc(s.analyst||lab.analysts_[1])}</b></div><div>Digitally signed by<br><b>Lab head, ${esc(lab.short)}</b><br>${new Date().toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div></div>
    <div class="rfoot">Concept demo · not a valid test report · results relate only to the sample tested</div></div>
-  ${s.exceed?`<div class="callout mt">This result exceeds the limit. RO ${esc(s.ro)} has been alerted, and it now appears on the dashboard under “Violations waiting for action”.</div>`:''}
+  ${s.exceed?`<div class="callout mt">Exceeds limit · RO ${esc(s.ro)} alerted · added to Violations pending action</div>`:''}
   <div class="btn-row mt"><button class="btn primary" onclick="closeModal();LBMODE='dash';renderLab('${s.id}')">See it on the dashboard</button><button class="btn" onclick="toast('Report emailed to RO ${esc(s.ro)} and the unit (demo)')">Send to RO and unit</button></div>`)}
 
 /* ---- 5. Lab admin ---- */
@@ -5562,6 +5562,41 @@ initPlan();initConsent();renderHome();
 {const p=parseHash();if(p){OWNER=p.v;goLocal(p.v,p.o)}else if(EMBED){OWNER='home'}}
 if(EMBED){let last=0;const send=()=>{const h=Math.ceil(document.querySelector('.shell').getBoundingClientRect().height)+10;if(Math.abs(h-last)>4){last=h;try{parent.postMessage({eipH:h},'*')}catch(e){}}};
   new ResizeObserver(send).observe(document.body);setInterval(send,800);window.addEventListener('load',send);send()}
+</script>
+<style id="quiet-css">
+.qi{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;border:1px solid #b9c7bf;color:#5d6b63;font:italic 600 11px Georgia,serif;margin-left:7px;vertical-align:middle;cursor:help;flex-shrink:0;position:relative;top:-1px;background:#fff}
+h1 .qi{width:19px;height:19px;font-size:12px;top:-3px}
+.qi:hover,.qi:focus{border-color:#0b6b3a;color:#0b6b3a;outline:none}
+.qill{display:inline-block;font-size:11px;font-weight:600;line-height:1;color:#8a5a00;background:#fff4dc;border:1px solid #f0dca8;border-radius:12px;padding:4px 9px;margin-left:10px;vertical-align:middle;cursor:help;position:relative;top:-3px;letter-spacing:.01em}
+#qtip{position:fixed;z-index:99999;max-width:320px;background:#103c26;color:#eef6f1;font-size:12.5px;line-height:1.5;border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.18);pointer-events:none;opacity:0;transition:opacity .12s;font-weight:400;font-style:normal;text-transform:none;letter-spacing:0}
+#qtip.on{opacity:1}#qtip b{color:#fff}#qtip a{color:#9fd3b4}
+#qtip .qk{display:block;color:#9fd3b4;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;margin:8px 0 2px}#qtip .qk:first-child{margin-top:0}
+</style>
+<script>
+/* Quiet layout: page descriptions, data sources, long hints and caution notes move into hover (i) icons */
+(function(){
+ const tip=document.createElement('div');tip.id='qtip';
+ const addTip=(el,label,html)=>{const part=(label?`<span class="qk">${label}</span>`:'')+html;el.dataset.tip=(el.dataset.tip||'')+part};
+ function info(host,label,html){let i=host.querySelector(':scope > .qi');if(!i){i=document.createElement('span');i.className='qi';i.tabIndex=0;i.textContent='i';i.setAttribute('aria-label','More information');
+   const a=host.querySelector(':scope > a, :scope > .pcount');if(a)host.insertBefore(i,a);else host.appendChild(i)}addTip(i,label,html)}
+ function quiet(){
+  document.querySelectorAll('p.sub:not([data-q])').forEach(p=>{const pv=p.previousElementSibling;const h=pv&&(pv.tagName==='H1'?pv:pv.querySelector('h1'));if(!h)return;p.dataset.q=1;if(p.textContent.trim())info(h,'',p.innerHTML);p.style.display='none'});
+  document.querySelectorAll('.card .src:not([data-q])').forEach(s=>{s.dataset.q=1;const c=s.closest('.card');const h=c&&c.querySelector('.card-h h2');if(!h)return;info(h,/^source:/i.test(s.textContent.trim())?'':'Note',s.innerHTML);s.style.display='none'});
+  document.querySelectorAll('.card-h .hint:not([data-q])').forEach(x=>{x.dataset.q=1;if(x.textContent.trim().length>40){const h=x.parentNode.querySelector('h2');if(h){info(h,'',x.innerHTML);x.style.display='none'}}});
+  document.querySelectorAll('.rvcaution:not([data-q])').forEach(c=>{c.dataset.q=1;const v=c.closest('.view');const h=v&&v.querySelector('h1');if(!h)return;
+    let p=h.querySelector('.qill');if(!p){p=document.createElement('span');p.className='qill';p.tabIndex=0;p.textContent='Illustrative data';h.appendChild(p)}addTip(p,'',c.innerHTML);c.style.display='none'});
+ }
+ let t=0;const mo=new MutationObserver(()=>{if(!t)t=requestAnimationFrame(()=>{t=0;quiet()})});
+ function show(el){tip.innerHTML=el.dataset.tip;tip.classList.add('on');const r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;
+  let x=Math.min(innerWidth-w-10,Math.max(10,r.left-12));let y=r.bottom+8;if(y+h>innerHeight-10)y=Math.max(10,r.top-h-8);tip.style.left=x+'px';tip.style.top=y+'px'}
+ const hide=()=>tip.classList.remove('on');
+ function start(){document.body.appendChild(tip);quiet();mo.observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('mouseover',e=>{const el=e.target.closest('[data-tip]');if(el&&el.matches('.qi,.qill'))show(el);else hide()});
+  document.addEventListener('focusin',e=>{const el=e.target.closest('.qi,.qill');if(el)show(el)});document.addEventListener('focusout',hide);
+  document.addEventListener('click',e=>{const el=e.target.closest('.qi,.qill');if(el){e.stopPropagation();tip.classList.contains('on')?hide():show(el)}},true);
+  addEventListener('scroll',hide,{passive:true,capture:true})}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
 </script>
 </body>
 </html>

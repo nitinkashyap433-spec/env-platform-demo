@@ -149,7 +149,7 @@
     const el = document.createElement('div');
     el.className = 'card mt cw';
     el.innerHTML = `
-    <div class="card-h"><h2>Stack camera · live</h2><span class="hint">Stack 1 · final outlet · analysed as it streams, nothing is recorded</span></div>
+    <div class="card-h"><h2>Stack camera · live</h2><span class="hint">Stack 1 · final outlet · not recorded</span></div>
     <div class="cw-grid">
       <div>
         <div class="cw-vwrap">
@@ -159,7 +159,7 @@
               <div class="cw-qr" title="Scan with the phone that will act as the stack camera"></div>
               <div class="cw-ptxt">
                 <div class="t">Connect the stack camera</div>
-                <div class="s">Scan this code with the phone camera, open the link, and tap <b>Start camera</b>. The feed appears here on its own.</div>
+                <div class="s">Scan with the phone, then tap <b>Start camera</b>.</div>
                 <div class="s cw-pairst"><span class="cw-dot"></span>Waiting for the camera · code <b class="cw-pcode"></b></div>
               </div>
             </div>
@@ -185,8 +185,8 @@
         <h3>Automatic checks</h3>
         <div class="cw-checks">${CHECKS.map(([k, l]) => `<div class="cw-chk" data-k="${k}"><i></i><span>${l}</span><small>Waiting for feed</small></div>`).join('')}</div>
         <h3 style="margin-top:14px">Alerts <span class="cw-mailst"></span></h3>
-        <div class="cw-inc"><div class="cw-note" style="margin:0">No alerts yet. An alert is raised only when a condition holds for ${T.hold} seconds.</div></div>
-        <div class="cw-note">Alerts reach the regional office by email with a single snapshot. Repeated tampering raises the unit's risk score.</div>
+        <div class="cw-inc"><div class="cw-note" style="margin:0">No alerts yet · raised after ${T.hold} s</div></div>
+        <div class="cw-note">Alerts go to the RO by email with a snapshot.</div>
       </div>
     </div>
     <div class="cw-x" hidden>
