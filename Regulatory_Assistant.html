@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rules & Regulations Knowledge Assistant</title>
+<style>
+:root{--bg:#f4f6f4;--card:#fff;--ink:#1c2a23;--muted:#5d6b63;--line:#e2e8e4;--g900:#0d3b24;--g700:#0b6b3a;--g500:#2f8f5b;--g100:#e7f3ec;--g50:#f2f8f4;--amber:#b26b00;--amber-bg:#fff4e0;--red:#b42318;--red-bg:#fdecea;--blue:#1f5fa8;--blue-bg:#e8f0fa;--grey:#eef1ef}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;font-size:14.5px;line-height:1.5}
+button,input,select{font-family:inherit}
+.top{background:var(--g900);color:#fff;padding:12px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top b{font-size:16px}.top span{opacity:.8;font-size:13px}
+.badge{background:#fff3cd;color:#7a5500;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:20px}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 20px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.lib{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+.lib .t{font-weight:600}.lib .s{font-size:12.5px;color:var(--muted)}
+.seg{display:inline-flex;background:var(--grey);border-radius:9px;padding:3px}
+.seg button{border:none;background:none;padding:7px 14px;border-radius:7px;font-size:13.5px;cursor:pointer;color:var(--muted);font-weight:500}
+.seg button.on{background:#fff;color:var(--g700);box-shadow:0 1px 2px rgba(0,0,0,.1);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:5px 11px;border-radius:20px;background:var(--grey);color:var(--muted)}
+.pill i{width:8px;height:8px;border-radius:50%;background:#9aa8a0}
+.pill.ok{background:var(--g100);color:var(--g700)}.pill.ok i{background:var(--g500)}
+.pill.load{background:var(--blue-bg);color:var(--blue)}.pill.load i{background:var(--blue);animation:pulse 1s infinite}
+.tbtn.clr{display:inline-flex;align-items:center;gap:6px;background:var(--red-bg);color:var(--red);border-color:#f3c3be;font-weight:600}.tbtn.clr:hover{background:var(--red);color:#fff;border-color:var(--red)}.tbtn.clr svg{width:14px;height:14px}.pill.bad{background:var(--amber-bg);color:var(--amber)}.pill.bad i{background:#e69500}
+.aisum{background:var(--g50);border:1px solid var(--g100);border-left:3px solid var(--g500);border-radius:10px;padding:12px 14px;margin:0 0 14px}.aisum .lab{font-size:12px;font-weight:600;color:var(--g700);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:flex;gap:8px;align-items:center}.aisum .lab span{font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted)}.aisum p{margin:4px 0}.aisum ul{margin:4px 0;padding-left:20px}.aisum li{margin:2px 0}.aisum .cref{display:inline-block;font-size:11.5px;font-weight:600;color:var(--g700);background:#fff;border:1px solid var(--g100);border-radius:6px;padding:0 5px;margin:0 1px;cursor:pointer;vertical-align:1px}.aisum.wait{color:var(--muted)}.aisum.wait .dots:after{content:'';animation:dots 1.2s steps(4) infinite}@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}.aisum.off{background:var(--grey);border-left-color:#9aa8a0;color:var(--muted);font-size:13px;padding:8px 12px}.aitest{font-size:13px;color:var(--muted);margin-top:8px}
+@keyframes pulse{50%{opacity:.3}}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer}
+.docs{display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.docs.on{display:block}
+.dgrp{margin:6px 0 10px}.dgrp h4{margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.dl{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:4px 0;border-bottom:1px dashed #edf1ee}
+.st{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.st.ok{background:var(--g100);color:var(--g700)}.st.old{background:var(--red-bg);color:var(--red)}.st.am{background:var(--blue-bg);color:var(--blue)}.st.ref{background:var(--grey);color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.chip{border:1px solid #bcd9c7;background:#fff;color:var(--g700);border-radius:8px;padding:6px 11px;font-size:13px;cursor:pointer}
+.chip:hover{background:var(--g50)}
+.ask{display:flex;margin-top:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.ask select{border:none;border-right:1px solid var(--line);padding:0 10px;font-size:13.5px;background:var(--g50);color:var(--g900);max-width:260px;outline:none}
+.ask input{flex:1;border:none;padding:13px 14px;font-size:15px;outline:none;min-width:0}
+.ask button{background:var(--g700);color:#fff;border:none;padding:0 22px;font-size:14.5px;font-weight:600;cursor:pointer}
+.ask button:hover{background:var(--g900)}
+.thread{margin-top:18px;display:flex;flex-direction:column;gap:16px}
+.q{align-self:flex-end;background:var(--g700);color:#fff;padding:10px 15px;border-radius:12px 12px 2px 12px;max-width:80%}
+.ans{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:900px){.cols{grid-template-columns:1fr}.ask{flex-wrap:wrap}.ask select{max-width:none;width:100%;border-right:none;border-bottom:1px solid var(--line);padding:9px}}
+.eiphead h1 .hbot{width:1.15em;height:.95em;color:var(--g700);vertical-align:-.08em;margin-right:.35em}.who .bot{width:26px;height:21px;color:var(--g700);flex:none}.aisum b{color:var(--g900)}.who{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;margin-bottom:8px;flex-wrap:wrap}
+.who .m{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--grey);color:var(--muted)}
+.who .m.kw{background:#eef1f7;color:#3b4f7a}.who .m.sem{background:#f3ecfd;color:#6a3fc2}.who .m.hy{background:var(--g100);color:var(--g700)}
+.doc{font-size:12px;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.h{font-weight:600;font-size:15px;margin:2px 0 8px}
+.body p{margin:0 0 8px}
+.body mark{background:none;color:inherit;font-weight:600;border-bottom:2px solid #f2c94c;padding:0}
+.gap{color:#9aa8a0;margin:0 0 8px}
+.src{font-size:13px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.src b{color:var(--g900)}
+.warn{font-size:13px;border-radius:8px;padding:8px 11px;margin:0 0 10px}
+.warn.ref{background:#fff6e0;color:#6b4a00}.warn.old{background:var(--red-bg);color:#7a1d12}.warn.am{background:var(--blue-bg);color:#173f6e}
+.warn a{color:inherit;font-weight:600;cursor:pointer;text-decoration:underline}
+.more{margin-top:10px;font-size:12.5px;color:var(--muted)}
+.more a{color:var(--g700);cursor:pointer;margin-right:10px;text-decoration:underline}
+.full{white-space:pre-wrap;font-size:13px;background:var(--g50);border-radius:8px;padding:10px 12px;margin-top:8px;display:none;max-height:340px;overflow:auto}
+.lnk{font-size:12.5px;color:var(--g700);cursor:pointer;text-decoration:underline;margin-top:6px;display:inline-block}
+.dbg{font-size:11.5px;color:var(--muted);margin-top:8px;font-family:Consolas,monospace;display:none}
+body.debug .dbg{display:block}
+.none{background:var(--amber-bg);border:1px solid #f2d9a6;border-radius:10px;padding:12px 14px;color:#6b4a00}
+.note{font-size:12.5px;color:var(--muted);margin-top:8px}
+.foot{font-size:12px;color:var(--muted);margin-top:26px;text-align:center}
+.hero{max-width:1000px;margin:6px auto 0}
+.in-frame .hero{margin:0}
+.askbox{display:flex;align-items:stretch;background:#fff;border:1px solid #cfdcd4;border-radius:14px;box-shadow:0 4px 16px rgba(16,60,38,.07);overflow:hidden}
+.askbox:focus-within{border-color:var(--g500);box-shadow:0 4px 18px rgba(11,107,58,.14)}
+.askbox select{border:none;background:var(--g50);color:var(--g900);font-size:13.5px;padding:0 12px;max-width:200px;border-right:1px solid var(--line);outline:none;cursor:pointer}
+.askbox input{flex:1;min-width:0;border:none;outline:none;padding:16px 16px;font-size:16px;background:transparent}
+.askbox button{background:var(--g700);color:#fff;border:none;padding:0 28px;font-size:15px;font-weight:600;cursor:pointer}
+.askbox button:hover{background:var(--g900)}
+.under{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-top:10px;flex-wrap:wrap}
+.under .chips{margin:0;flex:1;min-width:280px;align-items:center}
+.chips .lab{font-size:12.5px;color:var(--muted);margin-right:2px}
+.chip{border:1px solid #d5e5db;background:#fff;color:var(--g700);border-radius:16px;padding:4px 11px;font-size:12.5px;cursor:pointer}
+.chip.more{border-style:dashed;color:var(--muted)}
+.under .chip,.tbtn{margin:0;line-height:1.45}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tbtn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:16px;padding:4px 11px;font-size:12.5px;cursor:pointer}
+.tbtn:hover,.tbtn.on{border-color:var(--g500);color:var(--g700)}
+.tools .pill{padding:4px 10px;font-size:12px}
+.panel{display:none;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:10px}
+.panel.on{display:block}
+.panel .s{font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.thread{max-width:1000px;margin:18px auto 0}
+.in-frame .thread{max-width:none}
+.foot{max-width:1000px;margin-left:auto;margin-right:auto}
+@media(max-width:900px){.askbox{flex-wrap:wrap}.askbox select{max-width:none;width:100%;border-right:none;border-bottom:1px solid var(--line);padding:9px 12px}.askbox input{padding:13px}}
+
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.aisum .lab{flex-wrap:wrap;gap:2px 8px}.aisum .lab span{flex:1 1 200px}
+</style>
+<script>if(window.self!==window.top)document.documentElement.classList.add('in-frame');</script>
+<style>.in-frame body>nav.navbar{display:none!important}
+.in-frame body{background:transparent!important}</style>
+<script>if(window.self!==window.top){let last=0;const send=()=>{const w=document.querySelector('.wrap');if(!w)return;const h=Math.ceil(w.getBoundingClientRect().bottom+window.scrollY)+12;if(Math.abs(h-last)>4){last=h;parent.postMessage({eipH:h},'*')}};window.addEventListener('load',()=>{send();new ResizeObserver(send).observe(document.body)});setInterval(send,700)}</script>
+<style>.in-frame,.in-frame body{overflow:hidden!important}</style>
+<script>/* shared accessibility engine (parent page + every embedded frame) */
+(function(){
+  const CSS=`
+html.a11y-spacing body *{letter-spacing:.08em!important;word-spacing:.16em!important}
+html.a11y-lines body *{line-height:1.9!important}
+html.a11y-links a,html.a11y-links button,html.a11y-links [onclick],html.a11y-links .nav-link,html.a11y-links [data-go]{outline:2px solid #f2c200!important;outline-offset:1px;background-color:#fff8d6!important;color:#1c2a23!important}
+html.a11y-dys body,html.a11y-dys body *{font-family:Verdana,"Comic Sans MS",Tahoma,sans-serif!important;letter-spacing:.04em}
+html.a11y-cursor,html.a11y-cursor *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l15 10-7 1 4 8-3 1-4-8-5 5z' fill='%23000' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E") 4 2,auto!important}
+html.a11y-contrast body{filter:contrast(1.35) saturate(1.25)}
+html.a11y-gray body{filter:grayscale(1)}
+html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
+`;
+  function ensureStyle(){if(document.getElementById('a11y-css'))return;const s=document.createElement('style');s.id='a11y-css';s.textContent=CSS;(document.head||document.documentElement).appendChild(s)}
+  let state={scale:1,spacing:0,lines:0,links:0,dys:0,cursor:0,contrast:0,gray:0,tts:0};
+  function apply(st){state=Object.assign({},state,st);ensureStyle();const h=document.documentElement;
+    if(window.self===window.top)h.style.zoom=state.scale===1?'':String(state.scale);
+    [['spacing','a11y-spacing'],['lines','a11y-lines'],['links','a11y-links'],['dys','a11y-dys'],['cursor','a11y-cursor'],['contrast','a11y-contrast'],['gray','a11y-gray']].forEach(([k,c])=>h.classList.toggle(c,!!state[k]));
+    if(!state.tts&&window.speechSynthesis)speechSynthesis.cancel();}
+  function speak(t){if(!state.tts||!window.speechSynthesis||!t)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.slice(0,600));u.lang='en-IN';u.rate=1;speechSynthesis.speak(u)}
+  document.addEventListener('mouseup',()=>{if(!state.tts)return;const sel=String(window.getSelection()||'').trim();if(sel)speak(sel)});
+  document.addEventListener('click',e=>{if(!state.tts)return;if(String(window.getSelection()||'').trim())return;const el=e.target.closest('h1,h2,h3,h4,p,li,td,th,button,a,.pt,.pd,.kpi,.alert');if(el)speak(el.innerText)});
+  window.addEventListener('message',e=>{if(e.data&&e.data.a11y)apply(e.data.a11y)});
+  window.EIP_A11Y={apply,get:()=>state};
+})();
+</script>
+<style>/* ===== EIP shared type system: one heading → subheading → card → KPI pattern on every screen ===== */
+:root{--eip-font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;--eip-head:#1f2d27;--eip-muted:#5d6b63;--eip-accent:#0b6b3a;--eip-line:#e3ebe6;--eip-shadow:0 2px 10px rgba(16,60,38,.06)}
+/* T1 page title · T2 subtitle · T3 card title · K1 KPI label · K2 KPI value · K3 KPI note · TH table header */
+</style>
+<style>
+.in-frame .top{display:none}
+.in-frame body{background:transparent}
+.in-frame .wrap{max-width:none;padding:16px 0 30px}
+.eiphead{display:none}.in-frame .eiphead{display:block}
+.eiphead h1{font-size:28px;font-weight:600;color:var(--eip-head);letter-spacing:-.2px;margin:0 0 4px}
+.eiphead p{font-size:15px;color:var(--eip-muted);margin:0 0 18px}
+.in-frame .card,.in-frame .ans{border-radius:12px;border-color:var(--eip-line);box-shadow:var(--eip-shadow)}
+.in-frame .foot{margin-top:18px}
+</style>
+</head>
+<body>
+<div class="top"><b>Rules &amp; Regulations Knowledge Assistant</b><span>Answers only from the official text of the Acts, Rules and RSPCB orders, with exact citations</span><span class="badge">Concept demo</span></div>
+<div class="wrap">
+  <div class="eiphead"><h1><svg class="bot hbot" viewBox="0 0 640 512" aria-hidden="true"><path fill="currentColor" d="M320 0c17.7 0 32 14.3 32 32v64h120c39.8 0 72 32.2 72 72v272c0 39.8-32.2 72-72 72H168c-39.8 0-72-32.2-72-72V168c0-39.8 32.2-72 72-72h120V32c0-17.7 14.3-32 32-32zM208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16h-32zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16h-32zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16h-32zM264 256a40 40 0 1 0-80 0 40 40 0 1 0 80 0zm152 40a40 40 0 1 0 0-80 40 40 0 1 0 0 80zM48 224h16v192H48c-26.5 0-48-21.5-48-48v-96c0-26.5 21.5-48 48-48zm544 0c26.5 0 48 21.5 48 48v96c0 26.5-21.5 48-48 48h-16V224h16z"/></svg>Rules &amp; Regulations Knowledge Assistant</h1><p>Answers only from the official text of the Acts, Rules and RSPCB orders, with exact citations.</p></div>
+  <div class="hero">
+    <div class="askbox"><select id="scope" title="Search in"></select><input id="qin" placeholder="Ask about any Act or Rule…" autocomplete="off"><button id="go">Ask</button></div>
+    <div class="under">
+      <div class="chips" id="chips"></div>
+      <div class="tools"><span class="pill" id="mstat" title="Smart search understands the meaning of your question, not just the words."><i></i><span>Smart search: starting</span></span><span class="pill" id="aistat" style="display:none" title="Short AI summary written from the extracts found. The exact official text is always shown below it."><i></i><span>AI summary: checking</span></span><button class="tbtn" id="libBtn">Library · 626 documents</button><button class="tbtn" id="setBtn">Search settings</button><button class="tbtn clr" id="clrBtn" style="display:none"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v6M14 11v6"/></svg>Clear chat</button></div>
+    </div>
+    <div class="panel" id="libPanel"><div class="s">Environment Protection, Water and Air Acts (amended to 2024) and the rules on solid, plastic, e-waste, battery, bio-medical, hazardous and C&amp;D waste, hazardous chemicals, noise, end-of-life vehicles and mining, plus Jal Jeevan Mission guidelines. Consolidated texts come from a compilation of the amended rules; check against the Gazette before relying on them · 9,873 sections indexed</div><div id="docs"></div></div>
+    <div class="panel" id="setPanel">
+      <div class="row" style="justify-content:space-between">
+        <div class="seg" id="mode"><button data-m="hy" class="on">Hybrid (recommended)</button><button data-m="kw">Keyword</button><button data-m="sem">Meaning (AI model)</button></div>
+        <div class="row"><label class="chk"><input type="checkbox" id="cmp"> Compare all three</label><label class="chk"><input type="checkbox" id="dbg"> Show scores</label></div>
+      </div>
+      <div class="row" id="aiRow" style="display:none;margin-top:10px;gap:14px"><label class="chk"><input type="checkbox" id="aiOn" checked> AI summary above the extract</label><button class="tbtn" id="aiTest">Test AI summary</button><span class="aitest" id="aiTestOut"></span></div>
+      <div class="note" id="modeNote">Hybrid: combines both rankings. Usually the most reliable. Falls back to keyword automatically if the model is unavailable.</div>
+    </div>
+  </div>
+
+  <div class="thread" id="thread"></div>
+  <div class="foot">Answers are extracts from the notified text, not legal advice.</div>
+</div>
+
+
+<script src="assistant_library.js"></script><script src="assistant_index.js"></script>
+<script>
+if(typeof LIB_CHUNKS==='undefined')document.body.insertAdjacentHTML('afterbegin','<div style="background:#fde8e6;color:#7a1d12;padding:12px 16px;font:14px system-ui">Library file missing: keep assistant_library.js and assistant_index.js in the same folder as this page.</div>');
+const CHUNKS=typeof LIB_CHUNKS!=='undefined'?LIB_CHUNKS:[];
+const DOCS=typeof LIB_DOCS!=='undefined'?LIB_DOCS:{};
+
+/* Keyword (BM25) engine + helpers shared by page and tests */
+const STOP=new Set('following follow followed a an the of to in on for and or is are was were be been being what which who whom whose when where why how do does did can could should shall will would may might must there their this that these those it its as by with from at about into under over any all each every per than then so such not no yes i we you they he she me my our your us them please tell explain give list kindly regarding related rule rules under as per according required requirement requirements provision provisions mentioned mention say says said know need also have has had other'.split(' '));
+function stem(w){
+  if(w.length<=3)return w;
+  return w.replace(/(ational|tional)$/,'tion').replace(/(isation|ization)$/,'ise').replace(/(ising|izing|ised|ized|ises|izes|ize)$/,'ise')
+   .replace(/(ings|ing)$/,'').replace(/(ies)$/,'y').replace(/(ments|ment)$/,'').replace(/(ness)$/,'').replace(/(edly|ed)$/,'')
+   .replace(/(ions|ion)$/,'').replace(/(ers|er)$/,'').replace(/(ly)$/,'').replace(/(es)$/,'').replace(/s$/,'')||w;
+}
+function norm(s){return s.toLowerCase().replace(/bio[\s-]+medical/g,'biomedical').replace(/e-waste/g,'ewaste').replace(/\bburnt\b/g,'burn').replace(/sq\.\s*m/g,'sqm')}
+function toks(s){return (norm(s).replace(/[“”"’']/g,'').match(/[a-z0-9]+/g)||[]).filter(w=>!STOP.has(w)).map(stem).filter(w=>w.length>1)}
+// phrase synonyms: any key phrase in query adds these terms (lower weight)
+const SYN=[
+ [['label','labelling','labeling','marking','mark','tag'],['label','marking']],
+ [['segregate','segregation','separate','separation','sort','sorting','streams'],['segregate','separate','stream','sort']],
+ [['penalty','penalties','fine','fines','punishment','punish','compensation','violation','non-compliance','noncompliance'],['environmental compensation','penalty','fine','violation','non-compliance','polluter pays','levied','not complying']],
+ [['landfill','landfills','dump','dumping','dumpsite','dumpsites'],['landfill','sanitary landfill','dump site','dumpsite']],
+ [['compost','composting','organic','kitchen','food waste','wet waste','biodegradable'],['compost','wet waste','biodegradable','bio-methanation']],
+ [['bulk','large generator','big generator','bwg'],['bulk waste generator']],
+ [['rdf','refuse derived','refused derived','refuse-derived'],['refused derived fuel','rdf']],
+ [['ebwgr','extended bulk','responsibility certificate'],['extended bulk waste generator responsibility']],
+ [['spcb','state board','pollution control board','pcc','state pollution'],['state pollution control board','pollution control committee']],
+ [['cpcb','central board','central pollution'],['central pollution control board']],
+ [['ulb','municipality','municipal','corporation','nagar','urban local','city'],['urban local body','local body']],
+ [['panchayat','village','rural','gram'],['rural local body','panchayat','rural']],
+ [['deadline','timeline','time limit','by when','within how','how long','time frame','timeframe'],['timeline','within','period','beyond a period','hours','days','months']],
+ [['authorisation','authorization','permission','licence','license','approval','registration','register','consent'],['authorisation','registration','consent','previous consent']],
+ [['factory','industry','industries','plant','unit','units','company','mill'],['industry','industrial plant','trade','occupier']],
+ [['pollute','polluting','pollutes','polluted','contaminate','dirty'],['polluting matter','pollution','discharge']],
+ [['river','rivers','nala','nallah','canal','lake','pond'],['stream','water','sewage or trade effluent']],
+ [['punish','punishment','jail','imprisonment','prosecute','prosecution','penalty','penalties'],['punishable','imprisonment','penalty','fine']],
+ [['report','reporting','return','returns'],['annual report','report','form']],
+ [['burn','burning','fire','incinerate','incineration'],['burning','open burning','fire','incineration']],
+ [['vendor','hawker','street'],['street vendor']],
+ [['hotel','restaurant','dhaba','eatery'],['hotels','restaurants']],
+ [['diaper','diapers','pad','pads','napkin','sanitary'],['sanitary waste','diapers','sanitary pads']],
+ [['waste picker','ragpicker','rag picker','kabadi'],['waste pickers','informal']],
+ [['user fee','charges','charge','fee','fees','tariff','spot fine'],['user fee','fee','charges','spot fine']],
+ [['leachate'],['leachate']],
+ [['garbage','trash','rubbish','kachra','refuse'],['waste','solid waste']],
+ [['throw','throwing','thrown','dispose on','spill'],['litter','littering','dispose','throw']],
+ [['road','roads','street','streets','public place','footpath'],['streets','open public spaces','road']],
+ [['check','checks','monitor','monitors','inspect','supervise','oversee','ensure','enforce','who checks','who monitors'],['monitor','review','enforce','implementation','supervision']],
+ [['household','households','home','homes','resident','residents','citizen','citizens','people','public'],['waste generator','every waste generator']],
+ [['apply','applicable','applies','cover','covered','scope','exclude','excluded'],['application','apply','cover','not cover']],
+ [['fund','funds','escrow','money go','money collected','compensation money'],['funds','escrow','utilized']],
+ [['money','pay','paid','payment','charge money','rupees','amount'],['user fee','fee','charges','pay']],
+ [['sweeper','sweepers','safai','collector','collectors','kachra'],['waste collector','waste pickers','sweepers']],
+ [['when','commence','effect','start','come into force'],['come into force','commencement','effect']],
+ [['buffer','distance','zone'],['buffer zone','intermediate zone']],
+ [['hill','hilly','mountain','island'],['hilly','island']],
+ [['legacy','biomining','bio-mining','bioremediation','old dump'],['legacy waste','biomining','bio-remediation','dump site']],
+ [['duty','duties','responsibility','responsibilities','obligation','role','roles'],['duties','shall']],
+ [['construction','demolition','c&d','debris'],['construction and demolition']],
+ [['plastic','plastics'],['plastic','non-recyclable','refused derived fuel']],
+ [['show cause','show-cause','showcause','notice'],['directions','opportunity of being heard','show cause','closure']],
+ [['not giving','not replying','not responding','not reply','no reply','no response','ignore','ignores','ignoring','refuse','refuses','refusing','not cooperat','non cooperat','non-cooperat','not comply','does not comply','doesn\'t comply','non compliance'],['fails to comply','failure','fails to furnish','obstructs','contravention','punishable']],
+ [['handle','deal with','action against','what action','take action','what can the board do','what can we do'],['directions','closure','prohibition','punishable','penalty']],
+ [['seal','sealing','shut down','shutdown','close down','closure'],['closure','prohibition or regulation','stoppage','directions']],
+ [['inspect','inspection','visit','entry','enter premises'],['power of entry and inspection','enter','examine']],
+ [['thickness','thick','thin','gauge'],['micron','microns','thickness']],
+ [['waste to energy','wte','incinerator','energy'],['waste to energy']],
+ [['portal','online','website','centralised'],['centralised online portal']],
+ [['committee','monitoring committee'],['committee for effective implementation']],
+ [['standard','standards','norms','limit','limits','emission'],['standards','schedule iii','limit']],
+ [['accident','mishap','incident'],['accident reporting','form vi']],
+ [['gated','society','societies','rwa','resident welfare','apartment','housing'],['gated communities','resident welfare associations']],
+ [['event','gathering','function','wedding','festival'],['event','gathering','organiser']],
+ [['transport','vehicle','vehicles','truck','carry'],['transportation','vehicles','covered']],
+ [['dry waste','recyclable','recycle','recycling','recycler'],['dry waste','recyclable','recycler','material recovery facility']],
+ [['special care','hazardous household','battery','batteries','paint','bulb'],['special care waste']]
+];
+function expand(q){
+  const ql=' '+q.toLowerCase()+' ';const extra=[];
+  SYN.forEach(([keys,adds])=>{if(keys.some(k=>ql.includes(k.includes(' ')?k:' '+k)||ql.match(new RegExp('\\b'+k.replace(/[-&]/g,'.')+'\\w*\\b'))))extra.push(...adds)});
+  return extra;
+}
+class BM25{
+  constructor(chunks){
+    this.k1=1.4;this.b=0.7;this.docs=chunks.map(c=>{
+      const title=toks(c.title+' '+c.cite);const body=toks(c.text);
+      const tf={};body.forEach(t=>tf[t]=(tf[t]||0)+1);title.forEach(t=>tf[t]=(tf[t]||0)+2.5);
+      return{tf,len:body.length+title.length}});
+    this.N=this.docs.length;this.avg=this.docs.reduce((a,d)=>a+d.len,0)/this.N;this.df={};
+    this.docs.forEach(d=>Object.keys(d.tf).forEach(t=>this.df[t]=(this.df[t]||0)+1));
+  }
+  idf(t){const n=this.df[t]||0;return Math.log(1+(this.N-n+.5)/(n+.5))}
+  search(q){
+    const main=[...new Set(toks(q))];const syn=[...new Set(toks(expand(q).join(' ')))].filter(t=>!main.includes(t));
+    const terms=main.map(t=>[t,1]).concat(syn.map(t=>[t,.55]));
+    const res=this.docs.map((d,i)=>{let s=0,hit=0;terms.forEach(([t,w])=>{const f=d.tf[t];if(f){s+=w*this.idf(t)*f*(this.k1+1)/(f+this.k1*(1-this.b+this.b*d.len/this.avg));if(w===1)hit++}});return{i,s,cov:main.length?hit/main.length:0}});
+    res.sort((a,b)=>b.s-a.s);
+    return{res,main,syn};
+  }
+}
+function intent(q){const ql=q.toLowerCase();return{def:/(define|definition|meant by|meaning of|what does .* mean|what is (a |an |the )?["“']?[a-z\s-]{2,40}["”']?\??$)/.test(ql)&&!/duties|duty|responsib|how|penalt|when|minimum|maximum|limit|thickness|period|percent|amount|fee/.test(ql),duty:/duties|duty|responsibilities|who is responsible|role|obligation|must .* do|what should/.test(ql),form:/\bform\b|format|application form|apply for/.test(ql)}}
+function rank(engine,chunks,q){
+  const r=engine.search(q);const it=intent(q);const qt=new Set(r.main);
+  r.res.forEach(x=>{const c=chunks[x.i];let m=1;
+    if(c.kind==='form'&&!it.form)m*=.45;
+    if(c.kind==='def')m*=it.def?1.6:it.duty?.4:.7;
+    const tt=toks(c.title);const tm=tt.filter(t=>qt.has(t)).length;
+    if(tt.length)m*=1+.6*tm/Math.max(2,qt.size);
+    if(it.duty&&/^duties/i.test(c.title)){const subj=tt.filter(t=>!['duty','duti'].includes(t));const sm=subj.filter(t=>qt.has(t)).length;if(subj.length&&sm/subj.length>=.75)m*=2.2;else if(sm>=2)m*=1.3}
+    x.s*=m});
+  r.res.sort((a,b)=>b.s-a.s);
+  // opening sub-rule usually states the main obligation: small prior, then prefer it on near ties
+  r.res.forEach(x=>{const c=chunks[x.i].cite;if(/^Rule \d+(\(1\))?$/.test(c))x.s*=1.12});r.res.sort((a,b)=>b.s-a.s);
+  if(r.res.length){const top=r.res[0],base=x=>chunks[x.i].cite.replace(/\(.*$/,'');const b=base(top);
+    const near=r.res.slice(0,8).filter(x=>base(x)===b&&x.s>=top.s*.9&&chunks[x.i].kind!=='def').sort((a,b)=>a.i-b.i)[0];
+    if(near&&near!==top){r.res.splice(r.res.indexOf(near),1);r.res.unshift(near)}}
+  r.intent=it;return r;
+}
+
+
+/* Library-level routing on top of the BM25 engine: which Act/Rules a question is about, and version status */
+const ROUTE=[
+ ['water',/\bwater act\b|water \(prevention|\b1974\b|\bsewage\b|effluent|\bstreams?\b|\brivers?\b|\bnallah|\bwell\b.*pollut|\boutlet/],
+ ['air',/\bair act\b|air \(prevention|\b1981\b|air pollution control area|\bchimney\b|control equipment/],
+ ['swm26',/solid waste|\bswm\b|municipal waste|garbage|\bulb\b|urban local bod|bulk waste generator|landfill|legacy waste|compost/],
+ ['swm16',/swm rules,? 2016|solid waste management rules,? 2016|2016 solid waste/],
+ ['pwm',/plastic|carry bag|multi-?layer|\bmlp\b|biodegradable|compostable/],
+ ['ew',/e-?waste|electronic|electrical and electronic|\beee\b|refurbish|dismantl/],
+ ['bmw',/bio-?medical|\bbmw\b|hospital|clinic|health ?care|syringe|anatomical|\bcbwtf|sharps|nursing home/],
+ ['haz',/hazardous|transboundary|used oil|waste oil|\btsdf\b|co-?processing|import(ing)? of waste/],
+ ['cnd',/construction|demolition|\bc ?& ?d\b|debris|building material/],
+ ['mcdr',/mineral|\bmining\b|\bmine\b|mines|ibm\b|indian bureau of mines|ore\b/],
+ ['enf',/adjudicating|show.?cause|\bseal|closure|close down|shut ?down|not (giving|replying|responding|cooperating)|refus|obstruct|prosecut|stop (the )?(electricity|power|water)/],
+ ['epa',/environment (\(protection\)|protection) act|\bep act\b|\b1986\b|environment protection rules|\bep rules\b/],
+ ['battery',/batter(y|ies)|lead.?acid|lithium|\bev battery/],
+ ['noise',/noise|loudspeaker|loud speaker|decibel|\bdb\b|silence zone|horn|firecracker|dj\b/],
+ ['msihc',/hazardous chemical|msihc|isolated storage|major accident hazard|chemical storage/],
+ ['elv',/end.of.life vehicle|\belv\b|scrap(ping)? (facility|vehicle)|vehicle scrap|rvsf/],
+ ['jjm',/jal jeevan|\bjjm\b|tap connection|\bfhtc\b|household tap|village water|vwsc|pani samiti|drinking water supply/]
+];
+const GROUP={enf:['water','air','epa'],water:['water','water24','waterpen'],air:['air','airpen'],pwm:['pwm16','pwm21','pwm22','pwm22b','pwm24'],ew:['ew22','ew24','ew16','ewepr'],bmw:['bmw','bmw18','bmw19'],haz:['haz','haz25','haz16a','haz17','haz18','haz19','haz20','haz21','haz22','haz23','haz24','haz24b','msihc'],cnd:['cnd','cnd16'],battery:['battery','bat23','bat24','bat24b','bat25']};
+function routeDocs(q){const ql=q.toLowerCase();const hit=new Set();const named=/water act|air act|environment (\(protection\)|protection) act|\bep act\b|\brules\b/.test(ql);ROUTE.forEach(([k,re])=>{if(k==='enf'&&named&&/water act|air act|protection\) act|protection act|ep act/.test(ql))return;if(re.test(ql))(GROUP[k]||[k]).forEach(d=>hit.add(d))});return hit}
+function secRefs(q){return [...q.toLowerCase().matchAll(/\b(?:section|sec\.?|s\.)\s*(\d{1,3}[a-z]{0,2})\b/g)].map(m=>m[1].toUpperCase())}
+const SECDOC={};
+function secHome(chunks,s){if(!SECDOC[s]){SECDOC[s]=new Set(chunks.filter(c=>c.cite==='Section '+s||c.cite.startsWith('Section '+s+'(')||c.cite.startsWith('Section '+s+' ')).map(c=>c.doc))}return SECDOC[s]}
+function rankLib(engine,chunks,docs,q,filter){
+  const r=rank(engine,chunks,q);const hit=routeDocs(q);const ql=q.toLowerCase();const refs=secRefs(q);
+  const homes=new Set();refs.forEach(s=>secHome(chunks,s).forEach(d=>homes.add(d)));
+  r.res.forEach(x=>{const c=chunks[x.i],d=docs[c.doc];let m=1;
+    if(filter&&filter.size&&!filter.has(c.doc)){x.s=-1;return}
+    if(hit.size)m*=hit.has(c.doc)?1.9:0.6;
+    if(/^superseded/.test(d.status)&&!new RegExp('\\b'+d.year+'\\b').test(ql))m*=0.4;
+    if(d.status==='amendment')m*=/amend|change|new|latest|substitut|since when|history|20[12]\d/.test(ql)?1.05:0.6;
+    if(c.kind==='pre')m*=0.5;
+    if(['elv','mcdr','jjm','msihc','eprules','ewepr'].includes(c.doc)&&!hit.has(c.doc))m*=0.7;
+    x.s*=m});
+  if(/\b(how much|what percent\w*|percentage|how many|targets?|minimum|maximum|limits?)\b|%/i.test(q))r.res.forEach(x=>{const t=chunks[x.i].text;if(x.s>0&&((t.match(/(?:^|\s)\d{1,3}(?:\.\d+)?%?(?=\s|$)/g)||[]).length>=6||/\[Table taken/.test(t)))x.s*=1.25});
+  if(refs.length)r.res.forEach(x=>{if(x.s<0)return;const c=chunks[x.i];const t=c.text;let m=1;
+    refs.forEach(s=>{if(new RegExp('section\\s*'+s+'\\b','i').test(t))m*=1.6;if(c.cite==='Section '+s||c.cite.startsWith('Section '+s+'('))m*=1.3});
+    if(homes.size&&!hit.size)m*=homes.has(c.doc)?1.5:0.6;x.s*=m});
+  r.res.sort((a,b)=>b.s-a.s);r.routed=[...hit];return r}
+
+const $=s=>document.querySelector(s);
+const kw=new BM25(CHUNKS);
+let MODE='hy';
+const NOTES={kw:'Keyword: matches the words in your question (and their common variants) against the text. Instant, and works without internet.',
+ sem:'Meaning (AI model): compares the meaning of your question with every section, so different wording, or a question in Hindi, still finds the right provision. It never writes text, only finds it.',
+ hy:'Hybrid: combines both, then double-checks the best matches against your question. Usually the most reliable. Falls back to keyword automatically if smart search is unavailable.'};
+const SUGG=[['RSPCB order: rolling mills fuel','By when must rolling mills switch from coal to cleaner fuel?'],['RSPCB order: consent timelines','What are the timelines for disposal of consent applications?'],['Consent to discharge effluent','Can a new industry discharge effluent without the consent of the State Board?'],['Penalty under Section 33A','What is the penalty for not following directions under section 33A of the Water Act?'],['Storing bio-medical waste','How long can a hospital store bio-medical waste?'],['Carry bag thickness','What is the minimum thickness of plastic carry bags?'],['Bulk waste generators','What are the duties of a bulk waste generator?'],['Storing hazardous waste','How long can hazardous waste be stored?'],['C&D waste producers','What are the responsibilities of a producer of construction and demolition waste?'],['Mine closure plan','What is a progressive mine closure plan?']];
+let chipsAll=false;
+function drawChips(){const L=chipsAll?SUGG:SUGG.slice(0,3);$('#chips').innerHTML='<span class="lab">Try:</span>'+L.map(([l,q])=>`<button class="chip" title="${esc(q)}" data-q="${esc(q)}">${esc(l)}</button>`).join('')+(chipsAll?'':`<button class="chip more">+${SUGG.length-3} more</button>`);
+  document.querySelectorAll('#chips .chip').forEach(b=>b.onclick=()=>{if(b.classList.contains('more')){chipsAll=true;drawChips();return}$('#qin').value=b.dataset.q;ask()})}
+const togglePanel=(btn,pan,other,obtn)=>{const on=!$(pan).classList.contains('on');$(pan).classList.toggle('on',on);$(btn).classList.toggle('on',on);$(other).classList.remove('on');$(obtn).classList.remove('on')};
+$('#libBtn').onclick=()=>togglePanel('#libBtn','#libPanel','#setPanel','#setBtn');$('#setBtn').onclick=()=>togglePanel('#setBtn','#setPanel','#libPanel','#libBtn');
+document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{MODE=b.dataset.m;document.querySelectorAll('#mode button').forEach(x=>x.classList.toggle('on',x===b));$('#modeNote').textContent=NOTES[MODE]});
+$('#dbg').onchange=e=>document.body.classList.toggle('debug',e.target.checked);
+$('#go').onclick=ask;$('#qin').addEventListener('keydown',e=>{if(e.key==='Enter')ask()});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- library list and scope ---------- */
+const stCls=d=>/^superseded/.test(d.status)?'old':d.status==='amendment'?'am':/reference|guidelines/.test(d.status)?'ref':'ok';
+const stTxt=d=>/^superseded/.test(d.status)?'Superseded':d.status==='amendment'?'Amendment':d.status.replace(/^in force/,'In force');
+const GROUPS={};Object.values(DOCS).forEach(d=>{(GROUPS[d.group]=GROUPS[d.group]||[]).push(d)});
+$('#docs').innerHTML=Object.entries(GROUPS).map(([g,ds])=>ds[0].rspcb?`<div class="dgrp"><h4>${esc(g)}</h4><div class="dl"><span>${ds.length} documents from the RSPCB website</span><span class="st ref">${ds.filter(d=>d.later&&d.later.length||d.sameTopic&&d.sameTopic.length).length} flagged</span></div></div>`:`<div class="dgrp"><h4>${esc(g)}</h4>${ds.map(d=>`<div class="dl"><span>${esc(d.title)}</span><span class="st ${stCls(d)}" title="${esc(d.status)}">${esc(stTxt(d))}</span></div>`).join('')}</div>`).join('')+`<div class="note">Scanned documents were converted to text automatically. Superseded rules are kept for reference and are ranked lower unless you mention their year. RSPCB orders are from the Board's public website; links between orders (withdrawn, modified, newer order on the same topic) were detected automatically and should be confirmed.</div>`;
+drawChips();
+$('#scope').innerHTML='<option value="">All documents</option>'+Object.entries(GROUPS).map(([g,ds])=>`<option value="g:${esc(g)}">${esc(g)}</option>`+(ds.length>1&&!ds[0].rspcb?ds.map(d=>`<option value="d:${d.id}">&nbsp;&nbsp;${esc(d.short)}</option>`).join(''):'')).join('');
+function scopeSet(){const v=$('#scope').value;if(!v)return null;if(v.startsWith('d:'))return new Set([v.slice(2)]);return new Set(GROUPS[v.slice(2)].map(d=>d.id))}
+function scopeName(){const v=$('#scope').value;if(!v)return 'documents in the library';if(v.startsWith('d:'))return DOCS[v.slice(2)].title;return v.slice(2)+' documents'}
+/* amendments that change a given rule of a principal document */
+const AMD={};CHUNKS.forEach(c=>{const d=DOCS[c.doc];if(d.status!=='amendment'||!c.amends)return;c.amends.forEach(t=>{const k=(d.amends||'')+'|'+t.toLowerCase();(AMD[k]=AMD[k]||[]).push(c.id)})});
+function ooNote(d){const parts=[];
+  if(d.later&&d.later.length){const verb={'Withdraws':'withdrawn','Supersedes':'superseded','Revokes':'revoked','Partially modifies':'modified','Amends':'amended','Continues / extends':'extended','Corrigendum':'corrected'};
+    parts.push(`<div class="warn ${/^superseded/.test(d.status)?'old':'am'}"><b>Check before relying on this order.</b> A later order appears to have ${d.later.map(l=>`${verb[l.how]||'changed'} it: <i>${esc(l.title)}</i>${l.date?' ('+esc(l.date)+')':''}`).join('; ')}. This link was detected automatically from the order text.</div>`)}
+  else if(d.sameTopic&&d.sameTopic.length)parts.push(`<div class="warn am"><b>A newer order on this topic may exist.</b> Later: ${d.sameTopic.map(l=>`<i>${esc(l.title)}</i>${l.date?' ('+esc(l.date)+')':''}`).join('; ')}. Confirm which one is in force.</div>`);
+  if(d.ocr||/SCANNED|GARBLED/.test(d.scan||''))parts.push(`<div class="warn ref">This order is a scanned copy read by text recognition. Check the date and exact wording against the original PDF.</div>`);
+  return parts.join('')}
+function amendNote(c){const d=DOCS[c.doc];if(d.rspcb)return ooNote(d);if(/^superseded/.test(d.status))return `<div class="warn old"><b>${esc(d.short)}</b> has been ${esc(d.status)}. This extract is shown for reference only.</div>`;
+  if(d.status==='amendment')return `<div class="warn am">This is an amendment. It changes the ${esc(d.amends&&DOCS[d.amends]?DOCS[d.amends].title:d.amends)} and should be read with the principal rule.</div>`;
+  const m=c.cite.match(/^Rule (\d+[A-Z]?)/);if(!m)return '';const ids=AMD[c.doc+'|rule '+m[1].toLowerCase()];if(!ids)return '';
+  const by=[...new Set(ids.map(i=>DOCS[CHUNKS[i].doc].short))];
+  return `<div class="warn am">This text already includes later amendments. Rule ${m[1]} was changed by ${by.map(esc).join(', ')}. ${ids.slice(0,4).map(i=>`<a onclick="showChunk(${i},this)">${esc(DOCS[CHUNKS[i].doc].short)}, ${esc(CHUNKS[i].cite)}</a>`).join(' · ')}</div>`}
+
+/* ---------- semantic engine (runs offline in the browser) ---------- */
+const SEM={ready:false,failed:false,ext:null,segVec:null,segOf:null};
+function setStat(cls,txt){const p=$('#mstat');p.className='pill '+cls;p.querySelector('span').textContent=txt}
+function segments(){const segs=[],of=[];CHUNKS.forEach((c,i)=>{const head=(DOCS[c.doc].segShort||DOCS[c.doc].short)+'. '+c.title+'. ';const t=c.text;if(t.length<=700){segs.push(head+t);of.push(i)}else{for(let p=0;p<t.length;p+=550){segs.push(head+t.slice(p,p+700));of.push(i)}}});return{segs,of}}
+async function loadSem(){
+  try{
+    const {segs,of}=segments();SEM.segOf=of;
+    if(typeof PRE_VEC==='undefined'){setStat('bad','Smart search unavailable · index file missing · keyword search in use');SEM.failed=true;return}
+    if(PRE_VEC.n!==segs.length){setStat('bad','Smart search unavailable · index out of date · keyword search in use');SEM.failed=true;return}
+    if(!AI.on){setStat('bad','Smart search needs the relay · keyword search in use');SEM.failed=true;return}
+    setStat('load','Smart search: connecting…');
+    const b=Uint8Array.from(atob(PRE_VEC.b64),c=>c.charCodeAt(0));SEM.dim=PRE_VEC.dim;SEM.segVec=new Int8Array(b.buffer);
+    const j=await aiFetch('/health',{},10000);if(!j.search)throw new Error('search models not connected');
+    SEM.ready=true;setStat('ok','Smart search: ready');
+  }catch(e){console.error(e);SEM.failed=true;setStat('bad','Smart search offline · keyword search in use')}
+}
+const QCACHE=new Map();
+async function embed(texts){const need=texts.filter(t=>!QCACHE.has(t));
+  if(need.length){const j=await aiFetch('/embed',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texts:need.slice(0,100)})},12000);
+    j.vectors.forEach((v,k)=>{let n=0;for(const x of v)n+=x*x;n=Math.sqrt(n)||1;QCACHE.set(need[k],Float32Array.from(v,x=>x/n))})}
+  return texts.map(t=>QCACHE.get(t)||new Float32Array(SEM.dim))}
+function dot(a,B,off){let s=0;const D=SEM.dim;if(B instanceof Int8Array){for(let k=0;k<D;k++)s+=a[k]*B[off+k];return s/127}for(let k=0;k<D;k++)s+=a[k]*B[off+k];return s}
+async function rerank(q,ids){try{const j=await aiFetch('/rerank',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q,texts:ids.map(i=>(CHUNKS[i].title+'. '+CHUNKS[i].text).slice(0,1500))})},12000);return j.scores.map(x=>x==null?-99:x)}catch(e){console.warn('rerank unavailable',e);return null}}
+const PERIPH=new Set(['elv','mcdr','jjm','msihc','eprules','ewepr']);
+function docMult(c,hit,ql,filter){const d=DOCS[c.doc];if(filter&&!filter.has(c.doc))return null;let m=0;if(/\b(how much|what percent\w*|percentage|how many|targets?|minimum|maximum|limits?)\b|%/i.test(ql)&&(((c.text.match(/(?:^|\s)\d{1,3}(?:\.\d+)?%?(?=\s|$)/g)||[]).length>=6)||/\[Table taken/.test(c.text)))m+=.03;const refs=secRefs(ql);if(refs.length){const homes=new Set();refs.forEach(s=>secHome(CHUNKS,s).forEach(x=>homes.add(x)));refs.forEach(s=>{if(new RegExp('section\\s*'+s.toLowerCase()+'\\b','i').test(c.text))m+=.05});if(homes.size&&!hit.size)m+=homes.has(c.doc)?.05:-.05}
+  if(hit.size)m+=hit.has(c.doc)?.06:-.06;if(/^superseded/.test(d.status)&&!new RegExp('\\b'+d.year+'\\b').test(ql))m-=.05;if(d.status==='amendment')m-=.015;if(c.kind==='pre')m-=.08;if(PERIPH.has(c.doc)&&!hit.has(c.doc))m-=.04;return m}
+async function semRank(q,filter){
+  const [v]=await embed([q]);const best=new Map();
+  for(let s=0;s<SEM.segOf.length;s++){const c=SEM.segOf[s],sc=dot(v,SEM.segVec,s*SEM.dim);if(!best.has(c)||best.get(c)<sc)best.set(c,sc)}
+  const it=intent(q),hit=routeDocs(q),ql=q.toLowerCase();const res=[];
+  best.forEach((s,i)=>{const c=CHUNKS[i];const dm=docMult(c,hit,ql,filter);if(dm===null)return;let m=s+dm;if(c.kind==='form'&&!it.form)m-=.06;if(c.kind==='def')m+=it.def?.04:-.05;res.push({i,s:m,raw:s})});
+  res.sort((a,b)=>b.s-a.s);preferOpening(res,.97);return{res,qv:v};
+}
+function preferOpening(res,win){if(!res.length)return;const top=res[0],base=x=>CHUNKS[x.i].doc+CHUNKS[x.i].cite.replace(/\(.*$/,''),b=base(top);
+  const near=res.slice(0,8).filter(x=>base(x)===b&&x.s>=top.s*win&&CHUNKS[x.i].kind!=='def').sort((a,c)=>a.i-c.i)[0];
+  if(near&&near!==top){res.splice(res.indexOf(near),1);res.unshift(near)}}
+const GENERIC=new Set(['used','using','make','made','happen','happens','done','doing','give','given','take','allowed','allow','okay','still','much','many','some','like','just','only','need','needed','want','about','after','before','while','within','without','into','also','again','your','mine','them','then','here','whom','whose','penalty','fine','rule','rules','law','act','india','state','government','person','people','time','day','year','thing','work','case','city','area','place']);
+function unknownTerms(q,shown){const raw=(q.toLowerCase().match(/[a-z]{4,}/g)||[]).filter(w=>!STOP.has(w));const out=[];
+  const near=new Set(toks(shown.map(i=>CHUNKS[i].text+' '+CHUNKS[i].title).join(' ')));
+  raw.forEach(w=>{const st=stem(w);const df=kw.df[st]||0;if(df<=2&&st.length>=4&&!near.has(st)&&!GENERIC.has(w)&&!expand(w).length&&!out.includes(w))out.push(w)});return out}
+const KW_MIN=6.5,TH={semMin:.45,off:.50,offLow:.55,offDom:.56,part:.45,rrOff:.10,rrSem:.60,rrW:.3,rankW:1};const SEM_MIN=TH.semMin;
+const sig=x=>x>=0&&x<=1?x:1/(1+Math.exp(-x));
+async function applyRerank(q,list,R){if(!SEM.ready||!list.length)return list;const top=list.slice(0,30);const sc=await rerank(q,top.map(x=>x.i));if(!sc)return list;
+  const ql=q.toLowerCase();const n=top.length;const out=top.map((x,r)=>{const c=CHUNKS[x.i],d=DOCS[c.doc];let s=TH.rrW*sig(sc[r])+TH.rankW*(1-r/n);if(/^superseded/.test(d.status)&&!(d.year&&ql.includes(String(d.year))))s-=.08;return{...x,score:s,s,rr:sig(sc[r])}}).sort((a,b)=>b.s-a.s);
+  R.rrTop=out[0].rr;R.dbg=(R.dbg||'')+' · rerank '+out[0].rr.toFixed(3);return out.concat(list.slice(30))}
+function rareOnly(q){const core=[...new Set(toks(q))].filter(t=>!GENERIC.has(t));return core.length>0&&core.length<=2&&core.every(t=>(kw.df[t]||0)<=1)&&!expand(q).length}
+function knownRatio(q){const core=[...new Set(toks(q))].filter(t=>!GENERIC.has(t));if(!core.length)return 0;return core.filter(t=>(kw.df[t]||0)>2).length/core.length}
+const DOMAIN=/waste|pollut|effluent|emission|discharg|industr|factor|\bunits?\b|plant|consent|board|spcb|\bpcb|notice|closure|penalt|prosecut|inspect|sample|stack|chimney|sewage|river|stream|plastic|hospital|\bmines?\b|mining|mineral|hazard|recycl|landfill|authori[sz]|direction|violat|complian|environment|ocems|cetp|\betp\b|occupier|\bulb|municipal|noise|loudspeaker|batter|vehicle|chemical|\bepr\b|producer|brand owner|carry bag|compost|garbage|litter|dump|\bwater\b|\bair\b|standard|limit|\bacts?\b|\brules?\b|section|\bforms?\b|resident|communit|household|vendor|drinking|tap connection|tribunal|\bngt\b|appeal|\bfees?\b|\bfund\b|annual report|bulk|generator|scrap|sludge|e-?waste|bio-?medical|recycler|refurbish|dismantl|segregat|incinerat|burn/;
+async function offTopic(q,R){const kr=knownRatio(q);if(!SEM.ready)return kr<0.5;let raw=R.semTop;if(raw===undefined){const s=await semRank(q,null);raw=s.res[0]?s.res[0].raw:0}R.dbg=(R.dbg||'')+` · topic ${raw.toFixed(3)} known ${kr.toFixed(2)}`;
+  const dom=DOMAIN.test(q.toLowerCase());if(R.rrTop!==undefined){R.dbg+=` rr ${R.rrTop.toFixed(3)}`;if(R.rrTop>=TH.rrOff||raw>=TH.rrSem)return false;if(dom&&kr>=0.5&&R.rrTop>=TH.rrOff/3){R.partial=true;return false}return true}
+  const off=raw<TH.off||(kr<0.7&&raw<TH.offLow)||(!dom&&raw<TH.offDom);if(!off)return false;
+  if(dom&&kr>=0.5&&raw>=TH.part){R.partial=true;return false}return true}
+async function search(q,mode){const f=scopeSet();const R=await search0(q,mode,f);if(rareOnly(q)||await offTopic(q,R))R.none=true;if(R.partial&&R.kwList)R.list=R.kwList;R.unk=unknownTerms(q,R.none?[]:R.list.slice(0,3).map(x=>x.i));return R}
+async function search0(q,mode,f){
+  const k=rankLib(kw,CHUNKS,DOCS,q,f);k.res=k.res.filter(x=>x.s>=0);
+  if(mode==='kw'||!SEM.ready){const top=k.res[0];return{mode:SEM.ready||mode==='kw'?mode:'kw',fallback:mode!=='kw'&&!SEM.ready,list:k.res.slice(0,6).map(x=>({i:x.i,score:x.s})),none:!top||top.s<KW_MIN,main:k.main,syn:k.syn,dbg:k.res.slice(0,3).map(x=>CHUNKS[x.i].doc+':'+CHUNKS[x.i].cite+' '+x.s.toFixed(1)).join(' | ')}}
+  const s=await semRank(q,f);
+  if(mode==='sem'){const top=s.res[0];const R0={};const L=await applyRerank(q,s.res.slice(0,30).map(x=>({i:x.i,score:x.s,s:x.s})),R0);return{mode,rrTop:R0.rrTop,kwList:k.res.slice(0,6).map(x=>({i:x.i,score:x.s})),semTop:top?top.raw:0,list:L.slice(0,8).map(x=>({i:x.i,score:x.s})),none:!top||top.raw<SEM_MIN,main:k.main,syn:k.syn,qv:s.qv,dbg:s.res.slice(0,3).map(x=>CHUNKS[x.i].doc+':'+CHUNKS[x.i].cite+' '+x.raw.toFixed(3)).join(' | ')}}
+  const rr=new Map();k.res.slice(0,60).forEach((x,r)=>rr.set(x.i,(rr.get(x.i)||0)+1/(20+r)));s.res.slice(0,60).forEach((x,r)=>rr.set(x.i,(rr.get(x.i)||0)+1.1/(20+r)));
+  const itH=intent(q);let list=[...rr.entries()].map(([i,v])=>({i,score:v*(CHUNKS[i].kind==='def'&&!itH.def?.8:1)})).sort((a,b)=>b.score-a.score);list.forEach(x=>x.s=x.score);preferOpening(list,.93);list.forEach(x=>x.score=x.s);const R0={};list=await applyRerank(q,list,R0);if(R0.rrTop!==undefined)preferOpening(list,.97);
+  const none=!k.res.length||!s.res.length||(k.res[0].s<KW_MIN&&s.res[0].raw<SEM_MIN+.03);
+  return{mode,rrTop:R0.rrTop,kwList:k.res.slice(0,6).map(x=>({i:x.i,score:x.s})),semTop:s.res[0]?s.res[0].raw:0,list:list.slice(0,8),none,main:k.main,syn:k.syn,qv:s.qv,dbg:'kw: '+(k.res[0]?CHUNKS[k.res[0].i].doc+':'+CHUNKS[k.res[0].i].cite+' '+k.res[0].s.toFixed(1):'-')+' · sem: '+(s.res[0]?CHUNKS[s.res[0].i].doc+':'+CHUNKS[s.res[0].i].cite+' '+s.res[0].raw.toFixed(3):'-')};
+}
+/* ---------- pick the sentences to show ---------- */
+const tidy=s=>s.replace(/^[*°'"`^~|\]\[]+[A-Za-z]?(?=\(\d)/gm,'');
+function units(text){text=tidy(text);const out=[];text.split('\n').forEach(l=>{if(l.length>480){l.split(/(?<=[;.])\s+(?=[A-Z(])/).forEach(p=>out.push(p))}else out.push(l)});return out.filter(u=>u.trim().length>2)}
+async function pick(c,r){
+  const U=units(c.text);if(U.length<=3)return U.map((u,i)=>({u,i,keep:true}));
+  const main=new Set(r.main),syn=new Set(r.syn);
+  let sc=U.map(u=>{const t=toks(u);let s=0;new Set(t).forEach(w=>{if(main.has(w))s+=1;else if(syn.has(w))s+=.5});return s/Math.sqrt(4+t.length)});
+  if(r.qv&&SEM.ready){const V=await embed(U.slice(0,24));sc=sc.map((s,i)=>i<V.length?s+1.2*dot(r.qv,V[i],0):s)}
+  const lead=/[-–—:]\s*$/.test(U[0])||/shall,?[-–—]?$/.test(U[0].trim());
+  const order=sc.map((s,i)=>[s,i]).sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>x[1]);
+  if(lead&&!order.includes(0))order.push(0);
+  return U.map((u,i)=>({u,i,keep:order.includes(i)}));
+}
+function hl(u,r){const key=new Set(r.main.filter(t=>t.length>=4&&kw.idf(t)>=1.6));const done=new Set();return esc(u).replace(/[A-Za-z][A-Za-z-]{3,}/g,w=>{const st=stem(w.toLowerCase());if(key.has(st)&&!done.has(st)){done.add(st);return `<mark>${w}</mark>`}return w})}
+const where=c=>`${esc(DOCS[c.doc].short)}, ${esc(c.cite)}`;
+async function card(r,label,cls){
+  if(r.none||!r.list.length)return `<div class="ans"><div class="who"><svg class="bot" viewBox="0 0 640 512" aria-hidden="true"><path fill="currentColor" d="M320 0c17.7 0 32 14.3 32 32v64h120c39.8 0 72 32.2 72 72v272c0 39.8-32.2 72-72 72H168c-39.8 0-72-32.2-72-72V168c0-39.8 32.2-72 72-72h120V32c0-17.7 14.3-32 32-32zM208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16h-32zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16h-32zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16h-32zM264 256a40 40 0 1 0-80 0 40 40 0 1 0 80 0zm152 40a40 40 0 1 0 0-80 40 40 0 1 0 0 80zM48 224h16v192H48c-26.5 0-48-21.5-48-48v-96c0-26.5 21.5-48 48-48zm544 0c26.5 0 48 21.5 48 48v96c0 26.5-21.5 48-48 48h-16V224h16z"/></svg>Rules &amp; Regulations Assistant <span class="m ${cls}">${label}</span></div><div class="none">This doesn't appear to be covered in the ${esc(scopeName())}.${(r.unk||[]).length?` The documents don't mention ${r.unk.map(w=>'“'+esc(w)+'”').join(', ')}.`:''} Try rephrasing, or choose a different document from the list next to the question box.</div><div class="dbg">${esc(r.dbg||'')}</div></div>`;
+  const c=CHUNKS[r.list[0].i];const d=DOCS[c.doc];const P=await pick(c,r);let body='',gap=false;const unk=r.unk||[];
+  P.forEach(p=>{if(p.keep){body+=`<p>${hl(p.u,r)}</p>`;gap=false}else if(!gap){body+='<p class="gap">…</p>';gap=true}});
+  const seen=new Set([c.doc+c.cite]);const others=r.list.slice(1).map(x=>CHUNKS[x.i]).filter(o=>!seen.has(o.doc+o.cite)&&seen.add(o.doc+o.cite)).slice(0,3);
+  const id='f'+Math.random().toString(36).slice(2,8);
+  return `<div class="ans"><div class="who"><svg class="bot" viewBox="0 0 640 512" aria-hidden="true"><path fill="currentColor" d="M320 0c17.7 0 32 14.3 32 32v64h120c39.8 0 72 32.2 72 72v272c0 39.8-32.2 72-72 72H168c-39.8 0-72-32.2-72-72V168c0-39.8 32.2-72 72-72h120V32c0-17.7 14.3-32 32-32zM208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16h-32zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16h-32zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16h-32zM264 256a40 40 0 1 0-80 0 40 40 0 1 0 80 0zm152 40a40 40 0 1 0 0-80 40 40 0 1 0 0 80zM48 224h16v192H48c-26.5 0-48-21.5-48-48v-96c0-26.5 21.5-48 48-48zm544 0c26.5 0 48 21.5 48 48v96c0 26.5-21.5 48-48 48h-16V224h16z"/></svg>Rules &amp; Regulations Assistant <span class="m ${cls}">${label}</span>${r.fallback?'<span class="m">model not ready · keyword used</span>':''}</div>
+  ${unk.length?`<div class="none unkn" style="margin-bottom:12px"><b>${unk.map(w=>"“"+esc(w)+"”").join(", ")}</b> ${unk.length>1?"aren't":"isn't"} found in the ${esc(scopeName())}, so that part of your question may be outside these documents. The closest provision is shown below.</div>`:""}
+  ${AI.on&&$('#aiOn').checked&&!$('#cmp').checked?'<div class="aisum" data-ai="1"></div>':''}${r.partial?`<div class="warn am partn">The documents don't set out this exact situation step by step. These are the closest provisions in the law. Check them with the legal cell before acting.</div>`:''}<div class="xpart">${amendNote(c)}<div class="doc">${esc(d.title)}</div><div class="h">${esc(c.cite)} · ${esc(c.title)}</div><div class="body">${body}</div>
+  <span class="lnk" onclick="const f=document.getElementById('${id}');f.style.display=f.style.display==='block'?'none':'block'">Show full text</span><div class="full" id="${id}">${esc(tidy(c.text))}</div>
+  <div class="src"><b>Source:</b> ${esc(d.title)}, ${esc(c.cite)} <span style="color:var(--muted)">· page ${c.page} of the PDF${d.file?` (${esc(d.file)})`:''}${d.rspcb?`${d.orderNo?' · No. '+esc(d.orderNo):''}${d.issue?' · dated '+esc(d.issue):d.year?' · '+d.year:''}`:''}</span></div>
+  ${others.length?`<div class="more">Also relevant: ${others.map(o=>`<a onclick="showChunk(${o.id},this)">${where(o)}</a>`).join('')}</div>`:''}
+  </div><div class="dbg">${esc(r.dbg)}</div></div>`;
+}
+function showChunk(id,el){const c=CHUNKS[id];const d=document.createElement('div');d.className='full';d.style.display='block';d.textContent=DOCS[c.doc].title+' · '+c.cite+' · '+c.title+' (page '+c.page+')\n\n'+c.text;el.closest('.ans').appendChild(d);el.remove()}
+/* ---------- AI summary through the relay (optional) ---------- */
+const RELAY=(new URLSearchParams(location.search).get('relay')||'https://rspcb-relay.pgpsm11023.workers.dev').replace(/\/$/,'');
+const AI={on:/^https:\/\/|^http:\/\/(localhost|127\.0\.0\.1)[:/]/.test(RELAY),up:null};
+function aiStat(cls,txt){const p=$('#aistat');p.style.display='';p.className='pill '+cls;p.querySelector('span').textContent=txt}
+async function aiFetch(path,opt,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms);try{const r=await fetch(RELAY+path,{...opt,signal:c.signal});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j}finally{clearTimeout(t)}}
+async function aiHealth(){if(!AI.on)return;aiStat('load','AI summary: checking');try{const j=await aiFetch('/health',{},8000);AI.up=!!j.ok;aiStat(j.ok?'ok':'bad',j.ok?'AI summary: online':'AI summary: offline mode')}catch(e){AI.up=false;aiStat('bad','AI summary: offline mode')}}
+function aiExtracts(r){const MAXEX=r.count?8:5;const seen=new Set(),out=[];for(const x of r.list){const c=CHUNKS[x.i];const k=c.doc+c.cite;if(seen.has(k))continue;seen.add(k);const d=DOCS[c.doc];
+  const st=d.rspcb?[d.status!=='office order'&&d.status!=='guidance'?d.status:'',d.later&&d.later.length?'later order: '+d.later[0].title+' ('+d.later[0].date+')':d.sameTopic&&d.sameTopic.length?'later order on same topic: '+d.sameTopic[d.sameTopic.length-1].title+' ('+d.sameTopic[d.sameTopic.length-1].date+')':''].filter(Boolean).join('; '):(/^superseded|amendment/.test(d.status)?d.status:'');
+  out.push({id:c.id,source:(d.rspcb?d.short+' – ':'')+d.title+', '+c.cite+' · '+c.title,status:st,text:tidy(c.text)});if(out.length>=MAXEX)break}return out}
+function aiRender(txt,ex){const cref=s=>s.replace(/\[(\d)(?:\s*\([a-z0-9]{1,4}\))?\]/gi,(m,n)=>{const e=ex[+n-1];return e?`<span class="cref" title="${esc(e.source)}" onclick="aiOpen(${e.id},this)">${n}</span>`:m});
+  const bold=s=>s.replace(/\*\*([^*]+?)\*\*/g,'<b>$1</b>').replace(/\*\*/g,'');const lines=esc(txt).split('\n').map(l=>l.trim()).filter(Boolean);let h='',ul=false;
+  lines.forEach(l=>{if(/^[-•*]\s+/.test(l)){if(!ul){h+='<ul>';ul=true}h+='<li>'+bold(cref(l.replace(/^[-•*]\s+/,'')))+'</li>'}else{if(ul){h+='</ul>';ul=false}h+='<p>'+bold(cref(l))+'</p>'}});if(ul)h+='</ul>';return h}
+function aiOpen(id,el){const a=el.closest('.ans');const c=CHUNKS[id];const d=document.createElement('div');d.className='full';d.style.display='block';d.textContent=DOCS[c.doc].title+' · '+c.cite+' · '+c.title+' (page '+c.page+')\n\n'+c.text;a.appendChild(d);d.scrollIntoView({behavior:'smooth',block:'nearest'})}
+async function aiSummary(slot,q,r){
+  const ex=aiExtracts(r);slot.className='aisum wait';slot.innerHTML='<div class="lab">AI summary</div>Writing a short summary from the extracts<span class="dots"></span>';
+  try{const j=await aiFetch('/summarize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q,extracts:ex.map(({source,status,text})=>({source,status,text}))})},20000);
+    if(!j.summary)throw new Error('empty');const cut=j.stop==='max_tokens';slot.className='aisum';slot.innerHTML=`<div class="lab">AI summary <span>· written only from the numbered extracts; check the official text below</span></div>${aiRender(j.summary,ex)}${cut?'<p style="color:var(--muted);font-size:13px">(Summary was cut short. The full official text is below.)</p>':''}`;
+    if(AI.up!==true){AI.up=true;aiStat('ok','AI summary: online')}
+    if(/(don['’]t|do not) directly answer/i.test(j.summary)){const a=slot.closest('.ans');a.querySelectorAll('.unkn,.partn').forEach(e=>e.remove());const ls=slot.querySelector('.lab span');if(ls)ls.textContent='· written only from the extracts the search found';const x=a.querySelector('.xpart');
+      if(x){x.style.display='none';const l=document.createElement('span');l.className='lnk';l.textContent='Show closest provisions';l.onclick=()=>{const on=x.style.display==='none';x.style.display=on?'':'none';l.textContent=on?'Hide closest provisions':'Show closest provisions'};x.before(l)}}}
+  catch(e){console.warn('AI summary unavailable',e);AI.up=false;aiStat('bad','AI summary: offline mode');slot.className='aisum off';slot.textContent='AI summary is unavailable right now. The exact extract from the official text is shown below.'}}
+if(AI.on){$('#aiRow').style.display='flex';aiHealth()}
+$('#aiOn').onchange=e=>{$('#aistat').style.display=e.target.checked&&AI.on?'':'none'};
+$('#aiTest').onclick=async()=>{const o=$('#aiTestOut');o.textContent='Testing…';const t0=Date.now();
+  try{const j=await aiFetch('/summarize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:'What is the minimum thickness of plastic carry bags?',extracts:[{source:'Plastic Waste Management Rules, 2016, Rule 4(1)(c)',text:'carry bag made of virgin or recycled plastic, shall not be less than seventy five microns in thickness with effect from the 30th September, 2021 and one hundred and twenty (120) microns in thickness with effect from the 31st December, 2022'}]})},20000);
+    AI.up=true;aiStat('ok','AI summary: online');o.innerHTML=`<b style="color:var(--g700)">Working</b> · ${((Date.now()-t0)/1000).toFixed(1)} s · ${esc(j.model||'')}`}
+  catch(e){AI.up=false;aiStat('bad','AI summary: offline mode');o.innerHTML=`<b style="color:var(--amber)">Not reachable</b> (${esc(e.message||e.name)}). Answers will still show the exact extract.`}};
+const LBL={kw:['Keyword','kw'],sem:['Meaning','sem'],hy:['Hybrid','hy']};
+async function ask(){
+  const q=$('#qin').value.trim();if(!q)return;$('#qin').value='';
+  const th=$('#thread');const box=document.createElement('div');box.style.display='flex';box.style.flexDirection='column';box.style.gap='10px';
+  $('#clrBtn').style.display='';
+  box.innerHTML=`<div class="q">${esc(q)}</div><div class="ans" style="color:var(--muted)">Searching the library…</div>`;th.prepend(box);
+  let html;
+  let R=null;
+  if($('#cmp').checked){const cs=await Promise.all(['kw','sem','hy'].map(async m=>{const r=await search(q,m);const l=LBL[m];return card(r,l[0]+(m!=='kw'&&!SEM.ready?' (smart search not ready)':''),l[1])}));html=`<div class="cols">${cs.join('')}</div>`}
+  if(!$('#cmp').checked){R=await search(q,MODE);R.count=/\b(how many|list (all|the)|which (all|are the)|number of|name all|all the)\b/i.test(q);const l=LBL[R.mode]||LBL.kw;html=await card(R,l[0],l[1])}
+  box.lastElementChild.outerHTML=html;
+  const slot=box.querySelector('[data-ai]');if(slot&&R&&!R.none&&R.list.length)aiSummary(slot,q,R);else if(slot)slot.remove();
+}
+$('#clrBtn').onclick=()=>{$('#thread').innerHTML='';$('#clrBtn').style.display='none';$('#qin').focus()};
+loadSem();
+</script>
+</body>
+</html>
