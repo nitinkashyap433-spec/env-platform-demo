@@ -295,10 +295,10 @@ const ROUTE=[
  ['air',/\bair act\b|air \(prevention|\b1981\b|air pollution control area|\bchimney\b|control equipment/],
  ['swm26',/solid waste|\bswm\b|municipal waste|garbage|\bulb\b|urban local bod|bulk waste generator|landfill|legacy waste|compost/],
  ['swm16',/swm rules,? 2016|solid waste management rules,? 2016|2016 solid waste/],
- ['pwm',/plastic|carry bag|multi-?layer|\bmlp\b|biodegradable|compostable/],
- ['ew',/e-?waste|electronic|electrical and electronic|\beee\b|refurbish|dismantl/],
+ ['pwm',/\bpwm\b|plastic|carry bag|multi-?layer|\bmlp\b|biodegradable|compostable/],
+ ['ew',/\bewm\b|e-?waste|electronic|electrical and electronic|\beee\b|refurbish|dismantl/],
  ['bmw',/bio-?medical|\bbmw\b|hospital|clinic|health ?care|syringe|anatomical|\bcbwtf|sharps|nursing home/],
- ['haz',/hazardous|transboundary|used oil|waste oil|\btsdf\b|co-?processing|import(ing)? of waste/],
+ ['haz',/\bhowm\b|\bhwm\b|hazardous|transboundary|used oil|waste oil|\btsdf\b|co-?processing|import(ing)? of waste/],
  ['cnd',/construction|demolition|\bc ?& ?d\b|debris|building material/],
  ['mcdr',/mineral|\bmining\b|\bmine\b|mines|ibm\b|indian bureau of mines|ore\b/],
  ['enf',/adjudicating|show.?cause|\bseal|closure|close down|shut ?down|not (giving|replying|responding|cooperating)|refus|obstruct|prosecut|stop (the )?(electricity|power|water)/],
@@ -491,6 +491,18 @@ $('#aiTest').onclick=async()=>{const o=$('#aiTestOut');o.textContent='Testing…
   try{const j=await aiFetch('/summarize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:'What is the minimum thickness of plastic carry bags?',extracts:[{source:'Plastic Waste Management Rules, 2016, Rule 4(1)(c)',text:'carry bag made of virgin or recycled plastic, shall not be less than seventy five microns in thickness with effect from the 30th September, 2021 and one hundred and twenty (120) microns in thickness with effect from the 31st December, 2022'}]})},20000);
     AI.up=true;aiStat('ok','AI summary: online');o.innerHTML=`<b style="color:var(--g700)">Working</b> · ${((Date.now()-t0)/1000).toFixed(1)} s · ${esc(j.model||'')}`}
   catch(e){AI.up=false;aiStat('bad','AI summary: offline mode');o.innerHTML=`<b style="color:var(--amber)">Not reachable</b> (${esc(e.message||e.name)}). Answers will still show the exact extract.`}};
+/* ---------- amendment history (answered from the library catalogue, not by search) ---------- */
+function amendHistory(q){const ql=q.toLowerCase();
+  if(!/(how many|count|number of|list|history|which|all).{0,40}(amend|chang|revis|modif)|(amend|chang|revis|modif)\w*.{0,30}(how many|count|so far|till now|history)/.test(ql))return null;
+  const hit=routeDocs(q);if(!hit.size)return null;
+  const prin=[...hit].map(k=>DOCS[k]).filter(d=>d&&!d.rspcb&&d.status!=='amendment'&&!/^superseded/.test(d.status)&&Object.values(DOCS).some(a=>a.amends===d.id));
+  if(prin.length!==1)return null;const P=prin[0];
+  const am=Object.values(DOCS).filter(a=>a.amends===P.id).sort((a,b)=>(a.year||0)-(b.year||0)||(/2nd|second/i.test(a.short)?1:0)-(/2nd|second/i.test(b.short)?1:0)||a.short.localeCompare(b.short));
+  return {P,am}}
+function amendCard(h){const {P,am}=h;
+  return `<div class="ans"><div class="who">Rules &amp; Regulations Assistant <span class="m hy">Library record</span></div>
+  <div class="aisum"><div class="lab">From the library catalogue</div><p>The library holds <b>${am.length} amendment${am.length>1?'s':''}</b> to the <b>${esc(P.title)}</b>:</p><ul>${am.map(a=>`<li>${esc(a.title)}${a.year?' ('+a.year+')':''}</li>`).join('')}</ul>
+  <p style="color:var(--muted);font-size:13px">This counts only the amendment notifications loaded in this library. The principal text here is ${esc(P.status)}. Check the official gazette for any notified after that.</p></div></div>`}
 const LBL={kw:['Keyword','kw'],sem:['Meaning','sem'],hy:['Hybrid','hy']};
 async function ask(){
   const q=$('#qin').value.trim();if(!q)return;$('#qin').value='';
@@ -500,6 +512,7 @@ async function ask(){
   let html;
   let R=null;
   if($('#cmp').checked){const cs=await Promise.all(['kw','sem','hy'].map(async m=>{const r=await search(q,m);const l=LBL[m];return card(r,l[0]+(m!=='kw'&&!SEM.ready?' (smart search not ready)':''),l[1])}));html=`<div class="cols">${cs.join('')}</div>`}
+  const AH=!$('#cmp').checked&&amendHistory(q);if(AH){box.lastElementChild.outerHTML=amendCard(AH);return}
   if(!$('#cmp').checked){R=await search(q,MODE);R.count=/\b(how many|list (all|the)|which (all|are the)|number of|name all|all the)\b/i.test(q);const l=LBL[R.mode]||LBL.kw;html=await card(R,l[0],l[1])}
   box.lastElementChild.outerHTML=html;
   const slot=box.querySelector('[data-ai]');if(slot&&R&&!R.none&&R.list.length)aiSummary(slot,q,R);else if(slot)slot.remove();
