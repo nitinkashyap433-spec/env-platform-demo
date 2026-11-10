@@ -2359,22 +2359,23 @@ Verified at ________ on ________`;
 
 /* ============ EODB: consent timelines and industry feedback ============ */
 // Built on MIS-2 application timestamps plus a one-click rating after each decision. All figures illustrative.
-const EO_TYPES={cte:['Consent to Establish',120],cto:['Consent to Operate',120],ren:['CTO renewal',60]};
+const EO_TYPES={cte:['Consent to Establish'],cto:['Consent to Operate'],exp:['Expansion / modification']};
+const EO_LIM={Red:90,Orange:60,Green:30};
 const EO_STAGES=[['pre','Pre-screening',7],['fee','Fee and document check',5],['insp','Site inspection',21],['rep','Inspection report to decision desk',10],['dec','Decision and sign-off',14],['iss','Certificate issued',3]];
 const EO_REASONS_BAD=['Repeated queries','Inspection took long','Not told what was missing','Fee calculation unclear','Had to visit the office'];
 const EO_REASONS_GOOD=['Clear checklist','Quick decision','Helpful officer','Status updates by SMS'];
-const EO_COMMENTS=[[2,'Query raised three times for the same document.'],[5,'Renewal came through in under two weeks.'],[3,'Inspection was scheduled late but decision was quick after.'],[1,'No update for six weeks, had to call the RO.'],[4,'Checklist was clear. Fee screen could explain the slab better.'],[2,'Asked for a CGWA NOC that was already uploaded.'],[5,'Green category acknowledgement the same week.'],[3,'Fine overall, but the site visit date kept moving.']];
+const EO_COMMENTS=[[2,'Query raised three times for the same document.'],[5,'Expansion approval came through in under two weeks.'],[3,'Inspection was scheduled late but decision was quick after.'],[1,'No update for six weeks, had to call the RO.'],[4,'Checklist was clear. Fee screen could explain the slab better.'],[2,'Asked for a CGWA NOC that was already uploaded.'],[5,'Green category acknowledgement the same week.'],[3,'Fine overall, but the site visit date kept moving.']];
 const EO=[];let EOF_={type:'',cat:''};
 (function(){const R=mulberry32(5150);const pick=a=>a[Math.floor(R()*a.length)];
- const roSlow={};ROS.forEach((r,i)=>roSlow[r]=.75+R()*.8);
- for(let n=0;n<1800;n++){const ro=pick(ROS);const ty=R()<.22?'cte':R()<.45?'cto':'ren';const cat=R()<.35?'Red':R()<.7?'Orange':'Green';
-  const catF={Red:1.25,Orange:1,Green:.55}[cat];const age=Math.floor(R()*365);const sub=new Date(TODAY.getTime()-age*DAY);
+ const roSlow={};ROS.forEach((r,i)=>roSlow[r]=.8+R()*.5);
+ for(let n=0;n<1800;n++){const ro=pick(ROS);const ty=R()<.3?'cte':R()<.7?'cto':'exp';const cat=R()<.35?'Red':R()<.7?'Orange':'Green';
+  const catF={Red:1.02,Orange:.67,Green:.34}[cat];const age=Math.floor(R()*365);const sub=new Date(TODAY.getTime()-age*DAY);
   let t=0,st={},q=0;const done=R()<.86||age>200;
-  for(const [k,,base] of EO_STAGES){let d=base*catF*roSlow[ro]*(ty==='ren'?.55:1)*Math.exp((R()-.45)*.9);
-   if(k==='insp'&&cat==='Green'&&ty==='ren')d=0;
-   if((k==='pre'||k==='fee')&&R()<.28*roSlow[ro]){q++;d+=6+R()*10}
+  for(const [k,,base] of EO_STAGES){let d=base*catF*roSlow[ro]*(ty==='exp'?.8:1)*Math.exp((R()-.45)*.9);
+   if(k==='insp'&&cat==='Green'&&ty==='exp')d=0;
+   if((k==='pre'||k==='fee')&&R()<.2*roSlow[ro]){q++;d+=5+R()*8}
    st[k]=Math.round(d*10)/10;t+=d}
-  const days=Math.round(t);const lim=EO_TYPES[ty][1];const decided=done&&age>=days;
+  const days=Math.round(t);const lim=EO_LIM[cat];const decided=done&&age>=days;
   const within=days<=lim;const rated=decided&&R()<.42;
   let rating=null;if(rated){const base=5-(days/lim)*2.2-q*.7+(R()-.5)*1.6;rating=Math.max(1,Math.min(5,Math.round(base)))}
   EO.push({ro,ty,cat,sub,days,st,q,decided,within,lim,rating,reason:rating==null?null:rating<=3?pick(EO_REASONS_BAD):pick(EO_REASONS_GOOD),pendDays:decided?null:age});
@@ -2385,30 +2386,48 @@ function eoSet(k,v){EOF_[k]=v;renderEODB()}
 function renderEODB(){
  const A=eoF(),D=A.filter(x=>x.decided),P=A.filter(x=>!x.decided);const R_=D.filter(x=>x.rating!=null);
  const wi=D.length?D.filter(x=>x.within).length/D.length:0;const avgR=R_.length?R_.reduce((a,x)=>a+x.rating,0)/R_.length:0;
+ const rf=FAC.filter(f=>inRole(f.ro));const vc=rf.length?rf.filter(f=>daysToExpiry(f)>=0).length/rf.length:0;const qr=D.length?D.filter(x=>x.q>0).length/D.length:0;
  const risk=P.filter(x=>x.pendDays>=x.lim-7);const qpa=D.length?D.reduce((a,x)=>a+x.q,0)/D.length:0;
  const stMed=EO_STAGES.map(([k,l,b])=>[k,l,eoMed(D.map(x=>x.st[k]).filter(v=>v>0)),b]);const tot=stMed.reduce((a,x)=>a+x[2],0)||1;
  const slow=stMed.slice().sort((a,b)=>(b[2]-b[3])-(a[2]-a[3]))[0];
  const COLS=['#9cc7a9','#6fb08a','#e0a03a','#c9822a','#2f6fb3','#1e8a4c'];
- const byType=Object.entries(EO_TYPES).map(([k,[l,lim]])=>{const d=D.filter(x=>x.ty===k);return [l,lim,eoMed(d.map(x=>x.days)),d.length?d.filter(x=>x.within).length/d.length:0,d.length]});
+ const byCat=Object.entries(EO_LIM).map(([c,lim])=>{const d=D.filter(x=>x.cat===c);return [c,lim,eoMed(d.map(x=>x.days)),d.length?d.filter(x=>x.within).length/d.length:0,d.length]});
  const ros=[...new Set(A.map(x=>x.ro))].map(r=>{const d=D.filter(x=>x.ro===r),rr=d.filter(x=>x.rating!=null);return{r,n:d.length,med:eoMed(d.map(x=>x.days)),wi:d.length?d.filter(x=>x.within).length/d.length:0,q:d.length?d.reduce((a,x)=>a+x.q,0)/d.length:0,rt:rr.length?rr.reduce((a,x)=>a+x.rating,0)/rr.length:null,risk:P.filter(x=>x.ro===r&&x.pendDays>=x.lim-7).length}}).sort((a,b)=>a.wi-b.wi);
  const dist=[5,4,3,2,1].map(s=>[s,R_.filter(x=>x.rating===s).length]);const dmax=Math.max(1,...dist.map(x=>x[1]));
  const rc={};R_.forEach(x=>{rc[x.reason]=(rc[x.reason]||0)+1});const bad=EO_REASONS_BAD.map(r=>[r,rc[r]||0]).sort((a,b)=>b[1]-a[1]),good=EO_REASONS_GOOD.map(r=>[r,rc[r]||0]).sort((a,b)=>b[1]-a[1]);
  const pct=v=>Math.round(v*100)+'%';const sel=(k,o)=>`<select class="btn sm" onchange="eoSet('${k}',this.value)">${o.map(([v,l])=>`<option value="${v}" ${EOF_[k]===v?'selected':''}>${l}</option>`).join('')}</select>`;
- const BRAP=[['Single online application for CTE, CTO and authorisation','Done'],['Checklist of documents published for each category','Done'],['Timelines notified and shown to the applicant','Done'],['Auto-renewal of CTO for eligible units','In progress'],['Inspection only for Red and large Orange units','In progress'],['Applicant can see stage and pending officer','Gap'],['Feedback collected after every decision','Gap']];
+ const BRAP=[
+  ['101','Ensure that information is available on website on all necessary components for availing a service','such as comprehensive list of documents required, fee, procedure with stage wise details and time for completion of each procedure/ step, searchable based on risk category, size of firm, business location and Foreign/ Domestic investor','Consent to Establish','Return reasons show which documents to add to the checklist'],
+  ['102','Mandate time-bound delivery through a legislation','such as: 1. Right to Services Act / Public Service guarantee Act 2. Equivalent act with punitive provisions and grievance mechanism in case the stipulated timelines are not met','Consent to Establish','Every application tracked against its notified timeline'],
+  ['103','States to have an online system and ensure the following features without the requirement of physical visit to the department','i. Submission of application ii. Payment of application fee iii. Track status of application iv. Download the final signed certificate v. Third party verification','Consent to Establish','Stage-wise status, with the pending desk, for the applicant'],
+  ['128','Mandate to Publish an online dashboard in public domain','with following features: i. Clearly publish the data on number of applications received and granted, and the time taken and fee incurred to grant approvals/certificate ii. Highlight that the dashboard is updated preferably on real time or updated regularly (daily/weekly/fortnightly/monthly). Date and time of information updation may be mentioned. Covers Water Act, Air Act, and authorisations under the Hazardous, Plastic, E-waste, Bio-medical, Solid, C&D and Battery waste rules','Dashboard for environment related approvals','This screen, refreshed daily from MIS-2'],
+  ['98','Allow for renewal of Consent to Operate (under Water Act, 1974 and Air Act, 1981) based on self-certification and/or third party certification','','Environment Registration','Self-certified units picked for random audit by risk'],
+  ['99','Mandate to Publish an online dashboard in public domain for renewal of Consent to Operate','with following features: i. Clearly publish the data on number of applications received and granted, and the time taken and fee incurred to grant approvals/certificate ii. Highlight that the dashboard is updated preferably on real time or updated regularly (daily/weekly/fortnightly/monthly). Date and time of information updation may be mentioned','Environment Registration','Covered by the same dashboard'],
+  ['100','Allow validity period of Consent to Operate for period of 5 years and above.','','Environment Registration','Overtaken: CTO now valid until cancelled (Jan 2026)']];
  $('#eodbBody').innerHTML=`
  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><h1>Ease of doing business</h1><p class="sub" style="margin-bottom:12px">How long consents take, where they get stuck, and what industries say about the process. Built from MIS-2 timestamps plus a one-click rating after each decision.</p></div>
  <div style="display:flex;gap:8px;flex-wrap:wrap">${sel('type',[['','All application types'],...Object.entries(EO_TYPES).map(([k,v])=>[k,v[0]])])}${sel('cat',[['','All categories'],['Red','Red'],['Orange','Orange'],['Green','Green']])}</div></div>
  <div class="grid g5">${kpiRow([['Decided in last 12 months',D.length.toLocaleString('en-IN'),`${P.length} still pending`],
-  ['Decided within the notified time',pct(wi),'against the timeline for each type',wi<.8?'var(--amber)':''],
+  ['Decided within the notified time',pct(wi),'target 95%',wi<.8?'var(--amber)':''],
   ['Pending close to the deadline',risk.length,'within 7 days of deemed approval or past it',risk.length?'var(--red)':''],
   ['Queries per application',qpa.toFixed(1),'each query restarts the applicant\'s clock'],
   ['Industry rating',avgR?avgR.toFixed(1)+' / 5':'—',`${R_.length} ratings · ${D.length?pct(R_.length/D.length):'0%'} responded`]])}</div>
+ <div class="card mt"><div class="card-h"><h2>Benchmarks</h2><span class="hint">Today vs reference</span></div>
+ <div style="overflow-x:auto"><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Measure</th><th style="text-align:right">Today</th><th style="text-align:right">Benchmark</th><th>Reference</th></tr></thead><tbody>
+ ${[['Decided within notified time',pct(wi),'95%','UK Environment Agency target (achieved 79% in 2024-25)',wi<.95],
+    ['Industries holding a valid CTO',pct(vc),'99%','Top band in CPCB\'s performance audit of SPCBs',vc<.99],
+    ['Applications sent back for queries',pct(qr),'25%','Share of UK permit applications found incomplete',qr>.25],
+    ['Public dashboard: received, granted, time, fee','This screen','Required','BRAP 2024, Reform 128',false],
+    ['Applicant rating after each decision',R_.length?avgR.toFixed(1)+' / 5':'—','—','Not measured by BRAP or the CPCB audit',false]].map(([m,t,b,r,bad])=>`<tr><td>${m}</td><td style="text-align:right;font-weight:600;color:${bad?'var(--amber)':'inherit'}">${t}</td><td style="text-align:right">${b}</td><td class="small muted">${r}</td></tr>`).join('')}
+ </tbody></table></div>
+ <div class="src">UK Environment Agency, "Improving our environmental permitting service" (Jul 2025): 79% of applications within target, aim 95%, about 25% lack sufficient information. CPCB, Performance audit of SPCBs/PCCs, report to NGT in O.A. 95 of 2018 (Sep 2020): consent scored on CTOs issued within the stipulated period and share of industries with valid CTO. DPIIT, BRAP 2024. "Today" figures are illustrative.</div></div>
  <div class="grid g-6040 mt">
   <div class="card"><div class="card-h"><h2>Time by stage</h2><span class="hint">Median days</span></div>
    <div style="display:flex;height:34px;border-radius:8px;overflow:hidden;margin:4px 0 10px">${stMed.map(([k,l,m],i)=>m?`<div title="${l}: ${m.toFixed(0)} days" style="width:${m/tot*100}%;background:${COLS[i]};color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center">${m>=3?m.toFixed(0)+'d':''}</div>`:'').join('')}</div>
    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 14px">${stMed.map(([k,l,m,b],i)=>`<div class="small"><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${COLS[i]};vertical-align:-1px"></i> ${l}<div><b>${m.toFixed(0)} days</b> <span class="muted">· norm ${b}</span></div></div>`).join('')}</div>
    <p class="small" style="margin:12px 0 0;background:#fff8e6;border:1px solid #f0dca8;border-radius:8px;padding:8px 10px">Furthest over norm: <b>${slow[1]}</b>, ${slow[2].toFixed(0)} d vs ${slow[3]}</p></div>
-  <div class="card"><div class="card-h"><h2>By application type</h2></div><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Type</th><th style="text-align:right">Notified</th><th style="text-align:right">Median</th><th style="text-align:right">Within time</th></tr></thead><tbody>${byType.map(([l,lim,m,w,n])=>`<tr><td>${l}<div class="small muted">${n} decided</div></td><td style="text-align:right">${lim} d</td><td style="text-align:right"><b>${m} d</b></td><td style="text-align:right;color:${w<.8?'var(--amber)':'#1d6b40'}">${pct(w)}</td></tr>`).join('')}</tbody></table>
+  <div class="card"><div class="card-h"><h2>By category</h2></div><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Category</th><th style="text-align:right">Notified</th><th style="text-align:right">Median</th><th style="text-align:right">Within time</th></tr></thead><tbody>${byCat.map(([c,lim,m,w,n])=>`<tr><td>${c}<div class="small muted">${n} decided</div></td><td style="text-align:right">${lim} d</td><td style="text-align:right"><b>${m} d</b></td><td style="text-align:right;color:${w<.8?'var(--amber)':'#1d6b40'}">${Math.round(w*100)}%</td></tr>`).join('')}</tbody></table>
+   <div class="src">Red: 90 days under the MoEFCC amendment to the consent guidelines notified 23 Jan 2026 (earlier 120). Orange 60 and Green 30: to be confirmed against the gazette.</div>
    </div>
  </div>
  <div class="card mt"><div class="card-h"><h2>Regional offices</h2><span class="hint">Slowest first</span></div><div style="overflow-x:auto"><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Regional office</th><th style="text-align:right">Decided</th><th style="text-align:right">Median days</th><th style="text-align:right">Within time</th><th style="text-align:right">Queries / application</th><th style="text-align:right">Near deadline</th><th style="text-align:right">Rating</th></tr></thead>
@@ -2423,7 +2442,10 @@ function renderEODB(){
    <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:#fbfcfb"><div class="small muted">Consent to Operate issued · RJ-PAL-0412</div><div style="font-weight:600;margin:6px 0">How was your experience with this application?</div><div style="font-size:22px;letter-spacing:4px;color:#e0a03a">★★★★☆</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${[...EO_REASONS_GOOD.slice(0,2),...EO_REASONS_BAD.slice(0,3)].map(r=>`<span class="small" style="border:1px solid var(--line);border-radius:14px;padding:2px 9px;background:#fff">${r}</span>`).join('')}</div></div>
    <p class="small muted" style="margin:10px 0 0">Ratings go to HQ, not the handling officer.</p></div>
  </div>
- <div class="card mt"><div class="card-h"><h2>Reform checklist</h2><span class="hint">Status illustrative</span></div><div class="grid g2" style="gap:6px 24px">${BRAP.map(([t,s])=>`<div class="small" style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #f0f3f1"><span>${t}</span><span class="rstag ${s==='Done'?'m':s==='Gap'?'f':''}" style="${s==='In progress'?'background:#fff4e0;color:#9a4d06':''}">${s}</span></div>`).join('')}</div></div>
+ <div class="card mt"><div class="card-h"><h2>BRAP 2024 · Environment reforms</h2><span class="rstag m" style="font-size:11.5px">Rajasthan: Top Achiever, Environment Registration</span></div>
+  <div style="overflow-x:auto"><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th style="width:60px">Reform</th><th>Reform text (as in BRAP 2024)</th><th>Platform</th><th style="text-align:right">Status</th></tr></thead>
+  <tbody>${BRAP.map(([n,t,more,area,pf])=>`<tr><td><b>${n}</b></td><td>${t}${more?` <span class="qi" tabindex="0" data-tip="<span class='qk'>${area}</span>${esc(t)} ${esc(more)}">i</span>`:` <span class="qi" tabindex="0" data-tip="<span class='qk'>${area}</span>${esc(t)}">i</span>`}</td><td class="small" style="color:${pf.startsWith('Overtaken')?'#8a948e':'#1d6b40'}">${pf}</td><td style="text-align:right;white-space:nowrap" class="small muted">To confirm</td></tr>`).join('')}</tbody></table></div>
+  <div class="src">Reform text quoted from DPIIT, Business Reforms Action Plan 2024, Part B, Area 8 (Environment Registration Enablers). Rajasthan was named Top Achiever in Environmental Registration in the BRAP 2024 results. BRAP checks that each reform exists, with evidence; it does not measure how fast applications are actually decided. Status of each reform at RSPCB to be confirmed with the Board.</div></div>
  <div class="rvcaution mt">Application counts, timings, ratings and comments are illustrative. At implementation they would come from MIS-2 application timestamps and the feedback prompt added inside MIS-2.</div>`;
 }
 
