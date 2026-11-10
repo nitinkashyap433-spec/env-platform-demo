@@ -1037,6 +1037,10 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
 <i class="fas fa-file-signature nav-icon"></i>
 <span>Consent management</span>
 </a>
+<a role="button" tabindex="0" class="nav-link" data-tab="eodb">
+<i class="fas fa-gauge-high nav-icon"></i>
+<span>Ease of doing business</span>
+</a>
 <div class="nav-sec">Internal efficiency</div>
 <a role="button" tabindex="0" class="nav-link" data-tab="knowledge">
 <i class="fas fa-robot nav-icon"></i>
@@ -1141,6 +1145,7 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
                 <div id="fac" class="tab-content"></div>
                 <div id="programme" class="tab-content"></div>
                 <div id="river" class="tab-content"></div>
+                <div id="eodb" class="tab-content"></div>
                 <div id="ngt" class="tab-content"></div>
                 <div id="lab" class="tab-content"></div>
                 <!-- Air Quality Dashboard -->
@@ -3393,6 +3398,7 @@ const EIP_SECTIONS={
   fac:[['Industry 360','platform.html?embed=1#fac','new']],
   programme:[['Programme tracker','project-moniter.html','']],
   river:[['River monitor','platform.html?embed=1#river','new']],
+  eodb:[['Ease of doing business','platform.html?embed=1#eodb','new']],
   ngt:[['Case tracker','platform.html?embed=1#ngt','new']],
   lab:[['Laboratory &amp; samples','platform.html?embed=1#lab','new']],
   air:[['Overview','__own__',''],['AQI forecast','Predicted-air-quality.html','']],
@@ -3402,7 +3408,7 @@ const EIP_SECTIONS={
   grievance:[['Overview','__own__',''],['Analysis: register &amp; clusters','platform.html?embed=1#griev','new']],
   knowledge:[['Rules & regulations assistant','Regulatory_Assistant.html?embed=1','new']]
 };
-const VIEW2TAB={home:['home',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
+const VIEW2TAB={home:['home',0],eodb:['eodb',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
 function eipBuild(){
   // Grievance section is accidentally nested inside the Knowledge section (unclosed tags); move it back
   {const mc=document.querySelector('.main-content');document.querySelectorAll('.tab-content').forEach(t=>{if(t.parentElement!==mc)mc.appendChild(t)})}
@@ -3475,7 +3481,7 @@ const AREAS=[
   ['grievance',1,'Grievance management','Complaints closed one by one','Repeat complaints grouped by unit and area, with time to close']]},
  {ic:'fa-file-signature',t:'New applications &amp; EODB',q:'How quickly and predictably does an industry get its consent?',m:[
   ['consent',1,'Consent pipeline &amp; renewals','Applications sit in MIS-2 with no view of delays','Deadline alerts, deemed-approval risk and renewal reminders'],
-  [null,2,'EODB analytics &amp; industry feedback','Time taken and applicant experience are not measured','Stage-wise time from MIS-2 plus a one-click rating after each consent']]},
+  ['eodb',1,'EODB analytics &amp; industry feedback','Time taken and applicant experience are not measured','Stage-wise time from MIS-2 timestamps plus a one-click rating after each decision']]},
  {ic:'fa-gears',t:'Internal efficiency',q:'How much officer time goes into searching, tracking and chasing?',m:[
   ['knowledge',1,'Rules &amp; regulations assistant','Officers search PDFs and compendiums by hand','Answers with citations, and a warning when an order was changed later'],
   ['ngt',2,'NGT &amp; legal case tracker','Case status lives in files and email','Hearing calendar, compliance deadlines and replies due'],

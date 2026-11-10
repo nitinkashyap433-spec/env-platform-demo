@@ -1248,6 +1248,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <section class="view" id="v-water"><div id="waterBody"></div></section>
     <section class="view" id="v-waste"><div id="wasteBody"></div></section>
     <section class="view" id="v-griev"><div id="grievBody"></div></section>
+    <section class="view" id="v-eodb"><div id="eodbBody"></div></section>
     <section class="view" id="v-river"><div id="riverBody"></div></section>
     <section class="view" id="v-ngt"><div id="ngtBody"></div></section>
     <section class="view" id="v-lab"><div id="labBody"></div></section>
@@ -1581,6 +1582,7 @@ function goLocal(v,opts){
   if(v==='waste')renderWaste();
   if(v==='griev')renderGriev();
   if(v==='river'){if(opts&&opts.river&&RS_DATA[opts.river]){RS.river=opts.river;RS.st=null}RV.mode='sampled';renderRiverS()}
+  if(v==='eodb')renderEODB();
   if(v==='ngt')renderNGT(opts&&opts.case);
   if(v==='lab')renderLab(opts&&opts.id);
 }
@@ -2345,6 +2347,76 @@ ${c.ec?`2. Environmental compensation of ₹${c.ec} crore has been imposed. ₹$
 Deponent
 Verified at ________ on ________`;
   modal(`<h2>Draft compliance affidavit</h2><p class="small muted">Built from the case record and live monitoring data. The legal cell reviews and edits before filing.</p><textarea>${esc(txt)}</textarea><div class="btn-row mt"><button class="btn primary" onclick="closeModal();toast('Draft sent to the legal cell for review (demo)')">Send to legal cell</button><button class="btn" onclick="ngtOpen('${c.id}')">Back to case</button></div>`)}
+
+/* ============ EODB: consent timelines and industry feedback ============ */
+// Built on MIS-2 application timestamps plus a one-click rating after each decision. All figures illustrative.
+const EO_TYPES={cte:['Consent to Establish',120],cto:['Consent to Operate',120],ren:['CTO renewal',60]};
+const EO_STAGES=[['pre','Pre-screening',7],['fee','Fee and document check',5],['insp','Site inspection',21],['rep','Inspection report to decision desk',10],['dec','Decision and sign-off',14],['iss','Certificate issued',3]];
+const EO_REASONS_BAD=['Repeated queries','Inspection took long','Not told what was missing','Fee calculation unclear','Had to visit the office'];
+const EO_REASONS_GOOD=['Clear checklist','Quick decision','Helpful officer','Status updates by SMS'];
+const EO_COMMENTS=[[2,'Query raised three times for the same document.'],[5,'Renewal came through in under two weeks.'],[3,'Inspection was scheduled late but decision was quick after.'],[1,'No update for six weeks, had to call the RO.'],[4,'Checklist was clear. Fee screen could explain the slab better.'],[2,'Asked for a CGWA NOC that was already uploaded.'],[5,'Green category acknowledgement the same week.'],[3,'Fine overall, but the site visit date kept moving.']];
+const EO=[];let EOF_={type:'',cat:''};
+(function(){const R=mulberry32(5150);const pick=a=>a[Math.floor(R()*a.length)];
+ const roSlow={};ROS.forEach((r,i)=>roSlow[r]=.75+R()*.8);
+ for(let n=0;n<1800;n++){const ro=pick(ROS);const ty=R()<.22?'cte':R()<.45?'cto':'ren';const cat=R()<.35?'Red':R()<.7?'Orange':'Green';
+  const catF={Red:1.25,Orange:1,Green:.55}[cat];const age=Math.floor(R()*365);const sub=new Date(TODAY.getTime()-age*DAY);
+  let t=0,st={},q=0;const done=R()<.86||age>200;
+  for(const [k,,base] of EO_STAGES){let d=base*catF*roSlow[ro]*(ty==='ren'?.55:1)*Math.exp((R()-.45)*.9);
+   if(k==='insp'&&cat==='Green'&&ty==='ren')d=0;
+   if((k==='pre'||k==='fee')&&R()<.28*roSlow[ro]){q++;d+=6+R()*10}
+   st[k]=Math.round(d*10)/10;t+=d}
+  const days=Math.round(t);const lim=EO_TYPES[ty][1];const decided=done&&age>=days;
+  const within=days<=lim;const rated=decided&&R()<.42;
+  let rating=null;if(rated){const base=5-(days/lim)*2.2-q*.7+(R()-.5)*1.6;rating=Math.max(1,Math.min(5,Math.round(base)))}
+  EO.push({ro,ty,cat,sub,days,st,q,decided,within,lim,rating,reason:rating==null?null:rating<=3?pick(EO_REASONS_BAD):pick(EO_REASONS_GOOD),pendDays:decided?null:age});
+ }})();
+const eoMed=a=>{if(!a.length)return 0;const b=a.slice().sort((x,y)=>x-y);return b[Math.floor(b.length/2)]};
+const eoF=()=>EO.filter(x=>(!EOF_.type||x.ty===EOF_.type)&&(!EOF_.cat||x.cat===EOF_.cat)&&(ROLE==='HQ'||x.ro===ROLE));
+function eoSet(k,v){EOF_[k]=v;renderEODB()}
+function renderEODB(){
+ const A=eoF(),D=A.filter(x=>x.decided),P=A.filter(x=>!x.decided);const R_=D.filter(x=>x.rating!=null);
+ const wi=D.length?D.filter(x=>x.within).length/D.length:0;const avgR=R_.length?R_.reduce((a,x)=>a+x.rating,0)/R_.length:0;
+ const risk=P.filter(x=>x.pendDays>=x.lim-7);const qpa=D.length?D.reduce((a,x)=>a+x.q,0)/D.length:0;
+ const stMed=EO_STAGES.map(([k,l,b])=>[k,l,eoMed(D.map(x=>x.st[k]).filter(v=>v>0)),b]);const tot=stMed.reduce((a,x)=>a+x[2],0)||1;
+ const slow=stMed.slice().sort((a,b)=>(b[2]-b[3])-(a[2]-a[3]))[0];
+ const COLS=['#9cc7a9','#6fb08a','#e0a03a','#c9822a','#2f6fb3','#1e8a4c'];
+ const byType=Object.entries(EO_TYPES).map(([k,[l,lim]])=>{const d=D.filter(x=>x.ty===k);return [l,lim,eoMed(d.map(x=>x.days)),d.length?d.filter(x=>x.within).length/d.length:0,d.length]});
+ const ros=[...new Set(A.map(x=>x.ro))].map(r=>{const d=D.filter(x=>x.ro===r),rr=d.filter(x=>x.rating!=null);return{r,n:d.length,med:eoMed(d.map(x=>x.days)),wi:d.length?d.filter(x=>x.within).length/d.length:0,q:d.length?d.reduce((a,x)=>a+x.q,0)/d.length:0,rt:rr.length?rr.reduce((a,x)=>a+x.rating,0)/rr.length:null,risk:P.filter(x=>x.ro===r&&x.pendDays>=x.lim-7).length}}).sort((a,b)=>a.wi-b.wi);
+ const dist=[5,4,3,2,1].map(s=>[s,R_.filter(x=>x.rating===s).length]);const dmax=Math.max(1,...dist.map(x=>x[1]));
+ const rc={};R_.forEach(x=>{rc[x.reason]=(rc[x.reason]||0)+1});const bad=EO_REASONS_BAD.map(r=>[r,rc[r]||0]).sort((a,b)=>b[1]-a[1]),good=EO_REASONS_GOOD.map(r=>[r,rc[r]||0]).sort((a,b)=>b[1]-a[1]);
+ const pct=v=>Math.round(v*100)+'%';const sel=(k,o)=>`<select class="btn sm" onchange="eoSet('${k}',this.value)">${o.map(([v,l])=>`<option value="${v}" ${EOF_[k]===v?'selected':''}>${l}</option>`).join('')}</select>`;
+ const BRAP=[['Single online application for CTE, CTO and authorisation','Done'],['Checklist of documents published for each category','Done'],['Timelines notified and shown to the applicant','Done'],['Auto-renewal of CTO for eligible units','In progress'],['Inspection only for Red and large Orange units','In progress'],['Applicant can see stage and pending officer','Gap'],['Feedback collected after every decision','Gap']];
+ $('#eodbBody').innerHTML=`
+ <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><h1>Ease of doing business</h1><p class="sub" style="margin-bottom:12px">How long consents take, where they get stuck, and what industries say about the process. Built from MIS-2 timestamps plus a one-click rating after each decision.</p></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap">${sel('type',[['','All application types'],...Object.entries(EO_TYPES).map(([k,v])=>[k,v[0]])])}${sel('cat',[['','All categories'],['Red','Red'],['Orange','Orange'],['Green','Green']])}</div></div>
+ <div class="grid g5">${kpiRow([['Decided in last 12 months',D.length.toLocaleString('en-IN'),`${P.length} still pending`],
+  ['Decided within the notified time',pct(wi),'against the timeline for each type',wi<.8?'var(--amber)':''],
+  ['Pending close to the deadline',risk.length,'within 7 days of deemed approval or past it',risk.length?'var(--red)':''],
+  ['Queries per application',qpa.toFixed(1),'each query restarts the applicant\'s clock'],
+  ['Industry rating',avgR?avgR.toFixed(1)+' / 5':'—',`${R_.length} ratings · ${D.length?pct(R_.length/D.length):'0%'} responded`]])}</div>
+ <div class="grid g-6040 mt">
+  <div class="card"><div class="card-h"><h2>Where the time goes</h2><span class="hint">Median days per stage, decided applications</span></div>
+   <div style="display:flex;height:34px;border-radius:8px;overflow:hidden;margin:4px 0 10px">${stMed.map(([k,l,m],i)=>m?`<div title="${l}: ${m.toFixed(0)} days" style="width:${m/tot*100}%;background:${COLS[i]};color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center">${m>=3?m.toFixed(0)+'d':''}</div>`:'').join('')}</div>
+   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 14px">${stMed.map(([k,l,m,b],i)=>`<div class="small"><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${COLS[i]};vertical-align:-1px"></i> ${l}<div><b>${m.toFixed(0)} days</b> <span class="muted">· norm ${b}</span></div></div>`).join('')}</div>
+   <p class="small" style="margin:12px 0 0;background:#fff8e6;border:1px solid #f0dca8;border-radius:8px;padding:8px 10px"><b>${slow[1]}</b> runs furthest over its norm: a median of ${slow[2].toFixed(0)} days against ${slow[3]}. That is the first stage to fix.</p></div>
+  <div class="card"><div class="card-h"><h2>By application type</h2></div><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Type</th><th style="text-align:right">Notified</th><th style="text-align:right">Median</th><th style="text-align:right">Within time</th></tr></thead><tbody>${byType.map(([l,lim,m,w,n])=>`<tr><td>${l}<div class="small muted">${n} decided</div></td><td style="text-align:right">${lim} d</td><td style="text-align:right"><b>${m} d</b></td><td style="text-align:right;color:${w<.8?'var(--amber)':'#1d6b40'}">${pct(w)}</td></tr>`).join('')}</tbody></table>
+   <p class="small muted" style="margin:10px 0 0">Notified timelines shown are illustrative. They would be read from the Board's current order on timelines.</p></div>
+ </div>
+ <div class="card mt"><div class="card-h"><h2>Regional offices</h2><span class="hint">Slowest first · click a row to open its pending list in the consent pipeline</span></div><div style="overflow-x:auto"><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Regional office</th><th style="text-align:right">Decided</th><th style="text-align:right">Median days</th><th style="text-align:right">Within time</th><th style="text-align:right">Queries / application</th><th style="text-align:right">Near deadline</th><th style="text-align:right">Rating</th></tr></thead>
+ <tbody>${ros.map(r=>`<tr style="cursor:pointer" onclick="go('consent')"><td><b>${esc(r.r)}</b></td><td style="text-align:right">${r.n}</td><td style="text-align:right">${r.med}</td><td style="text-align:right;color:${r.wi<.75?'var(--red)':r.wi<.85?'var(--amber)':'#1d6b40'}">${pct(r.wi)}</td><td style="text-align:right">${r.q.toFixed(1)}</td><td style="text-align:right">${r.risk||'—'}</td><td style="text-align:right">${r.rt?r.rt.toFixed(1):'—'}</td></tr>`).join('')}</tbody></table></div></div>
+ <div class="grid g-6040 mt">
+  <div class="card"><div class="card-h"><h2>What industries say</h2><span class="hint">One-click rating after each decision</span></div>
+   <div class="grid g2" style="gap:18px">
+    <div>${dist.map(([s,c])=>`<div style="display:grid;grid-template-columns:34px 1fr 40px;gap:8px;align-items:center;margin:5px 0;font-size:13px"><span>${s} ★</span><div style="background:#eef2ef;border-radius:4px;height:12px"><div style="width:${c/dmax*100}%;height:100%;border-radius:4px;background:${s>=4?'#1e8a4c':s===3?'#e0a03a':'#c4452f'}"></div></div><span class="muted" style="text-align:right">${c}</span></div>`).join('')}</div>
+    <div class="small"><div class="muted" style="margin-bottom:4px">Most common complaints</div>${bad.slice(0,3).map(([r,c])=>`<div style="margin:3px 0">${r} <b>${c}</b></div>`).join('')}<div class="muted" style="margin:10px 0 4px">Most common praise</div>${good.slice(0,2).map(([r,c])=>`<div style="margin:3px 0">${r} <b>${c}</b></div>`).join('')}</div></div>
+   <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px">${EO_COMMENTS.slice(0,4).map(([s,t])=>`<div class="small" style="margin:6px 0"><b style="color:${s>=4?'#1d6b40':s===3?'#9a4d06':'#b42318'}">${'★'.repeat(s)}${'☆'.repeat(5-s)}</b> ${esc(t)}</div>`).join('')}</div></div>
+  <div class="card"><div class="card-h"><h2>How feedback is collected</h2><span class="hint">Shown to the applicant in MIS-2</span></div>
+   <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:#fbfcfb"><div class="small muted">Consent to Operate issued · RJ-PAL-0412</div><div style="font-weight:600;margin:6px 0">How was your experience with this application?</div><div style="font-size:22px;letter-spacing:4px;color:#e0a03a">★★★★☆</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${[...EO_REASONS_GOOD.slice(0,2),...EO_REASONS_BAD.slice(0,3)].map(r=>`<span class="small" style="border:1px solid var(--line);border-radius:14px;padding:2px 9px;background:#fff">${r}</span>`).join('')}</div></div>
+   <p class="small muted" style="margin:10px 0 0">One tap after the certificate is issued. Ratings go to HQ, not to the officer who handled the file.</p></div>
+ </div>
+ <div class="card mt"><div class="card-h"><h2>Reform checklist</h2><span class="hint">Ease-of-doing-business reforms for consent management · status illustrative, to be confirmed with the Board</span></div><div class="grid g2" style="gap:6px 24px">${BRAP.map(([t,s])=>`<div class="small" style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #f0f3f1"><span>${t}</span><span class="rstag ${s==='Done'?'m':s==='Gap'?'f':''}" style="${s==='In progress'?'background:#fff4e0;color:#9a4d06':''}">${s}</span></div>`).join('')}</div></div>
+ <div class="rvcaution mt">Application counts, timings, ratings and comments are illustrative. At implementation they would come from MIS-2 application timestamps and the feedback prompt added inside MIS-2.</div>`;
+}
 
 /* ============ RIVER WATER QUALITY (periodic sampling) ============ */
 // Built around the Board's monthly river samples (NWMP-style). Stations, values and dates are illustrative.
