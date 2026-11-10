@@ -533,6 +533,293 @@ async function ask(){
 $('#clrBtn').onclick=()=>{$('#thread').innerHTML='';$('#clrBtn').style.display='none';$('#qin').focus()};
 loadSem();
 </script>
+<style id="ui2">
+/* ===== Regulations desk layout: left tools, main thread, right source panel ===== */
+.ui2 .top,.ui2 .eiphead,.ui2 .foot{display:none!important}
+.ui2 body{overflow:hidden}
+.ui2 .wrap{max-width:none;margin:0;padding:0}
+.app{display:grid;grid-template-columns:252px minmax(0,1fr);height:100vh;background:var(--bg)}
+.app.src-on{grid-template-columns:252px minmax(0,1fr) minmax(340px,34%)}
+.rail{background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.rail .brand{display:flex;align-items:center;gap:9px;padding:16px 16px 12px;font-weight:700;color:var(--g900);font-size:15px}
+.rail .brand svg{width:26px;height:21px;color:var(--g700)}
+.rail .brand small{display:block;font-weight:500;color:var(--muted);font-size:11.5px}
+.newq{margin:2px 12px 10px;display:flex;align-items:center;gap:8px;justify-content:center;border:1px solid #bcd9c7;background:var(--g50);color:var(--g700);font-weight:600;border-radius:9px;padding:9px 10px;cursor:pointer;font-size:13.5px}
+.newq:hover{background:var(--g100)}
+.tools2{padding:4px 8px;display:flex;flex-direction:column;gap:2px}
+.tools2 button{display:flex;align-items:center;gap:10px;border:0;background:none;text-align:left;padding:9px 10px;border-radius:8px;font-size:14px;color:var(--ink);cursor:pointer}
+.tools2 button svg{width:18px;height:18px;flex:none;color:var(--muted)}
+.tools2 button:hover{background:var(--g50)}
+.tools2 button.on{background:var(--g100);color:var(--g900);font-weight:600}.tools2 button.on svg{color:var(--g700)}
+.rail h5{margin:14px 18px 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.role{margin:0 12px;display:flex;background:var(--grey);border-radius:9px;padding:3px}
+.role button{flex:1;border:0;background:none;border-radius:7px;padding:6px 4px;font-size:12.5px;color:var(--muted);cursor:pointer;font-weight:500}
+.role button.on{background:#fff;color:var(--g700);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.hist{flex:1;overflow-y:auto;padding:0 8px;min-height:60px}
+.hist button{display:block;width:100%;text-align:left;border:0;background:none;padding:7px 10px;border-radius:7px;font-size:13px;color:var(--ink);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist button:hover{background:var(--g50)}
+.hist button small{color:var(--muted);font-size:11px;margin-right:6px;text-transform:uppercase;letter-spacing:.03em}
+.hist .empty{font-size:12.5px;color:var(--muted);padding:4px 10px}
+.railfoot{border-top:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.railfoot .pill{justify-content:flex-start}
+.railfoot .tbtn{text-align:left}
+.mainx{display:flex;flex-direction:column;min-width:0;min-height:0}
+.mhead{display:flex;align-items:center;gap:10px;padding:12px 22px;border-bottom:1px solid var(--line);background:#fff;min-height:54px}
+.mhead h2{margin:0;font-size:16px;font-weight:650;color:var(--g900)}
+.mhead .sub2{font-size:12.5px;color:var(--muted)}
+.mhead .menu{display:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 8px;cursor:pointer}
+.mscroll{flex:1;overflow-y:auto;padding:22px 22px 30px}
+.inner{max-width:880px;margin:0 auto}
+.view{display:none}.view.on{display:block}
+.ui2 .thread{margin-top:0}
+.welcome{text-align:center;padding:7vh 0 18px}
+.welcome h3{font-size:24px;font-weight:650;margin:0 0 6px;color:var(--g900)}
+.welcome p{margin:0 0 20px;color:var(--muted)}
+.welcome .chips{justify-content:center}
+.ui2 .chips:has(>.lab){padding-left:0}.ui2 .chips>.lab{display:none}
+.composer{border-top:1px solid var(--line);background:linear-gradient(rgba(244,246,244,0),var(--bg) 30%);padding:10px 22px 16px}
+.composer .inner{position:relative}
+.ui2 .askbox{box-shadow:0 2px 10px rgba(16,60,38,.06)}
+.fu{font-size:12px;color:var(--muted);margin:0 0 6px 4px}.fu b{color:var(--g700);font-weight:600}.fu a{color:var(--muted);cursor:pointer;text-decoration:underline;margin-left:6px}
+.ui2 #setPanel{position:fixed;left:264px;bottom:16px;width:min(560px,calc(100vw - 290px));z-index:40;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.ui2 #libPanel,.ui2 .under .tools{display:none!important}
+.q{max-width:78%}
+/* source panel */
+.src{background:#fff;border-left:1px solid var(--line);display:none;flex-direction:column;min-height:0}
+.app.src-on .src{display:flex}
+.src .sh{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.src .sh .t{flex:1;min-width:0}.src .sh .t b{display:block;font-size:14.5px;color:var(--g900);line-height:1.35}.src .sh .t span{font-size:12px;color:var(--muted)}
+.src .x{border:0;background:var(--grey);border-radius:7px;width:30px;height:30px;cursor:pointer;font-size:16px;color:var(--muted);flex:none}
+.src .sb{flex:1;overflow-y:auto;padding:14px 18px;font-size:14px;line-height:1.6}
+.src .sb pre{white-space:pre-wrap;font:inherit;margin:0}
+.src .sb .secl{display:block;width:100%;text-align:left;border:0;background:none;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer;color:var(--ink)}
+.src .sb .secl:hover{background:var(--g50)}.src .sb .secl.on{background:var(--g100);font-weight:600}
+.src .sf{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--line)}
+.sbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;font-size:13px;cursor:pointer;color:var(--ink)}
+.sbtn:hover{background:var(--g50)}.sbtn.pri{background:var(--g700);color:#fff;border-color:var(--g700)}.sbtn.pri:hover{background:var(--g900)}
+.sbtn:disabled{opacity:.5;cursor:default}
+.warn2{font-size:12.5px;border-radius:8px;padding:7px 10px;margin:0 0 10px;background:var(--amber-bg);color:#7a4a00}
+/* forms and library */
+.fcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.fgrid .fwide{grid-column:1/-1}
+.fl{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--muted);font-weight:600}
+.fl input,.fl select,.fl textarea{border:1px solid #d5ddd8;border-radius:8px;padding:9px 11px;font:inherit;font-size:14px;color:var(--ink);background:#fff;font-weight:400}
+.fl textarea{min-height:110px;resize:vertical}
+.fhint{font-size:12.5px;color:var(--muted);margin:4px 0 14px}
+.out{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+.out .lab2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
+.out .lab2 .tag{background:var(--amber-bg);color:#7a4a00;text-transform:none;letter-spacing:0;font-weight:600;border-radius:12px;padding:2px 9px}
+.out .body p{margin:6px 0}.out .body ul{margin:6px 0;padding-left:20px}
+.out .body h4{margin:14px 0 4px;font-size:13.5px;color:var(--g900)}
+.used{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;font-size:12.5px;color:var(--muted)}
+.used a{display:block;color:var(--g700);cursor:pointer;margin:3px 0}
+.libtools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.libtools input{flex:1 1 260px;border:1px solid #d5ddd8;border-radius:9px;padding:10px 12px;font:inherit}
+.gchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.gchips button{border:1px solid var(--line);background:#fff;border-radius:16px;padding:5px 11px;font-size:12.5px;cursor:pointer;color:var(--ink)}
+.gchips button.on{background:var(--g700);color:#fff;border-color:var(--g700)}
+.drow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);background:#fff;border-radius:10px;margin-bottom:6px;cursor:pointer}
+.drow:hover{border-color:#bcd9c7;background:var(--g50)}
+.drow .dt{flex:1;min-width:0}.drow .dt b{display:block;font-size:13.8px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.drow .dt span{font-size:12px;color:var(--muted)}
+.libcount{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+.spin{color:var(--muted);font-size:13.5px}.spin:after{content:'';animation:dots 1.2s steps(4) infinite}
+@media(max-width:900px){
+ .app,.app.src-on{grid-template-columns:minmax(0,1fr)}
+ .rail{position:fixed;inset:0 auto 0 0;width:270px;z-index:60;transform:translateX(-100%);transition:transform .2s;box-shadow:0 0 30px rgba(0,0,0,.15)}
+ .app.rail-open .rail{transform:none}
+ .mhead .menu{display:inline-block}
+ .src{position:fixed;inset:0;z-index:70}
+ .fgrid{grid-template-columns:1fr}
+ .ui2 #setPanel{left:12px;width:calc(100vw - 24px)}
+ .mscroll,.composer{padding-left:14px;padding-right:14px}
+}
+</style>
+<script>
+/* ===== Regulations desk: layout and tools (session only: nothing is stored) ===== */
+(function(){
+const SVG={
+ ask:'<path d="M4 5h16v11H8l-4 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+ lib:'<path d="M5 4h4v16H5zM10 4h4v16h-4zM15.5 4.5l3.8 1 -3.6 15-3.8-1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+ draft:'<path d="M14 3H6v18h12V7zM14 3v4h4M9 12h6M9 16h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>',
+ cmp:'<path d="M4 6h7v12H4zM13 6h7v12h-7zM7 10h1M16 10h1M7 13h1M16 13h1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>',
+ chk:'<path d="M7 4h10v16H7zM10 9l1.5 1.5L14 8M10 14h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>',
+ plus:'<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ menu:'<path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'};
+const ic=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${SVG[k]}</svg>`;
+const TOOLS=[['ask','Ask the rules','Answers with exact citations from the official text'],['draft','Draft a document','Notices, replies and office notes built from cited provisions'],['cmp','Compare orders','What changed between two orders, and which one is later'],['chk','Check an application','Documents, timelines and rules that apply to a case'],['lib','Library','Every Act, Rule, order and guideline in the assistant']];
+const UI={tool:'ask',role:'field',hist:[],lastQ:null,lastR:null};
+window.RDESK=UI;
+document.documentElement.classList.add('ui2');
+const wrap=document.querySelector('.wrap');
+const app=document.createElement('div');app.className='app';
+app.innerHTML=`<aside class="rail" id="rail">
+  <div class="brand">${document.querySelector('.who .bot, .hbot')?document.querySelector('.hbot').outerHTML.replace('class="bot hbot"','class="bot"'):''}<div>Regulations desk<small>RSPCB · Acts, Rules and orders</small></div></div>
+  <button class="newq" id="newq">${ic('plus').replace('<svg','<svg style="width:15px;height:15px"')}New question</button>
+  <nav class="tools2" id="tools2">${TOOLS.map(([k,l])=>`<button data-t="${k}" class="${k==='ask'?'on':''}">${ic(k)}<span>${l}</span></button>`).join('')}</nav>
+  <h5>Answer style</h5>
+  <div class="role" id="role"><button data-r="field" class="on" title="Short, plain answers for quick look-ups">Field officer</button><button data-r="legal" title="Formal wording with section and clause references">HQ legal &amp; admin</button></div>
+  <h5>This session</h5>
+  <div class="hist" id="hist"><div class="empty">Questions and drafts from this session appear here. Nothing is saved after you close the page.</div></div>
+  <div class="railfoot" id="railfoot"></div>
+ </aside>
+ <section class="mainx">
+  <div class="mhead"><button class="menu" id="menuBtn" aria-label="Menu">${ic('menu').replace('<svg','<svg style="width:18px;height:18px;vertical-align:-4px"')}</button><div><h2 id="mtitle">Ask the rules</h2><div class="sub2" id="msub">Answers with exact citations from the official text</div></div></div>
+  <div class="mscroll" id="mscroll"><div class="inner">
+   <div class="view on" id="v-ask"><div class="welcome" id="welcome"><h3>What do you need to check?</h3><p>Ask in English or Hindi. Every answer quotes the official text and names the section or order.</p></div></div>
+   <div class="view" id="v-draft"></div><div class="view" id="v-cmp"></div><div class="view" id="v-chk"></div><div class="view" id="v-lib"></div>
+  </div></div>
+  <div class="composer" id="composer"><div class="inner"><div class="fu" id="fu" style="display:none"></div></div></div>
+ </section>
+ <aside class="src" id="src"><div class="sh"><div class="t" id="srcT"></div><button class="x" id="srcX" aria-label="Close">×</button></div><div class="sb" id="srcB"></div><div class="sf" id="srcF"></div></aside>`;
+wrap.parentNode.insertBefore(app,wrap);
+const $q=s=>document.querySelector(s);
+// move existing pieces into the new frame
+$q('#v-ask').appendChild($q('#thread'));
+$q('#welcome').appendChild($q('#chips'));
+const hero=$q('.hero');$q('#composer .inner').appendChild($q('.askbox'));
+$q('#composer .inner').appendChild($q('#setPanel'));
+const rf=$q('#railfoot');rf.appendChild($q('#mstat'));rf.appendChild($q('#aistat'));const sb=$q('#setBtn');rf.appendChild(sb);
+wrap.style.display='none';
+$q('#qin').placeholder='Ask about any Act, Rule or RSPCB order…';
+// tools
+function setTool(t){UI.tool=t;document.querySelectorAll('#tools2 button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+ document.querySelectorAll('.mainx .view').forEach(v=>v.classList.toggle('on',v.id==='v-'+t));
+ const T=TOOLS.find(x=>x[0]===t);$q('#mtitle').textContent=T[1];$q('#msub').textContent=T[2];
+ $q('#composer').style.display=t==='ask'?'':'none';app.classList.remove('rail-open');if(t!=='lib')app.classList.remove('src-on');
+ if(t==='lib')drawLib();if(t==='draft')drawDraft();if(t==='cmp')drawCmp();if(t==='chk')drawChk();
+ if(t==='ask')setTimeout(()=>$q('#qin').focus(),30)}
+document.querySelectorAll('#tools2 button').forEach(b=>b.onclick=()=>setTool(b.dataset.t));
+document.querySelectorAll('#role button').forEach(b=>b.onclick=()=>{UI.role=b.dataset.r;document.querySelectorAll('#role button').forEach(x=>x.classList.toggle('on',x===b))});
+$q('#menuBtn').onclick=()=>app.classList.toggle('rail-open');
+$q('#newq').onclick=()=>{$q('#thread').innerHTML='';UI.lastQ=null;UI.lastR=null;showFu();$q('#welcome').style.display='';setTool('ask')};
+// history (session only)
+function addHist(kind,label,target){UI.hist.unshift({kind,label,target});const h=$q('#hist');
+ h.innerHTML=UI.hist.slice(0,40).map((x,i)=>`<button data-i="${i}" title="${esc(x.label)}"><small>${x.kind}</small>${esc(x.label)}</button>`).join('');
+ h.querySelectorAll('button').forEach(b=>b.onclick=()=>{const x=UI.hist[+b.dataset.i];setTool(x.target.tool);if(x.target.el)setTimeout(()=>x.target.el.scrollIntoView({behavior:'smooth',block:'start'}),60)})}
+// relay: add answer style and task to every summary request
+const _aiFetch=aiFetch;window.aiFetch=aiFetch=async function(path,opt,ms){if(path==='/summarize'&&opt&&opt.body){try{const b=JSON.parse(opt.body);if(!b.task)b.task='ask';b.audience=UI.role;if(UI.ctx&&b.task==='ask'&&!b.context)b.context=UI.ctx;opt=Object.assign({},opt,{body:JSON.stringify(b)})}catch(e){}}return _aiFetch(path,opt,ms)};
+// follow-up questions
+const FU=/^(and|also|what about|how about|what if|in that case|then|is it|does it|do they|for|same for|what is the (fee|time|penalty)|kya|aur)\b|\b(it|this|that|they|them|same|above)\b/i;
+function isFollow(q){return UI.lastQ&&q.split(/\s+/).length<=9&&FU.test(q)}
+function fuQuery(prev,q){const subj=q.replace(/[?.!]+$/,'').replace(/^(and|also|then|aur|kya)\s+/i,'').replace(/^(what|how)\s+about\s+|^same\s+for\s+|^for\s+|^in\s+(the\s+)?case\s+of\s+/i,'').trim();
+ const w=subj.split(/\s+/);const last=w[w.length-1].toLowerCase().replace(/s$/,'');const pw=prev.replace(/[?.!]+$/,'').split(/\s+/);
+ const k=pw.findIndex(x=>x.toLowerCase().replace(/[^a-zऀ-ॿ-]/g,'').replace(/s$/,'')===last);
+ if(k>=0&&w.length<=5){const span=Math.min(Math.max(w.length,2),k+1);return pw.slice(0,k+1-span).concat(w,pw.slice(k+1)).join(' ')}
+ return subj+' '+prev}
+function showFu(){const f=$q('#fu');if(!UI.lastQ){f.style.display='none';return}f.style.display='';f.innerHTML=`Follow-ups use the context of: <b>${esc(UI.lastQ.length>80?UI.lastQ.slice(0,80)+'…':UI.lastQ)}</b><a id="fuX">start fresh</a>`;$q('#fuX').onclick=()=>{UI.lastQ=null;showFu()}}
+// the conversation: append in order, follow-ups carry context
+window.ask=ask=async function(){
+ const q0=$q('#qin').value.trim();if(!q0)return;$q('#qin').value='';$q('#welcome').style.display='none';
+ const follow=isFollow(q0);const q=follow?fuQuery(UI.lastQ,q0):q0;UI.ctx=follow?UI.lastQ:null;
+ const th=$q('#thread');const box=document.createElement('div');box.style.cssText='display:flex;flex-direction:column;gap:10px';
+ box.innerHTML=`<div class="q">${esc(q0)}${follow?`<div style="font-size:11.5px;opacity:.8;margin-top:3px">follow-up to: ${esc(UI.lastQ.slice(0,70))}</div>`:''}</div><div class="ans"><span class="spin">Searching the library</span></div>`;th.appendChild(box);
+ box.scrollIntoView({behavior:'smooth',block:'start'});addHist('Ask',q0,{tool:'ask',el:box});
+ let html,R=null;
+ if($q('#cmp').checked){const cs=await Promise.all(['kw','sem','hy'].map(async m=>{const r=await search(q,m);const l=LBL[m];return card(r,l[0]+(m!=='kw'&&!SEM.ready?' (smart search not ready)':''),l[1])}));html=`<div class="cols">${cs.join('')}</div>`}
+ const AH=!$q('#cmp').checked&&amendHistory(q0);if(AH){box.lastElementChild.outerHTML=amendCard(AH);return}
+ const LS=!$q('#cmp').checked&&libStats(q0);if(LS){box.lastElementChild.outerHTML=LS;return}
+ if(!$q('#cmp').checked){R=await search(q,MODE);R.count=/\b(how many|list (all|the)|which (all|are the)|number of|name all|all the)\b/i.test(q0);const l=LBL[R.mode]||LBL.kw;html=await card(R,l[0],l[1])}
+ box.lastElementChild.outerHTML=html;
+ if(!follow)UI.lastQ=q0;UI.lastR=R;showFu();
+ const slot=box.querySelector('[data-ai]');if(slot&&R&&!R.none&&R.list.length)aiSummary(slot,follow?q0:q0,R);else if(slot)slot.remove()};
+$q('#go').onclick=()=>ask();
+const qin=$q('#qin');const qn=qin.cloneNode(true);qin.replaceWith(qn);qn.addEventListener('keydown',e=>{if(e.key==='Enter')ask()});
+document.querySelectorAll('#chips .chip').forEach(()=>{});
+const _draw=drawChips;window.drawChips=drawChips=function(){_draw();document.querySelectorAll('#chips .chip').forEach(b=>{if(b.classList.contains('more'))return;b.onclick=()=>{$q('#qin').value=b.dataset.q;ask()}})};drawChips();
+// source panel: citations open on the right
+const stBadge=d=>d.rspcb?(d.later&&d.later.length?'<span class="st old">Later order exists</span>':d.sameTopic&&d.sameTopic.length?'<span class="st am">Newer order on topic</span>':'<span class="st ok">RSPCB '+esc(d.status||'document')+'</span>'):`<span class="st ${stCls(d)}">${esc(stTxt(d))}</span>`;
+function openSrc(id,docOnly){const c=CHUNKS[id];const d=DOCS[c.doc];app.classList.add('src-on');
+ const meta=[d.rspcb?d.short:d.group,d.orderNo?'No. '+d.orderNo:'',d.issue?'dated '+d.issue:d.year||'',d.ocr?'scanned copy, text recognition':''].filter(Boolean).join(' · ');
+ $q('#srcT').innerHTML=`<b>${esc(d.title)}</b><span>${esc(meta)}</span><div style="margin-top:6px">${stBadge(d)}</div>`;
+ const secs=CHUNKS.filter(x=>x.doc===c.doc);const k=secs.indexOf(c);
+ $q('#srcB').innerHTML=(d.ocr?'<div class="warn2">Read from a scanned copy. Check figures and dates against the original PDF.</div>':'')+(docOnly?`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">${secs.length} section${secs.length>1?'s':''}</div>`+secs.map(x=>`<button class="secl" data-id="${x.id}">${esc(x.cite)} · ${esc(x.title)}</button>`).join(''):`<div style="font-size:12.5px;font-weight:600;color:var(--g700);margin-bottom:8px">${esc(c.cite)} · ${esc(c.title)}${c.page?` · page ${c.page}`:''}</div><pre>${esc(c.text)}</pre>`);
+ $q('#srcB').scrollTop=0;
+ $q('#srcB').querySelectorAll('.secl').forEach(b=>b.onclick=()=>openSrc(+b.dataset.id));
+ $q('#srcF').innerHTML=docOnly?`<button class="sbtn pri" id="sAsk">Ask about this document</button>`:`<button class="sbtn" id="sPrev" ${k<=0?'disabled':''}>‹ Previous</button><button class="sbtn" id="sNext" ${k>=secs.length-1?'disabled':''}>Next ›</button><button class="sbtn" id="sAll">All sections</button><button class="sbtn pri" id="sAsk">Ask about this document</button>`;
+ if(!docOnly){$q('#sPrev').onclick=()=>openSrc(secs[k-1].id);$q('#sNext').onclick=()=>openSrc(secs[k+1].id);$q('#sAll').onclick=()=>openSrc(id,true)}
+ $q('#sAsk').onclick=()=>{const sel=$q('#scope');const v='d:'+d.id;if(![...sel.options].some(o=>o.value===v)){const o=document.createElement('option');o.value=v;o.textContent=d.short+' · '+d.title.slice(0,50);sel.appendChild(o)}sel.value=v;setTool('ask');$q('#qin').placeholder='Ask about '+d.title.slice(0,60)+'…';$q('#qin').focus()}}
+$q('#srcX').onclick=()=>app.classList.remove('src-on');
+window.showChunk=showChunk=function(id){openSrc(id)};window.aiOpen=aiOpen=function(id){openSrc(id)};window.openSrc=openSrc;
+// ---------- shared: run searches and call the relay with a task ----------
+async function gather(queries,per,max,scope){const seen=new Set(),out=[];for(const [q,sc] of queries){const prev=$q('#scope').value;if(sc!==undefined)$q('#scope').value=sc;let r;try{r=await search(q,MODE)}finally{$q('#scope').value=prev}
+  if(!r||r.none)continue;let n=0;for(const x of r.list){const c=CHUNKS[x.i];const key=c.doc+c.cite;if(seen.has(key))continue;seen.add(key);out.push(c);if(++n>=per||out.length>=max)break}if(out.length>=max)break}return out}
+const exOf=cs=>cs.map(c=>{const d=DOCS[c.doc];return{id:c.id,source:(d.rspcb?d.short+' – ':'')+d.title+', '+c.cite+' · '+c.title,status:d.rspcb&&d.later&&d.later.length?'later order: '+d.later[0].title+' ('+d.later[0].date+')':'',text:tidy(c.text)}});
+async function runTask(task,q,ex,extra,slot,label,tag){slot.className='out';slot.innerHTML=`<div class="lab2">${label}${tag?`<span class="tag">${tag}</span>`:''}</div><div class="spin">Working from ${ex.length} cited provision${ex.length>1?'s':''}</div>`;
+ if(!AI.on){slot.querySelector('.spin').outerHTML='<div class="warn2">This needs the AI service, which is not connected on this page.</div>';return}
+ try{const j=await aiFetch('/summarize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({task,q,extracts:ex.map(({source,status,text})=>({source,status,text}))},extra||{}))},45000);
+  if(!j.summary)throw new Error('empty');
+  const old=task!=='ask'&&j.task!==task;
+  slot.innerHTML=`<div class="lab2">${label}${tag?`<span class="tag">${tag}</span>`:''}</div>${old?'<div class="warn2">The AI relay is an older version, so this came back as a short summary. Update the Worker with the new relay_worker.js to get full drafts.</div>':''}<div class="body">${render2(j.summary,ex)}</div>
+  <div class="used"><b style="color:var(--ink)">Provisions used</b>${ex.map((e,i)=>`<a onclick="openSrc(${e.id})">[${i+1}] ${esc(e.source)}</a>`).join('')}</div>
+  <div style="display:flex;gap:8px;margin-top:12px"><button class="sbtn" data-copy>Copy text</button></div>`;
+  slot.querySelector('[data-copy]').onclick=e=>{navigator.clipboard&&navigator.clipboard.writeText(j.summary.replace(/\*\*/g,''));e.target.textContent='Copied'};
+  if(AI.up!==true){AI.up=true;aiStat('ok','AI summary: online')}}
+ catch(e){slot.innerHTML=`<div class="lab2">${label}</div><div class="warn2">The AI service did not respond. The provisions found are listed below; try again in a moment.</div><div class="used">${ex.map((e,i)=>`<a onclick="openSrc(${e.id})">[${i+1}] ${esc(e.source)}</a>`).join('')}</div>`}}
+function render2(txt,ex){const lines=String(txt).split('\n');let h='';let buf=[];const flush=()=>{if(buf.length){h+=aiRender(buf.join('\n'),ex);buf=[]}};
+ lines.forEach(l=>{const m=l.match(/^#{1,4}\s+(.*)$/);if(m){flush();h+='<h4>'+esc(m[1])+'</h4>'}else buf.push(l)});flush();return h}
+// ---------- Library ----------
+let LIBG='',LIBQ='';
+function drawLib(){const v=$q('#v-lib');if(!v.dataset.ok){v.dataset.ok=1;
+  v.innerHTML=`<div class="libtools"><input id="libq" placeholder="Search titles, order numbers or dates…"></div><div class="gchips" id="gch"></div><div class="libcount" id="libc"></div><div id="libl"></div>`;
+  $q('#libq').oninput=e=>{LIBQ=e.target.value.toLowerCase();libList()};}
+ const gs=Object.keys(GROUPS);$q('#gch').innerHTML=[['','All']].concat(gs.map(g=>[g,g])).map(([g,l])=>`<button data-g="${esc(g)}" class="${g===LIBG?'on':''}">${esc(l)} <span style="opacity:.7">${g?GROUPS[g].length:Object.keys(DOCS).length}</span></button>`).join('');
+ $q('#gch').querySelectorAll('button').forEach(b=>b.onclick=()=>{LIBG=b.dataset.g;drawLib()});libList()}
+function libList(){let ds=Object.values(DOCS).filter(d=>(!LIBG||d.group===LIBG)&&(!LIBQ||(d.title+' '+(d.short||'')+' '+(d.orderNo||'')+' '+(d.issue||'')+' '+(d.year||'')).toLowerCase().includes(LIBQ)));
+ ds.sort((a,b)=>(b.issue||b.year||'').toString().localeCompare((a.issue||a.year||'').toString()));
+ $q('#libc').textContent=ds.length+' document'+(ds.length===1?'':'s');
+ $q('#libl').innerHTML=ds.slice(0,300).map(d=>`<div class="drow" data-d="${d.id}"><div class="dt"><b title="${esc(d.title)}">${esc(d.title)}</b><span>${esc([d.rspcb?d.short:d.group,d.orderNo?'No. '+d.orderNo:'',d.ocr?'scanned':''].filter(Boolean).join(' · '))}</span></div>${stBadge(d)}</div>`).join('')+(ds.length>300?'<div class="libcount">Showing the first 300. Narrow the search to see more.</div>':'');
+ $q('#libl').querySelectorAll('.drow').forEach(r=>r.onclick=()=>{const c=CHUNKS.find(x=>x.doc===r.dataset.d);if(c)openSrc(c.id,true)})}
+// ---------- Draft a document ----------
+const DKINDS=[['scn','Show-cause notice','Show-cause notice under the Water Act and Air Act for non-compliance','Unit: M/s ABC Textiles, Balotra (Red category, textile dyeing).\nFinding on 12 Oct 2026 inspection: effluent discharged into the drain at night; ETP bypass line found; OCEMS COD readings frozen for 9 days; CTO conditions on ZLD not met.'],
+ ['ngt','Reply to an NGT / court direction','Compliance reply to a tribunal direction on river pollution','Direction: report action taken against units discharging untreated effluent into the Bandi river near Pali within 4 weeks.\nAction so far: 46 units inspected, 9 closure directions, 3 CETPs issued directions to upgrade, monthly river sampling at 6 points.'],
+ ['note','Office note / file noting','Office note seeking approval','Subject: delegation of power to Regional Officers to grant CTO renewal for Orange category units up to ₹25 crore investment, to cut pending renewals in Bhiwadi and Jodhpur.'],
+ ['dir','Direction under Section 33A / 31A','Direction for closure or stoppage of operations','Unit: M/s XYZ Steel Re-rolling, Jaipur (Red category).\nFinding: running on coal-fired furnace after the deadline to switch to cleaner fuel; stack emissions above limit on two samples.']];
+let DK='scn';
+function drawDraft(){const v=$q('#v-draft');const K=DKINDS.find(x=>x[0]===DK);
+ v.innerHTML=`<div class="fcard"><div class="fgrid"><label class="fl fwide">Document<select id="dk">${DKINDS.map(k=>`<option value="${k[0]}" ${k[0]===DK?'selected':''}>${k[1]}</option>`).join('')}</select></label>
+  <label class="fl fwide">Facts of the case<textarea id="dfacts">${esc(K[3])}</textarea></label>
+  <label class="fl">Signing authority<input id="dsign" value="Regional Officer, RSPCB"></label><label class="fl">Language<select id="dlang"><option>English</option><option>Hindi</option></select></label></div>
+  <div class="fhint">The draft is written only from provisions found in the library, each cited. It is a starting point for the officer, not a final document.</div>
+  <button class="sbtn pri" id="dgo">Find provisions and draft</button></div><div id="dout"></div>`;
+ $q('#dk').onchange=e=>{DK=e.target.value;drawDraft()};
+ $q('#dgo').onclick=async()=>{const K=DKINDS.find(x=>x[0]===DK);const facts=$q('#dfacts').value.trim();if(!facts)return;const slot=document.createElement('div');$q('#dout').prepend(slot);slot.className='out';slot.innerHTML='<span class="spin">Finding the provisions that apply</span>';
+  const qs=[[facts.slice(0,300)],[K[2]],[{scn:'show cause notice penalty section 33A 31A direction closure',ngt:'action taken report river pollution direction compliance',note:'delegation of power regional officer office order',dir:'direction under section 33A closure disconnection of electricity'}[DK]]];
+  const cs=await gather(qs,3,9);addHist('Draft',K[1]+': '+facts.slice(0,40),{tool:'draft',el:slot});
+  runTask('draft',K[2],exOf(cs),{kind:K[1],facts:facts.slice(0,1500),sign:$q('#dsign').value.slice(0,80),lang:$q('#dlang').value},slot,K[1],'Draft for officer review')}}
+// ---------- Compare orders ----------
+function docOpts(){return Object.values(DOCS).sort((a,b)=>(b.issue||'').localeCompare(a.issue||'')).map(d=>`<option value="${d.id}">${esc((d.rspcb?d.short+' · ':'')+d.title.slice(0,90))}</option>`).join('')}
+function pairs(){const P=[];Object.values(DOCS).forEach(d=>{if(d.rspcb&&d.later&&d.later.length){const l=d.later[0];const t=Object.values(DOCS).find(x=>x.rspcb&&x.title===l.title);if(t)P.push([d.id,t.id,d.title,l.rel||''])}});const seen=new Set();return P.filter(p=>{const k=p[2];if(seen.has(k))return false;seen.add(k);return true}).slice(0,6)}
+function drawCmp(){const v=$q('#v-cmp');if(v.dataset.ok)return;v.dataset.ok=1;const P=pairs();
+ v.innerHTML=`<div class="fcard"><div class="fgrid"><label class="fl fwide">Earlier document<select id="ca"><option value="">Choose…</option>${docOpts()}</select></label>
+  <label class="fl fwide">Later document<select id="cb"><option value="">Choose…</option>${docOpts()}</select></label>
+  <label class="fl fwide">Topic to focus on (optional)<input id="ct" placeholder="e.g. fuel deadline, timelines, delegation limits"></label></div>
+  ${P.length?`<div class="fhint" style="margin-top:12px">Orders the library already links to a later order:</div><div class="gchips">${P.map((p,i)=>`<button data-p="${i}">${esc(p[2].slice(0,60))}</button>`).join('')}</div>`:''}
+  <button class="sbtn pri" id="cgo">Compare</button></div><div id="cout"></div>`;
+ v.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{const p=P[+b.dataset.p];$q('#ca').value=p[0];$q('#cb').value=p[1]});
+ $q('#cgo').onclick=async()=>{const a=$q('#ca').value,b=$q('#cb').value;if(!a||!b||a===b)return;const t=$q('#ct').value.trim();const slot=document.createElement('div');$q('#cout').prepend(slot);slot.className='out';slot.innerHTML='<span class="spin">Reading both documents</span>';
+  const take=async id=>t?await gather([[t,'d:'+id]],4,4):CHUNKS.filter(c=>c.doc===id).slice(0,4);
+  const ensure=id=>{const sel=$q('#scope');if(![...sel.options].some(o=>o.value==='d:'+id)){const o=document.createElement('option');o.value='d:'+id;o.textContent=DOCS[id].short;sel.appendChild(o)}};ensure(a);ensure(b);
+  const ca=await take(a),cb=await take(b);const da=DOCS[a],db=DOCS[b];addHist('Compare',da.title.slice(0,30)+' vs '+db.title.slice(0,20),{tool:'cmp',el:slot});
+  const ex=exOf(ca).map(e=>Object.assign(e,{source:'DOCUMENT A – '+e.source})).concat(exOf(cb).map(e=>Object.assign(e,{source:'DOCUMENT B – '+e.source})));
+  runTask('compare',t||'Compare the two documents',ex,{a:(da.title+(da.issue?' ('+da.issue+')':'')).slice(0,200),b:(db.title+(db.issue?' ('+db.issue+')':'')).slice(0,200)},slot,'Comparison','From the text of both documents')}}
+// ---------- Check an application ----------
+function drawChk(){const v=$q('#v-chk');if(v.dataset.ok)return;v.dataset.ok=1;
+ v.innerHTML=`<div class="fcard"><div class="fgrid"><label class="fl">Application<select id="ka"><option>Consent to Establish</option><option>Consent to Operate</option><option>Expansion / modification</option><option>Hazardous waste authorisation</option><option>Bio-medical waste authorisation</option></select></label>
+  <label class="fl">Category<select id="kc"><option>Red</option><option>Orange</option><option>Green</option><option>White</option></select></label>
+  <label class="fl">Sector<input id="ks" value="Textile dyeing and printing"></label><label class="fl">Capital investment (₹ crore)<input id="ki" value="12" inputmode="decimal"></label>
+  <label class="fl">Water source<select id="kw"><option>Groundwater</option><option>Municipal supply</option><option>Surface water</option></select></label><label class="fl">Location<input id="kl" value="Balotra industrial area"></label></div>
+  <div class="fhint">Lists what the library says applies: documents to submit, who decides, the time limit, the fee basis and sector conditions. Each point is cited.</div>
+  <button class="sbtn pri" id="kgo">Check</button></div><div id="kout"></div>`;
+ $q('#kgo').onclick=async()=>{const A=$q('#ka').value,C=$q('#kc').value,S=$q('#ks').value,I=$q('#ki').value,W=$q('#kw').value,L=$q('#kl').value;const slot=document.createElement('div');$q('#kout').prepend(slot);slot.className='out';slot.innerHTML='<span class="spin">Looking up checklists, timelines and conditions</span>';
+  const qs=[['checklist of documents for '+A],['timeline for disposal of '+A+' application '+C+' category'],['consent fee '+C+' category capital investment'],['delegation of power to grant '+A+' '+C+' category regional officer'],[S+' guidelines pollution control conditions']];if(W==='Groundwater')qs.push(['NOC from CGWA groundwater for consent']);
+  const cs=await gather(qs,2,10);addHist('Check',A+' · '+C+' · '+S.slice(0,20),{tool:'chk',el:slot});
+  runTask('check',`${A} for a ${C} category ${S} unit, investment ₹${I} crore, water from ${W}, at ${L}`,exOf(cs),{},slot,'What applies','From the cited provisions')}}
+setTool('ask');
+if(window.self!==window.top)document.documentElement.classList.add('in-frame');
+})();
+</script>
+
 <script>try{const b=document.getElementById('libBtn');if(b&&typeof LIB_DOCS!=='undefined')b.textContent='Library · '+Object.keys(LIB_DOCS).length+' documents'}catch(e){}</script>
 </body>
 </html>
