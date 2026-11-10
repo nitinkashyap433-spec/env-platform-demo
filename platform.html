@@ -1209,7 +1209,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
           </div>
           <div class="legend" style="margin-bottom:8px" id="compLegend"></div>
           <div class="ptwrap"><table id="ptable"></table></div>
-          <div class="src">Inputs: consent register · OCEMS feed (last 7 days) · complaints within 2 km · inspection and violation history</div>
+          <div class="src">Inputs: consent register · OCEMS feed (last 7 days) · complaints where the unit is a possible source (upwind or in the direction pointed, with sector or OCEMS match) · inspection and violation history</div>
         </div>
         <div>
           <div class="card">
@@ -1438,7 +1438,38 @@ const COMP=[];
 const hot={BLT:12,PAL:11,BHW:10,JDH:8,JPR:7,KOT:4,BHL:5,ALW:3,CHT:3,UDR:2,KSG:3,NMR:2,BKN:1};
 CLUSTERS.forEach(cl=>{for(let i=0;i<hot[cl.id];i++){const ll=[cl.c[0]+gauss()*0.05,cl.c[1]+gauss()*0.055];COMP.push({ll,type:pick(['BLT','PAL','JDH','BHL'].includes(cl.id)?['Coloured effluent in drain','Foul smell at night','Effluent discharge on land']:['Smoke / dust from unit','Open burning of waste','Noise at night','Foul smell at night']),days:ri(1,40),ro:cl.ro})}});
 for(let i=0;i<4;i++)COMP.push({ll:[STAR.ll[0]+gauss()*0.006,STAR.ll[1]+gauss()*0.007],type:i%2?'Foul smell at night':'Coloured effluent in drain',days:ri(2,15),ro:'Balotra'});
-FAC.forEach(f=>{f.complaints=COMP.filter(c=>km(c.ll,f.ll)<=2).length});
+/* ===== complaint attribution: a complaint belongs to a place; units become possible sources only with evidence ===== */
+const RA=mulberry32(7171);
+const brg=(a,b)=>{const y=(b[1]-a[1])*Math.cos((a[0]+b[0])/2*Math.PI/180),x=b[0]-a[0];return (Math.atan2(y,x)*180/Math.PI+360)%360};
+const adiff=(a,b)=>Math.abs(((a-b+540)%360)-180);
+const CT_SEC={'Smoke / dust from unit':['Steel re-rolling','Cement','Thermal power','Chemical','Fertiliser','Non-ferrous metal','Stone crushing','Ceramics','Mining','Marble processing'],
+ 'Foul smell at night':['Chemical','Pharma','Textile dyeing','Textile printing','Fertiliser','Food processing'],
+ 'Coloured effluent in drain':['Textile dyeing','Textile printing'],
+ 'Effluent discharge on land':['Textile dyeing','Textile printing','Pharma','Chemical'],
+ 'Noise at night':['Stone crushing','Steel re-rolling','Engineering','Marble processing'],
+ 'Open burning of waste':[]};
+const VISUAL={'Smoke / dust from unit':1,'Open burning of waste':1};
+const CONE_BRG=15,CONE_WIND=35,CONE_KM=5;
+function attribute(c){
+  if(c.wind==null)c.wind=Math.round((285+(RA()-.5)*90+360)%360);
+  const night=/night/i.test(c.type)||c.night;const sec=CT_SEC[c.type]||[];const out=[];
+  FAC.forEach(f=>{const d=km(c.ll,f.ll);if(d>CONE_KM)return;const b=brg(c.ll,f.ll);const why=[];let geo=0;
+    if(c.bearing!=null){const a=adiff(b,c.bearing);if(a<=CONE_BRG){geo=.5*(1-a/CONE_BRG)+.05;why.push('in the direction pointed')}}
+    else{const a=adiff(b,c.wind);if(a<=CONE_WIND){geo=.5*(1-a/CONE_WIND)+.05;why.push('upwind at the time')}}
+    if(!geo&&d<=.4){geo=.25;why.push('next to the complaint')}
+    if(!geo)return;
+    let s=geo*(1-d/(CONE_KM*2));
+    if(sec.includes(f.sector)){s+=.2;why.push('sector matches')}
+    const m=f.m;if(m&&((night&&m.nightFlag)||m.exceed>=12||m.flatFlag)){s+=.25;why.push(m.nightFlag&&night?'OCEMS night spike':m.flatFlag?'OCEMS readings frozen':'OCEMS above limit')}
+    out.push({f,d,s:Math.min(1,s),why})});
+  out.sort((a,b)=>b.s-a.s);c.cands=out.slice(0,5);
+  const t=c.cands[0];c.lead=t&&t.s>=.55&&(!c.cands[1]||t.s-c.cands[1].s>=.1)?t.f:null;
+  return c}
+COMP.forEach(c=>{c.bearing=null;
+  if(VISUAL[c.type]){const nb=FAC.filter(f=>km(f.ll,c.ll)<=3);if(nb.length){const u=nb[Math.floor(RA()*nb.length)];c.bearing=Math.round((brg(c.ll,u.ll)+gauss()*6+360)%360)}}
+  attribute(c)});
+FAC.forEach(f=>{f.cArea=COMP.filter(c=>km(c.ll,f.ll)<=2).length;f.cPoss=COMP.filter(c=>c.cands.some(x=>x.f===f)).length;f.complaints=COMP.filter(c=>c.lead===f).length});
+
 /* ===== inspection schedule (RSPCB Order F12(5-Adm)/RSPCB/1672-1681, 24.08.2023) and balanced demo data ===== */
 const SCH_ORDER='RSPCB Order dated 24.08.2023';
 const FREQ={Q:[90,'Quarterly'],H:[182,'Half-yearly'],A:[365,'Annually'],T:[730,'Once in two years'],N:[0,'Need based'],M:[30,'Monthly']};
@@ -1473,6 +1504,15 @@ const C17=['Pharma','Fertiliser','Non-ferrous metal'];
  u=pickU('ALW',f=>f.ocems)||pickU('NMR',f=>f.ocems);if(u){re(u,'exceed');Object.assign(u,{validTo:new Date(TODAY.getTime()+9*DAY),pastViol:2})}
  const k3=FAC.find(f=>f.id==='RJ-KOT-003');if(k3){re(k3,'exceed');k3.pastViol=Math.min(k3.pastViol,1)}
 })();
+/* complaints for the story units: placed downwind of the unit, then every complaint is re-checked against current OCEMS */
+COMP.forEach(attribute);
+FAC.forEach(f=>{const want=f.complaints;let have=COMP.filter(c=>c.lead===f).length,tries=0;
+  while(have<want&&tries<12){tries++;const w=Math.round((285+(RA()-.5)*60+360)%360),d=.6+RA()*.8,r=((w+180)%360)*Math.PI/180;
+   const ll=[f.ll[0]+d/111*Math.cos(r),f.ll[1]+d/(111*Math.cos(f.ll[0]*Math.PI/180))*Math.sin(r)];const S=SECTORS[f.sector]||{};
+   const type=S.media==='Effluent'?((f.m&&f.m.nightFlag)?'Foul smell at night':'Coloured effluent in drain'):'Smoke / dust from unit';
+   const c={ll,type,days:ri(2,30),ro:f.ro,wind:w};c.bearing=VISUAL[type]?Math.round((brg(ll,f.ll)+gauss()*4+360)%360):null;attribute(c);
+   if(c.lead===f){COMP.push(c);have++}}});
+FAC.forEach(f=>{f.cArea=COMP.filter(c=>km(c.ll,f.ll)<=2).length;f.cPoss=COMP.filter(c=>c.cands.some(x=>x.f===f)).length;f.complaints=COMP.filter(c=>c.lead===f).length});
 const inspDue=f=>f.freqD?f.freqD-f.lastInsp:null;
 function schedChip(f){const d=inspDue(f);if(d===null)return `<span class="chip grey" title="${esc(f.freqWhy)}">Need based</span>`;
   if(d<0)return `<span class="chip bad" title="${esc(f.freqWhy)} · due ${f.freqL.toLowerCase()}">${f.freqL} · overdue ${-d} d</span>`;
@@ -1491,7 +1531,7 @@ const COMPS=[
  {k:'cat',label:'Pollution category',color:'var(--c-cat)',w:25},
  {k:'exc',label:'OCEMS exceedances',color:'var(--c-exc)',w:20},
  {k:'int',label:'Data integrity flags',color:'var(--c-int)',w:20},
- {k:'cmp',label:'Complaints nearby',color:'var(--c-cmp)',w:15},
+ {k:'cmp',label:'Complaints (possible source)',color:'var(--c-cmp)',w:15},
  {k:'con',label:'Consent status',color:'var(--c-con)',w:10},
  {k:'his',label:'Violation history',color:'var(--c-his)',w:5},
  {k:'gap',label:'Inspection overdue',color:'var(--c-gap)',w:5}
@@ -1516,7 +1556,7 @@ function score(f){
   if(m.flatFlag)rs.push('Flatlined readings');
   if(m.lowAvail)rs.push(`Data availability ${Math.round(m.avail)}%`);
   if(m.exceed)rs.push(`${m.exceed} h above limit`);
-  if(f.complaints>=2)rs.push(`${f.complaints} complaints within 2 km`);
+  if(f.complaints>=2)rs.push(`Possible source of ${f.complaints} complaints`);
   if(f.pastViol>=2)rs.push(`${f.pastViol} past violations`);
   {const d=inspDue(f);if(d!==null&&d<0)rs.push(`Inspection overdue ${-d} d (${f.freqL.toLowerCase()})`)}
   f.reasons=rs;
@@ -1674,7 +1714,7 @@ function renderHome(){
   const near=ro=>{const c=CLUSTERS.find(c=>c.ro===ro);return c?c.c:null};
   const poorFc=STATIONS.filter(s=>s.fc[1]>200&&(ROLE==='HQ'||km(s.ll,near(ROLE))<60));
   const A=[];
-  if(inRole('Balotra'))A.push({sev:'high',t:`Night-time effluent spikes at ${STAR.id}`,d:`Balotra · COD above limit most nights · ${STAR.complaints} complaint${STAR.complaints===1?'':'s'} nearby`,go:'fac',id:STAR.id});
+  if(inRole('Balotra'))A.push({sev:'high',t:`Night-time effluent spikes at ${STAR.id}`,d:`Balotra · COD above limit most nights${STAR.complaints?` · possible source of ${STAR.complaints} complaint${STAR.complaints===1?'':'s'}`:''}`,go:'fac',id:STAR.id});
   if(expiredOp.length)A.push({sev:'high',t:`${expiredOp.length} unit${expiredOp.length>1?'s':''} running on expired consent`,d:'OCEMS data still flowing after expiry',go:'consent'});
   if(integ.length)A.push({sev:'high',t:`${integ.length} unit${integ.length>1?'s':''} with OCEMS data-integrity flags`,d:'Frozen values, night-only spikes or data gaps',go:'plan'});
   {const rl=RIVERS2.luni,sm=rvSummary(rl,RH-1);if(inRole('Balotra'))A.splice(1,0,{sev:'high',t:`Luni below Balotra is in ${pcls(sm.worst.b)[1]}`,d:`CETP Balotra overloaded at night · ${sm.untreated.toFixed(1)} MLD untreated reaching the river`,go:'river'})}
@@ -1716,7 +1756,7 @@ function renderHome(){
    ngt:['NGT & legal cases','Hearings, directions and compliance in one register.',`${ngtR.filter(atRisk).length} hearings at risk · ${ngtR.length} active cases`,'<path d="M12 3v18M5 7h14M5 7l-3 7h6zM19 7l-3 7h6zM8 21h8"/>',ngtR.length>0],
    lab:['Laboratory & samples','Track samples and check OCEMS against the Board\'s lab.',`${labLow} units with weak OCEMS data`,'<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/>'],
    water:['Water quality & CETPs','CETP inlet and outlet against norms.',`${cetpR.filter(c=>c.outlet>c.limit).length} of ${cetpR.length} CETPs above norm`,'<path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/>',cetpR.length>0],
-   griev:['Grievances','Complaints by area, age and likely source.',`${compOld} complaints older than 15 days`,'<path d="M4 5h16v11H8l-4 4z"/>']
+   griev:['Grievances','Complaints by area, age and possible source.',`${compOld} complaints older than 15 days`,'<path d="M4 5h16v11H8l-4 4z"/>']
   };
   const DEF=['plan','consent','fac','river','ngt','lab'];
   let order=tileOrder().filter(k=>TILE[k]);
@@ -1762,7 +1802,7 @@ function initBigMap(){
   LAY.stations=L.layerGroup();STATIONS.forEach(s=>{const b=aqiBand(s.aqi);const m=L.marker(s.ll,{icon:L.divIcon({className:'',html:`<div style="background:${b[2]};color:${s.aqi>100&&s.aqi<=200?'#222':'#fff'};font-size:11px;font-weight:700;padding:2px 5px;border-radius:4px;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.3)">${s.aqi}</div>`,iconSize:[30,18],iconAnchor:[15,9]})});
     m.bindPopup(`<b>${s.n}</b><br>AQI <b>${s.aqi}</b> · ${b[1]} · main pollutant ${s.pol}<br><span class="small">Forecast: ${s.fc.map((v,i)=>['Tomorrow','Day 2','Day 3'][i]+' '+v+' ('+aqiBand(v)[1]+')').join('<br>')}</span><br><span class="small muted">Indian National AQI scale</span>`);LAY.stations.addLayer(m)});
   LAY.fires=L.layerGroup();FIRES.forEach(x=>{const m=L.marker(x.ll,{icon:L.divIcon({className:'',html:`<div style="width:9px;height:9px;background:#ff5a1f;transform:rotate(45deg);border:1px solid #fff;opacity:${x.hrs<=24?1:.55}"></div>`,iconSize:[9,9]})});m.bindPopup(`<b>Fire detection</b> (${x.src})<br>${x.hrs} hours ago · confidence ${x.conf}<br>Fire radiative power ${x.frp} MW${x.note?'<br><i>'+x.note+'</i>':''}<br><button class="btn sm" style="margin-top:6px" onclick="toast('Ground verification assigned to district team (demo)')">Assign ground check</button>`);LAY.fires.addLayer(m)});
-  LAY.complaints=L.layerGroup();COMP.forEach(c=>{const m=L.circleMarker(c.ll,{radius:4.5,color:'#fff',weight:1,fillColor:'#7a4fd6',fillOpacity:.9});const near=FAC.map(f=>[f,km(f.ll,c.ll)]).sort((a,b)=>a[1]-b[1])[0];m.bindPopup(`<b>Complaint</b>: ${c.type}<br>Open for ${c.days} days<br><span class="small">Nearest unit: ${near[0].id} (${near[1].toFixed(1)} km)</span>`);LAY.complaints.addLayer(m)});
+  LAY.complaints=L.layerGroup();COMP.forEach(c=>{const m=L.circleMarker(c.ll,{radius:4.5,color:'#fff',weight:1,fillColor:'#7a4fd6',fillOpacity:.9});m.bindPopup(`<b>Complaint</b>: ${c.type}<br>Open for ${c.days} days<br><span class="small">${c.conf?'Confirmed source: '+c.conf.id:c.cands&&c.cands.length?c.cands.length+' possible source'+(c.cands.length>1?'s':'')+' (not confirmed)':'No registered unit traced'}</span>`);LAY.complaints.addLayer(m)});
   LAY.cetps=L.layerGroup();CETPS.forEach(c=>{const bad=c.outlet>c.limit;const m=L.marker(c.ll,{icon:L.divIcon({className:'',html:`<div style="width:14px;height:14px;background:#1f5fa8;border:2px solid ${bad?'#d7263d':'#fff'};border-radius:3px"></div>`,iconSize:[14,14]})});m.bindPopup(`<b>${c.n}</b><br>Capacity ${c.cap} MLD<br>Outlet COD <b style="color:${bad?'#b42318':'inherit'}">${c.outlet}</b> mg/L (norm ${c.limit})<br>Inlet COD ${c.inlet} mg/L`);LAY.cetps.addLayer(m)});
   $$('.mpanel input[data-layer]').forEach(cb=>{if(cb.checked)LAY[cb.dataset.layer].addTo(bigMap);cb.addEventListener('change',()=>cb.checked?LAY[cb.dataset.layer].addTo(bigMap):bigMap.removeLayer(LAY[cb.dataset.layer]))});
   $('#flaggedOnly').addEventListener('change',buildFacLayers);
@@ -1925,9 +1965,9 @@ function renderFac(id){
     <div class="card"><div class="card-h"><h2>Inspections &amp; enforcement</h2></div><div class="tl" id="tl">${histFor(f).map(e=>`<div class="ev ${e.isNew?'new':''}"><div class="when">${fmtD(e.d)}</div><div style="font-weight:600">${e.t}</div><div class="small muted">${e.s}</div></div>`).join('')}</div></div>
   </div>
   <div class="grid g-6040 mt">
-    <div class="card"><div class="card-h"><h2>Surroundings (2 km)</h2><span class="hint">${nearC.length} complaints · nearest CETP ${near[1].toFixed(1)} km</span></div><div class="minimap" id="facmap" style="height:300px"></div><div class="src">Complaints from grievance portal · CETP and station locations illustrative</div></div>
+    <div class="card"><div class="card-h"><h2>Surroundings (2 km)</h2><span class="hint">${nearC.length} complaints in the area · nearest CETP ${near[1].toFixed(1)} km</span></div><div class="minimap" id="facmap" style="height:300px"></div><div class="src">Complaints from grievance portal · CETP and station locations illustrative</div></div>
     <div class="card"><div class="card-h"><h2>Context</h2></div>
-      <div class="check"><span class="ic ${nearC.length>=3?'bad':nearC.length?'warn':'ok'}">${nearC.length}</span><div><div class="ct">Open complaints within 2 km</div><div class="cd">${nearC.length?nearC.map(c=>c.type).filter((v,i,a)=>a.indexOf(v)===i).join(' · '):'None'}</div></div></div>
+      ${(()=>{const poss=COMP.filter(c=>c.cands&&c.cands.some(x=>x.f===f)),lead=COMP.filter(c=>c.lead===f),conf=COMP.filter(c=>c.conf===f);return `<div class="check"><span class="ic ${conf.length?'bad':lead.length?'warn':'ok'}">${Math.max(f.complaints,lead.length)}</span><div><div class="ct">Complaints</div><div class="cd">${nearC.length} in the area (2 km) · possible source for ${Math.max(f.cPoss,poss.length)} · backed by wind or OCEMS ${Math.max(f.complaints,lead.length)} · confirmed on site ${conf.length} <span class="qi" tabindex="0" data-tip="A complaint is tied to a place, not a unit. A unit is a possible source when it lies upwind of the complaint at that time, or in the direction the complainant pointed. It counts towards the risk score only when the sector or OCEMS data backs it up, and it is named as the source only after a site visit.">i</span></div></div></div>`})()}
       <div class="check"><span class="ic ${near[0].outlet>near[0].limit?'bad':'ok'}">C</span><div><div class="ct">${near[0].n} (${near[1].toFixed(1)} km)</div><div class="cd">Outlet COD ${near[0].outlet} mg/L vs norm ${near[0].limit}${near[0].outlet>near[0].limit?' · CETP failing':''}</div></div></div>
       <div class="check"><span class="ic ${st[0].aqi>200?'warn':'ok'}">A</span><div><div class="ct">${st[0].n} (${st[1].toFixed(0)} km)</div><div class="cd">AQI ${st[0].aqi} · ${aqiBand(st[0].aqi)[1]}</div></div></div>
       <div class="check"><span class="ic ${f.pastViol>=2?'bad':f.pastViol?'warn':'ok'}">${f.pastViol}</span><div><div class="ct">Violations in last 5 years</div><div class="cd">Last inspected ${f.lastInsp} days ago</div></div></div>
@@ -1956,7 +1996,7 @@ function noticeDlg(id){const f=FAC.find(x=>x.id===id);const S=SECTORS[f.sector];
   if(m&&m.exceed&&!m.nightFlag)obs.push(`continuous monitoring data shows ${m.exceed} hours above the prescribed ${S.param} limit of ${S.limit} ${S.unit} in the last seven days`);
   if(m&&m.flatFlag)obs.push(`the monitoring system reported an unchanged value for ${m.flat} consecutive hours, indicating the data may not reflect actual conditions`);
   if(m&&m.lowAvail)obs.push(`data availability from the monitoring system was ${m.avail.toFixed(0)}%, below the required level`);
-  if(f.complaints)obs.push(`${f.complaints} complaints regarding pollution have been received from the vicinity of the unit`);
+  {const cf=COMP.filter(c=>c.conf===f).length;if(cf)obs.push(`${cf} complaint${cf>1?'s':''} regarding pollution ${cf>1?'were':'was'} verified on site against the unit`)}
   if(daysToExpiry(f)<0)obs.push(`the Consent to Operate expired on ${fmtD(f.validTo)} and the unit appears to be operating without valid consent`);
   if(!obs.length)obs.push('[observations to be added by the officer]');
   const txt=`DRAFT – FOR OFFICER REVIEW
@@ -2093,10 +2133,11 @@ function renderWaste(){
 
 /* ============ GRIEVANCES ============ */
 const R4=mulberry32(9090);const CHANNELS=['Rajasthan Sampark','Board helpline','Email','Walk-in'];
-COMP.forEach((c,i)=>{c.id='GRV-'+(26000+i*7);c.ch=CHANNELS[Math.floor(R4()*4)];const near=FAC.map(f=>[f,km(f.ll,c.ll)]).sort((a,b)=>a[1]-b[1])[0];c.unit=near[0];c.dist=near[1];
-  const p=R4();c.status=c.days<=3?'New':p<.45?'Assigned':p<.8?'Site visit done':'Reply awaited';c.visit=c.status==='Site visit done';});
+COMP.forEach((c,i)=>{c.id='GRV-'+(26000+i*7);c.ch=CHANNELS[Math.floor(R4()*4)];
+  const p=R4();c.status=c.days<=3?'New':p<.45?'Assigned':p<.8?'Site visit done':'Reply awaited';c.visit=c.status==='Site visit done';
+  c.conf=c.visit&&c.lead?c.lead:null;c.untraced=c.visit&&!c.lead;});
 const CLOSED=ROS.map(ro=>{const n=8+Math.floor(R4()*30);const avg=6+R4()*16;return{ro,n,avg:+avg.toFixed(1),noVisit:Math.round(R4()*35),late:Math.round(avg>15?40+R4()*30:R4()*25)}});
-function clusters(){const used=new Set(),out=[];COMP.forEach((c,i)=>{if(used.has(i))return;const mem=COMP.map((d,j)=>[d,j]).filter(([d,j])=>!used.has(j)&&km(c.ll,d.ll)<=6);if(mem.length>=4){mem.forEach(([,j])=>used.add(j));const types={};mem.forEach(([d])=>types[d.type]=(types[d.type]||0)+1);const units=[...new Set(mem.map(([d])=>d.unit.id))];out.push({n:mem.length,ro:c.ro,ll:c.ll,top:Object.entries(types).sort((a,b)=>b[1]-a[1])[0][0],units,station:STATIONS.some(s=>km(s.ll,c.ll)<=5)})}});return out.sort((a,b)=>b.n-a.n)}
+function clusters(){const used=new Set(),out=[];COMP.forEach((c,i)=>{if(used.has(i))return;const mem=COMP.map((d,j)=>[d,j]).filter(([d,j])=>!used.has(j)&&km(c.ll,d.ll)<=6);if(mem.length>=4){mem.forEach(([,j])=>used.add(j));const types={};mem.forEach(([d])=>types[d.type]=(types[d.type]||0)+1);const sc={};mem.forEach(([d])=>(d.cands||[]).forEach(x=>{sc[x.f.id]=(sc[x.f.id]||0)+x.s}));const units=Object.entries(sc).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);out.push({n:mem.length,ro:c.ro,ll:c.ll,top:Object.entries(types).sort((a,b)=>b[1]-a[1])[0][0],units,station:STATIONS.some(s=>km(s.ll,c.ll)<=5)})}});return out.sort((a,b)=>b.n-a.n)}
 let gFilt={ro:'',type:'',st:''},grievMap=null;
 function renderGriev(){
   if(ROLE!=='HQ')gFilt.ro=ROLE;
@@ -2104,13 +2145,13 @@ function renderGriev(){
   const late=COMP.filter(c=>c.days>15).length;const CL=clusters();const blind=CL.filter(c=>!c.station).length;
   const sel=(id,opts,v,all)=>`<select onchange="gFilt.${id}=this.value;renderGriev()"><option value="">${all}</option>${opts.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
   const stChip=s=>({'New':'blue','Assigned':'warn','Site visit done':'ok','Reply awaited':'grey'}[s]);
-  $('#grievBody').innerHTML=`<h1>Grievances</h1><p class="sub">Every complaint placed on the map, linked to the units around it, and tracked until it is closed.</p>
+  $('#grievBody').innerHTML=`<h1>Grievances</h1><p class="sub">Each complaint is pinned to a place and time. Units become possible sources only when the wind, the direction pointed, the sector or OCEMS data back it up, and a source is named only after a site visit.</p>
   <div class="grid g5">${kpiRow([['Open complaints',COMP.length,'across all channels'],['Beyond 15 days',late,'past the service standard',late?'var(--red)':''],['Avg time to close',(CLOSED.reduce((t,c)=>t+c.avg*c.n,0)/CLOSED.reduce((t,c)=>t+c.n,0)).toFixed(1)+' days','last 30 days'],['Complaint clusters',CL.length,'4+ complaints within 6 km'],['Clusters with no station nearby',blind,'pollution monitoring would miss']])}</div>
-  <div class="grid g-6040 mt"><div class="card"><div class="card-h"><h2>Complaint register</h2><div class="flt">${sel('ro',ROS,gFilt.ro,'All offices')}${sel('type',[...new Set(COMP.map(c=>c.type))],gFilt.type,'All types')}${sel('st',['New','Assigned','Site visit done','Reply awaited'],gFilt.st,'All statuses')}</div></div>
-   <div style="max-height:470px;overflow:auto"><table><thead><tr><th>ID</th><th>Complaint</th><th>Likely source</th><th class="num">Days</th><th>Status</th><th></th></tr></thead><tbody>${GL.map(c=>`<tr><td class="small"><b>${c.id}</b><div class="muted">${c.ch}</div></td><td><div style="font-weight:500">${c.type}</div><div class="small muted">${c.ro}</div></td><td class="small"><a href="#" data-go="fac" data-id="${c.unit.id}">${c.unit.id}</a><div class="muted">${c.dist.toFixed(1)} km · score ${c.unit.score}</div></td><td class="num" style="${c.days>15?'color:var(--red);font-weight:600':''}">${c.days}</td><td><span class="chip ${stChip(c.status)}">${c.status}</span></td><td>${c.status==='New'?`<button class="btn sm" onclick="grvAssign('${c.id}')">Assign</button>`:''}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">No complaints match these filters</td></tr>'}</tbody></table></div>
-   <div class="src">Channels merged: Rajasthan Sampark portal, helpline, email, walk-in · likely source = nearest registered unit</div></div>
+  <div class="grid g-6040 mt"><div class="card"><div class="card-h"><h2>Complaint register</h2><div class="flt"><button class="btn sm primary" onclick="grvReport()">+ Citizen report</button>${sel('ro',ROS,gFilt.ro,'All offices')}${sel('type',[...new Set(COMP.map(c=>c.type))],gFilt.type,'All types')}${sel('st',['New','Assigned','Site visit done','Reply awaited'],gFilt.st,'All statuses')}</div></div>
+   <div style="max-height:470px;overflow:auto"><table><thead><tr><th>ID</th><th>Complaint</th><th>Source</th><th class="num">Days</th><th>Status</th><th></th></tr></thead><tbody>${GL.map(c=>`<tr><td class="small"><b>${c.id}</b><div class="muted">${c.ch}</div></td><td><div style="font-weight:500">${c.type}</div><div class="small muted">${c.ro}</div></td><td class="small">${grvSrcCell(c)}</td><td class="num" style="${c.days>15?'color:var(--red);font-weight:600':''}">${c.days}</td><td><span class="chip ${stChip(c.status)}">${c.status}</span></td><td>${c.status==='New'?`<button class="btn sm" onclick="grvAssign('${c.id}')">Assign</button>`:''}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">No complaints match these filters</td></tr>'}</tbody></table></div>
+   <div class="src">Channels merged: Rajasthan Sampark portal, helpline, email, walk-in, citizen app. Possible sources: registered units within 5 km that lie upwind at the time of the complaint (wind from the nearest station) or within 15° of the direction the complainant pointed, ranked by sector match and OCEMS readings. Confirmed only after a site visit.</div></div>
   <div><div class="card" style="padding:0;overflow:hidden"><div class="card-h" style="padding:14px 16px 0"><h2>Complaint clusters</h2></div><div id="grievmap" style="height:250px;margin-top:10px"></div></div>
-   <div class="card mt"><div class="card-h"><h2>Clusters</h2></div>${CL.slice(0,5).map(c=>`<div class="check"><span class="ic ${c.station?'warn':'bad'}">${c.n}</span><div><div class="ct">${c.ro}: mostly "${c.top.toLowerCase()}"</div><div class="cd">Units nearby: ${c.units.slice(0,3).map(u=>`<a href="#" data-go="fac" data-id="${u}">${u}</a>`).join(', ')}${c.station?'':' · <b style="color:var(--red)">no air station within 5 km</b>'}</div></div></div>`).join('')}</div></div></div>
+   <div class="card mt"><div class="card-h"><h2>Clusters</h2></div>${CL.slice(0,5).map(c=>`<div class="check"><span class="ic ${c.station?'warn':'bad'}">${c.n}</span><div><div class="ct">${c.ro}: mostly "${c.top.toLowerCase()}"</div><div class="cd">Possible sources: ${c.units.slice(0,3).map(u=>`<a href="#" data-go="fac" data-id="${u}">${u}</a>`).join(', ')}${c.station?'':' · <b style="color:var(--red)">no air station within 5 km</b>'}</div></div></div>`).join('')}</div></div></div>
   <div class="card mt"><div class="card-h"><h2>Closure by office</h2><span class="hint">Last 30 days</span></div><table><thead><tr><th>Regional Office</th><th class="num">Closed</th><th class="num">Avg days</th><th class="num">Closed late</th><th class="num">Closed without a site visit</th></tr></thead><tbody>${CLOSED.sort((a,b)=>b.avg-a.avg).map(c=>`<tr><td><b>${c.ro}</b></td><td class="num">${c.n}</td><td class="num" style="${c.avg>15?'color:var(--red);font-weight:600':''}">${c.avg.toFixed(1)}</td><td class="num">${c.late}%</td><td class="num" style="${c.noVisit>25?'color:var(--amber);font-weight:600':''}">${c.noVisit}%</td></tr>`).join('')}</tbody></table>
    </div>`;
   if(grievMap){grievMap.remove();grievMap=null}
@@ -2119,6 +2160,59 @@ function renderGriev(){
   L_COMP(GL);setTimeout(()=>{grievMap.invalidateSize();if(GL.length)grievMap.fitBounds(L.latLngBounds(GL.map(c=>c.ll)).pad(.15))},60);
 }
 function L_COMP(list){list.forEach(c=>L.circleMarker(c.ll,{radius:4,color:'#fff',weight:.8,fillColor:'#7a4fd6',fillOpacity:.9}).bindTooltip(c.id+' · '+c.type).addTo(grievMap))}
+function grvSrcCell(c){
+  if(c.conf)return `<span class="chip ok">Confirmed</span> <a href="#" data-go="fac" data-id="${c.conf.id}">${c.conf.id}</a>`;
+  if(c.untraced)return `<span class="chip grey">Visited · not traced</span>`;
+  const n=(c.cands||[]).length;if(!n)return `<span class="muted">No registered unit traced</span>`;
+  const t=c.cands[0];return `<a href="#" onclick="grvSrc('${c.id}');return false">${n} possible source${n>1?'s':''}</a><div class="muted">${c.lead?'leading: '+t.f.id+' · '+t.why.slice(1).join(', '):'no clear lead yet'}</div>`}
+let grvMap2=null;
+function grvCone(map,c){
+  const ang=c.bearing!=null?c.bearing:c.wind,half=c.bearing!=null?CONE_BRG:CONE_WIND,R=CONE_KM;
+  const pt=(b,d)=>{const r=b*Math.PI/180;return [c.ll[0]+d/111*Math.cos(r),c.ll[1]+d/(111*Math.cos(c.ll[0]*Math.PI/180))*Math.sin(r)]};
+  const poly=[c.ll];for(let a=-half;a<=half;a+=3)poly.push(pt(ang+a,R));poly.push(c.ll);
+  L.polygon(poly,{color:c.bearing!=null?'#7a4fd6':'#2f6fb3',weight:1.5,fillOpacity:.12,dashArray:'4 3'}).addTo(map);
+  L.circleMarker(c.ll,{radius:7,color:'#fff',weight:2,fillColor:'#7a4fd6',fillOpacity:1}).bindTooltip('Complaint location').addTo(map);
+  FAC.filter(f=>km(f.ll,c.ll)<=CONE_KM+1).forEach(f=>{const cd=(c.cands||[]).find(x=>x.f===f);L.circleMarker(f.ll,{radius:cd?6:3.5,color:cd?'#b42318':'#8a948e',weight:cd?2:1,fillColor:cd?'#fde8e6':'#d5dbd7',fillOpacity:1}).bindTooltip(f.id+(cd?' · possible source':'')).addTo(map)});
+  map.fitBounds(L.latLngBounds(poly.concat(c.cands.map(x=>x.f.ll))).pad(.2))}
+function grvSrcBody(c){
+  const dir=d=>['N','NE','E','SE','S','SW','W','NW'][Math.round(d/45)%8];
+  return `<div class="small muted">${c.id} · ${esc(c.type)} · ${c.ro}</div>
+  <div class="small" style="margin:6px 0 10px">${c.bearing!=null?`Complainant pointed <b>${dir(c.bearing)} (${c.bearing}°)</b>`:`Wind at the time: from the <b>${dir(c.wind)} (${c.wind}°)</b>`} · units within ${CONE_KM} km checked</div>
+  <div id="grvmap2" style="height:260px;border-radius:10px;overflow:hidden;border:1px solid var(--line)"></div>
+  <table style="margin-top:10px"><thead><tr><th>Possible source</th><th>Why</th><th class="num">Match</th></tr></thead><tbody>${(c.cands||[]).map(x=>`<tr><td><a href="#" data-go="fac" data-id="${x.f.id}" onclick="closeModal()">${x.f.id}</a><div class="small muted">${x.f.sector} · ${x.d.toFixed(1)} km</div></td><td class="small">${x.why.join(' · ')}</td><td class="num">${Math.round(x.s*100)}%</td></tr>`).join('')||'<tr><td colspan="3" class="small muted">No registered unit in the cone. Treated as an area complaint for the RO.</td></tr>'}</tbody></table>
+  <div class="small muted" style="margin-top:8px">${c.conf?`Confirmed on site: <b>${c.conf.id}</b>`:'Possible sources only. A unit is named as the source after the site visit.'}</div>`}
+function grvSrc(id){const c=COMP.find(x=>x.id===id);modal(`<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-size:18px">Possible sources</h2><button class="btn sm" onclick="closeModal()">Close</button></div>${grvSrcBody(c)}<div class="btn-row mt">${!c.conf&&c.cands.length?`<button class="btn primary" onclick="grvConfirm('${c.id}')">Record site-visit finding</button>`:''}</div>`);
+  setTimeout(()=>{if(grvMap2){grvMap2.remove();grvMap2=null}grvMap2=L.map('grvmap2',{zoomControl:false,attributionControl:false});streetBase().addTo(grvMap2);grvCone(grvMap2,c)},30)}
+function grvConfirm(id){const c=COMP.find(x=>x.id===id);modal(`<h2 style="margin:0 0 6px;font-size:18px">Site-visit finding · ${c.id}</h2><p class="small muted">Recorded by the field officer after the visit.</p>${c.cands.map(x=>`<label class="small" style="display:block;margin:6px 0"><input type="radio" name="gcf" value="${x.f.id}"> Source confirmed: <b>${x.f.id}</b> (${x.f.sector})</label>`).join('')}<label class="small" style="display:block;margin:6px 0"><input type="radio" name="gcf" value="" checked> Source not found among registered units</label><div class="btn-row mt"><button class="btn primary" onclick="(()=>{const v=document.querySelector('input[name=gcf]:checked').value;const c=COMP.find(x=>x.id==='${c.id}');c.status='Site visit done';c.visit=true;c.conf=v?FAC.find(f=>f.id===v):null;c.untraced=!v;closeModal();renderGriev();toast(v?'Source confirmed: '+v:'Recorded: source not traced')})()">Save</button><button class="btn" onclick="closeModal()">Cancel</button></div>`)}
+let GRP={type:'Smoke / dust from unit',bearing:60,ll:null,dist:'~1 km'},grpMap=null,grpLayer=null;
+function grvReport(){
+  if(!GRP.ll){const u=FAC.find(f=>f.cluster==='BHW'&&f.ocems&&f.m&&f.m.flatFlag)||FAC.find(f=>f.cluster==='BHW')||FAC[0];const r=240*Math.PI/180,d=1.3;GRP.ll=[u.ll[0]+d/111*Math.cos(r),u.ll[1]+d/(111*Math.cos(u.ll[0]*Math.PI/180))*Math.sin(r)];GRP.bearing=Math.round(brg(GRP.ll,u.ll))}
+  const types=['Smoke / dust from unit','Foul smell at night','Coloured effluent in drain','Open burning of waste','Noise at night'];
+  modal(`<div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-size:18px">Report pollution <span class="small muted" style="font-weight:400">· citizen app (demo)</span></h2><button class="btn sm" onclick="closeModal()">Close</button></div>
+  <div class="grid g2" style="gap:16px;margin-top:10px;align-items:start">
+   <div>
+    <div class="small muted" style="margin-bottom:4px">What do you see or smell?</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">${types.map(t=>`<button class="btn sm ${GRP.type===t?'primary':''}" onclick="GRP.type='${t}';grvReport()">${t}</button>`).join('')}</div>
+    ${VISUAL[GRP.type]?`<div class="small muted" style="margin:12px 0 4px">Point your phone towards it</div>
+    <div style="display:flex;align-items:center;gap:10px"><svg viewBox="-50 -50 100 100" width="74" height="74"><circle r="46" fill="#f4f8f5" stroke="#cfe0d6"/><text y="-34" text-anchor="middle" font-size="10" fill="#5d6b63">N</text><g transform="rotate(${GRP.bearing})"><path d="M0,-38 L7,0 L-7,0 Z" fill="#7a4fd6"/><path d="M0,38 L7,0 L-7,0 Z" fill="#cfd6d1"/></g></svg>
+    <div style="flex:1"><input type="range" min="0" max="359" value="${GRP.bearing}" style="width:100%" oninput="GRP.bearing=+this.value;this.closest('div').querySelector('b').textContent=this.value+'°';this.closest('div').parentNode.querySelector('svg g').setAttribute('transform','rotate('+this.value+')');grpDraw()"><div class="small">Direction <b>${GRP.bearing}°</b> · phone compass</div></div></div>
+    <div class="small muted" style="margin:12px 0 4px">How far, roughly? (optional)</div><div style="display:flex;gap:6px">${['< 500 m','~1 km','Far'].map(d=>`<button class="btn sm ${GRP.dist===d?'primary':''}" onclick="GRP.dist='${d}';grvReport()">${d}</button>`).join('')}</div>`:`<div class="small muted" style="margin:12px 0 0">No direction needed. The wind at this time decides where to look.</div>`}
+    <div class="small muted" style="margin:12px 0 4px">Photo (optional)</div><input type="file" accept="image/*" class="small">
+    <div class="small" style="margin-top:12px;background:#f4f8f5;border:1px solid #d6e7dc;border-radius:8px;padding:8px 10px">Mobile number verified by OTP. Your identity is kept confidential and is never shared with the industry. You do not need to go near any unit.</div>
+   </div>
+   <div><div class="small muted" style="margin-bottom:4px">Your location (click the map to move)</div><div id="grpmap" style="height:300px;border-radius:10px;overflow:hidden;border:1px solid var(--line)"></div></div>
+  </div>
+  <div class="btn-row mt"><button class="btn primary" onclick="grvSubmit()">Submit report</button></div>`);
+  setTimeout(()=>{if(grpMap){grpMap.remove();grpMap=null}grpMap=L.map('grpmap',{zoomControl:false,attributionControl:false}).setView(GRP.ll,13);streetBase().addTo(grpMap);grpMap.on('click',e=>{GRP.ll=[e.latlng.lat,e.latlng.lng];grpDraw()});grpDraw()},30)}
+function grpDraw(){if(!grpMap)return;if(grpLayer)grpLayer.remove();grpLayer=L.layerGroup().addTo(grpMap);
+  FAC.filter(f=>km(f.ll,GRP.ll)<=6).forEach(f=>L.circleMarker(f.ll,{radius:3.5,color:'#8a948e',weight:1,fillColor:'#d5dbd7',fillOpacity:1}).bindTooltip(f.id).addTo(grpLayer));
+  if(VISUAL[GRP.type]){const pt=(b,d)=>{const r=b*Math.PI/180;return [GRP.ll[0]+d/111*Math.cos(r),GRP.ll[1]+d/(111*Math.cos(GRP.ll[0]*Math.PI/180))*Math.sin(r)]};const p=[GRP.ll];for(let a=-CONE_BRG;a<=CONE_BRG;a+=3)p.push(pt(GRP.bearing+a,CONE_KM));L.polygon(p,{color:'#7a4fd6',weight:1.5,fillOpacity:.12,dashArray:'4 3'}).addTo(grpLayer)}
+  L.circleMarker(GRP.ll,{radius:7,color:'#fff',weight:2,fillColor:'#7a4fd6',fillOpacity:1}).addTo(grpLayer)}
+function grvSubmit(){
+  const near=CLUSTERS.map(cl=>[cl,km(cl.c,GRP.ll)]).sort((a,b)=>a[1]-b[1])[0][0];
+  const c={ll:GRP.ll.slice(),type:GRP.type,days:0,ro:near.ro,id:'GRV-'+(27000+COMP.length),ch:'Citizen app',status:'New',visit:false,bearing:VISUAL[GRP.type]?GRP.bearing:null,night:/night/i.test(GRP.type)};
+  attribute(c);c.conf=null;c.untraced=false;COMP.unshift(c);renderGriev();
+  toast(c.id+' received · '+(c.cands.length?c.cands.length+' possible source'+(c.cands.length>1?'s':'')+' found':'no registered unit in that direction'));grvSrc(c.id)}
 function grvAssign(id){const c=COMP.find(x=>x.id===id);c.status='Assigned';renderGriev();toast(`${id} assigned to ${OFFICERS[c.ro]?OFFICERS[c.ro][1]:'field officer'} (demo)`)}
 
 /* ============ NGT & LEGAL CASES ============ */
