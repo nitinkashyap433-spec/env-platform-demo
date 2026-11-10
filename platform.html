@@ -885,6 +885,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--g50)}
 .ptag{margin-left:auto;font-size:10px;font-weight:600;background:var(--blue-bg);color:var(--blue);padding:1px 6px;border-radius:10px}
 .p2l{margin:0;padding-left:18px}.p2l li{margin:6px 0;font-size:13.5px}
 
+.rstag{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}.rstag.f{background:#fdecea;color:#b42318}.rstag.m{background:#e7f4ec;color:#1d6b40}
 .selrow td{background:var(--g50)}
 .river{position:relative;padding-left:4px}
 .river:before{content:"";position:absolute;left:9px;top:8px;bottom:8px;width:3px;background:#cfe0f3;border-radius:2px}
@@ -1579,7 +1580,7 @@ function goLocal(v,opts){
   if(v==='water')renderWater(opts&&opts.cetp);
   if(v==='waste')renderWaste();
   if(v==='griev')renderGriev();
-  if(v==='river'){if(opts&&opts.river){if(RV.view==='state'){renderRiver();setTimeout(()=>rvGo(opts.river),350)}else rvPick(opts.river)}else renderRiver()}
+  if(v==='river'){if(opts&&opts.river&&RS_DATA[opts.river]){RS.river=opts.river;RS.st=null}RV.mode='sampled';renderRiverS()}
   if(v==='ngt')renderNGT(opts&&opts.case);
   if(v==='lab')renderLab(opts&&opts.id);
 }
@@ -2345,6 +2346,118 @@ Deponent
 Verified at ________ on ________`;
   modal(`<h2>Draft compliance affidavit</h2><p class="small muted">Built from the case record and live monitoring data. The legal cell reviews and edits before filing.</p><textarea>${esc(txt)}</textarea><div class="btn-row mt"><button class="btn primary" onclick="closeModal();toast('Draft sent to the legal cell for review (demo)')">Send to legal cell</button><button class="btn" onclick="ngtOpen('${c.id}')">Back to case</button></div>`)}
 
+/* ============ RIVER WATER QUALITY (periodic sampling) ============ */
+// Built around the Board's monthly river samples (NWMP-style). Stations, values and dates are illustrative.
+const RS_DATA={
+ jojari:{name:'Jojari',basin:'Luni basin (west)',eph:true,cetp:'CETP Jodhpur',st:[['JOJ-1','Jodhpur upstream',8,0.9,'u'],['JOJ-2','Doli (downstream of Jodhpur)',52,1.08,'d']]},
+ bandi:{name:'Bandi',basin:'Luni basin (west)',eph:true,cetp:'CETP Pali',st:[['BAN-1','Pali upstream',5,1,'u'],['BAN-2','Nehda (downstream of Pali)',44,0.8,'d']]},
+ luni:{name:'Luni',basin:'Luni basin (west)',eph:true,cetp:'CETP Balotra',st:[['LUN-1','Below Bandi confluence',14,1,'u'],['LUN-2','Balotra upstream',9,1,'u'],['LUN-3','Tilwara (downstream of Balotra)',34,1.05,'d']]},
+ berach:{name:'Berach',basin:'Chambal basin',cetp:null,st:[['BER-1','Udaipur (Ayad)',5.5,1,'u'],['BER-2','Bhilwara downstream',9,1,'d']]},
+ chambal:{name:'Chambal',basin:'Chambal basin',cetp:null,st:[['CHA-1','Kota barrage upstream',2.1,1,'u'],['CHA-2','Kota downstream',4.6,1,'d'],['CHA-3','Dholpur',2.9,1,'d']]},
+ banas:{name:'Banas',basin:'Chambal basin',cetp:null,st:[['BNS-1','Bisalpur dam',1.9,1,'u'],['BNS-2','Tonk',3.3,1,'d']]},
+ mahi:{name:'Mahi',basin:'Mahi basin (south)',cetp:null,st:[['MAH-1','Mahi Bajaj Sagar, Banswara',1.6,1,'u']]}
+};
+const RS_SEAS=[1,1.05,1.15,1.3,1.35,1.25,.7,.55,.6,.85,.95,1];
+const RS_N=24;let RS={river:'luni',st:null};
+(function(){const R=mulberry32(4242);const now=new Date(TODAY);now.setDate(1);
+ const months=[];for(let k=RS_N-1;k>=0;k--){const d=new Date(now.getFullYear(),now.getMonth()-k,12);months.push(d)}
+ RS.months=months;
+ Object.entries(RS_DATA).forEach(([rid,rv])=>{rv.id=rid;
+  rv.stations=rv.st.map(([code,name,b0,trend,pos],si)=>{
+   const s={code,name,pos,rid,samples:[]};
+   months.forEach((d,k)=>{const m=d.getMonth();
+    const dry=[3,4,5,10,11,0,1].includes(m);
+    if(rv.eph&&pos==='u'&&dry&&R()<.75){s.samples.push({d,k,st:'noflow'});return}
+    if(R()<.06){s.samples.push({d,k,st:'missed'});return}
+    const tr=Math.pow(trend,(k-(RS_N-12))/12);
+    const bod=Math.max(.6,b0*RS_SEAS[m]*tr*Math.exp((R()-.5)*.35));
+    const dO=Math.max(.2,Math.min(9,7.9-.095*bod-(m>=3&&m<=5?.6:0)+(R()-.5)*.8));
+    const fc=Math.round(Math.max(40,(pos==='d'?1:.25)*(bod*bod*55)*Math.exp((R()-.5)*.8))/10)*10;
+    const tds=Math.round((rv.eph?2600:450)*(pos==='d'?1.6:1)*(m>=6&&m<=8?.6:1)*Math.exp((R()-.5)*.3));
+    const day=rint(5,24);const dd=new Date(d.getFullYear(),d.getMonth(),day);
+    if(k===RS_N-1&&day>=TODAY.getDate()){s.samples.push({d:dd,k,st:'due'});return}
+    s.samples.push({d:dd,k,st:'ok',bod:+bod.toFixed(1),do:+dO.toFixed(1),fc,tds});
+   });
+   return s});
+ });
+})();
+const rsAll=()=>Object.values(RS_DATA).flatMap(r=>r.stations);
+const rsOk=s=>s.samples.filter(x=>x.st==='ok');
+const rsLast=s=>{const o=rsOk(s);return o[o.length-1]};
+const rs12=s=>s.samples.filter(x=>x.k>=RS_N-12);
+const rsBreach=x=>x.st==='ok'&&(x.bod>3||x.do<5||x.fc>2500);
+function rsClass(s){const o=rs12(s).filter(x=>x.st==='ok');if(!o.length)return null;return pcls(Math.max(...o.map(x=>x.bod)))}
+function rsTrend(s){const a=s.samples.filter(x=>x.st==='ok'&&x.k>=RS_N-6).map(x=>x.bod),b=s.samples.filter(x=>x.st==='ok'&&x.k>=RS_N-18&&x.k<RS_N-12).map(x=>x.bod);
+ if(a.length<2||b.length<2)return null;const av=a.reduce((p,c)=>p+c,0)/a.length,bv=b.reduce((p,c)=>p+c,0)/b.length;return (av-bv)/bv}
+const rsMon=d=>d.toLocaleDateString('en-IN',{month:'short',year:'2-digit'});const rsMonL=d=>d.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+function rsChart(s){
+ const W=720,H=230,L=42,Rr=14,T=14,B=34,n=RS_N;const ok=rsOk(s);const ymax=Math.max(6,...ok.map(x=>x.bod))*1.12;
+ const X=k=>L+(W-L-Rr)*(k+.5)/n,Y=v=>T+(H-T-B)*(1-v/ymax);
+ let g='';
+ RS.months.forEach((d,k)=>{const m=d.getMonth();if(m>=6&&m<=8)g+=`<rect x="${X(k)-(W-L-Rr)/n/2}" y="${T}" width="${(W-L-Rr)/n}" height="${H-T-B}" fill="#eaf2fb"/>`});
+ [[3,'Bathing limit 3'],[10,'Priority III above 10'],[30,'Priority I above 30']].forEach(([v,l])=>{if(v<ymax)g+=`<line x1="${L}" x2="${W-Rr}" y1="${Y(v)}" y2="${Y(v)}" stroke="${v===3?'#2f8f5b':'#c7cfca'}" stroke-dasharray="${v===3?'5 4':'2 4'}"/><text x="${W-Rr-2}" y="${Y(v)-4}" font-size="10" text-anchor="end" fill="#6a7a70">${l} mg/L</text>`});
+ for(let t=0;t<=4;t++){const v=ymax/4*t;g+=`<text x="${L-6}" y="${Y(v)+3}" font-size="10" text-anchor="end" fill="#8a948e">${v.toFixed(0)}</text>`}
+ RS.months.forEach((d,k)=>{if(k%3===0)g+=`<text x="${X(k)}" y="${H-12}" font-size="10" text-anchor="middle" fill="#8a948e">${rsMon(d)}</text>`});
+ let path='',pen=false;s.samples.forEach(x=>{if(x.st==='ok'){path+=(pen?'L':'M')+X(x.k).toFixed(1)+' '+Y(x.bod).toFixed(1);pen=true}else pen=false});
+ g+=`<path d="${path}" fill="none" stroke="#1f5fa8" stroke-width="2"/>`;
+ s.samples.forEach(x=>{if(x.st==='ok'){const c=pcls(x.bod)[2];g+=`<circle cx="${X(x.k)}" cy="${Y(x.bod)}" r="4.2" fill="${c}" stroke="#fff" stroke-width="1.2"><title>${fmtD(x.d)}: BOD ${x.bod} mg/L, DO ${x.do} mg/L</title></circle>`}
+  else if(x.st!=='due')g+=`<text x="${X(x.k)}" y="${H-B-4}" font-size="11" text-anchor="middle" fill="${x.st==='missed'?'#b42318':'#9aa49e'}">${x.st==='missed'?'✕':'–'}<title>${rsMon(x.d)}: ${x.st==='missed'?'sample not collected':'no flow, not sampled'}</title></text>`});
+ g+=`<text x="12" y="${T+(H-T-B)/2}" font-size="10" fill="#6a7a70" transform="rotate(-90 12 ${T+(H-T-B)/2})" text-anchor="middle">BOD mg/L</text>`;
+ return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Monthly BOD at ${esc(s.name)}">${g}</svg>
+ <div class="small muted" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:4px"><span><i style="display:inline-block;width:10px;height:10px;background:#eaf2fb;border:1px solid #cfe0f3;vertical-align:-1px"></i> Monsoon months</span><span>– No flow, not sampled</span><span style="color:#b42318">✕ Sample not collected</span><span>Dot colour = CPCB priority class of that sample</span></div>`}
+function rsPick(rid,code){RS.river=rid;RS.st=code||null;renderRiverS();const e=document.getElementById('rsDetail');if(e&&code)e.scrollIntoView({behavior:'smooth',block:'start'})}
+function rsLive(){RV.mode='live';RV.view='state';renderRiver();window.scrollTo(0,0)}
+function renderRiverS(){
+ const all=rsAll();const last12=all.flatMap(rs12);const planned=last12.filter(x=>x.st!=='due').length,got=last12.filter(x=>x.st==='ok').length,nof=last12.filter(x=>x.st==='noflow').length,miss=last12.filter(x=>x.st==='missed').length;
+ const lastBreach=all.filter(s=>{const l=rsLast(s);return l&&rsBreach(l)});
+ const worst=all.map(s=>({s,c:rsClass(s),mx:Math.max(0,...rs12(s).filter(x=>x.st==='ok').map(x=>x.bod))})).sort((a,b)=>b.mx-a.mx)[0];
+ const curMonth=RS.months[RS_N-1];const dueNow=all.filter(s=>{const x=s.samples[RS_N-1];return x&&x.st==='due'});
+ const rv=RS_DATA[RS.river];const sel=rv.stations.find(s=>s.code===RS.st)||rv.stations.slice().sort((a,b)=>(rsLast(b)||{bod:0}).bod-(rsLast(a)||{bod:0}).bod)[0];
+ const rows=Object.values(RS_DATA).map(r=>r.stations.map((s,i)=>{const l=rsLast(s);const c=rsClass(s);const tr=rsTrend(s);const br=rs12(s).filter(rsBreach).length,n12=rs12(s).filter(x=>x.st==='ok').length;
+   return `<tr class="${s===sel?'selrow':''}" style="cursor:pointer" onclick="rsPick('${r.id}','${s.code}')"><td>${i===0?`<b>${r.name}</b><div class="small muted">${r.basin}</div>`:''}</td><td>${esc(s.name)}<div class="small muted">${s.code}</div></td>
+   <td>${l?fmtD(l.d):'—'}</td><td style="text-align:right">${l?l.bod:'—'}</td><td style="text-align:right">${l?l.do:'—'}</td>
+   <td>${c?`<span class="rstag" style="background:${c[2]}26;color:${({'#2f8f5b':'#1d6b40','#b8c94a':'#5c6a12','#e5b800':'#7a5f00','#f08a24':'#9a4d06'})[c[2]]||c[2]}">${c[1]}</span>`:'<span class="small muted">No samples</span>'}</td>
+   <td style="text-align:right">${n12?`${br} of ${n12}`:'—'}</td><td>${tr===null?'<span class="small muted">—</span>':tr>.1?`<span style="color:var(--red)">▲ ${Math.round(tr*100)}%</span>`:tr<-.1?`<span style="color:#1d6b40">▼ ${Math.round(-tr*100)}%</span>`:'<span class="small muted">≈ steady</span>'}</td></tr>`}).join('')).join('');
+ // detail
+ const o12=rs12(sel).filter(x=>x.st==='ok');const br12=o12.filter(rsBreach).length;const tr=rsTrend(sel);const l=rsLast(sel);
+ const bySeason=[[3,4,5],[6,7,8],[9,10,11,0,1,2]].map(ms=>{const v=o12.filter(x=>ms.includes(x.d.getMonth())).map(x=>x.bod);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null});
+ const ins=[];
+ if(o12.length)ins.push(`Failed the bathing-water criteria in <b>${br12} of ${o12.length}</b> samples in the last 12 months.`);
+ if(bySeason[0]&&bySeason[1])ins.push(`BOD averages <b>${bySeason[0].toFixed(1)}</b> mg/L in Apr–Jun against <b>${bySeason[1].toFixed(1)}</b> in the monsoon, when rain dilutes the flow.`);
+ if(tr!==null)ins.push(`Last six months compared with the same months a year earlier: BOD ${tr>.1?'<b style="color:var(--red)">up '+Math.round(tr*100)+'%</b>':tr<-.1?'<b style="color:#1d6b40">down '+Math.round(-tr*100)+'%</b>':'about the same'}.`);
+ const up=rv.stations.find(s=>s.pos==='u'&&rsLast(s)),dn=rv.stations.filter(s=>s.pos==='d'&&rsLast(s)).sort((a,b)=>rsLast(b).bod-rsLast(a).bod)[0];
+ if(up&&dn&&rsLast(dn).bod>rsLast(up).bod*1.8)ins.push(`BOD rises from <b>${rsLast(up).bod}</b> at ${esc(up.name)} to <b>${rsLast(dn).bod}</b> at ${esc(dn.name)}. The stretch in between is where discharges should be checked.`);
+ const nofs=rs12(sel).filter(x=>x.st==='noflow').length,ms=rs12(sel).filter(x=>x.st==='missed').length;
+ if(nofs)ins.push(`No flow in ${nofs} month${nofs>1?'s':''}, so no sample could be taken.`);if(ms)ins.push(`<span style="color:var(--red)">${ms} scheduled sample${ms>1?'s were':' was'} not collected.</span>`);
+ const cases=(typeof NGT!=='undefined'?NGT.filter(c=>c.river===rv.id):[]);
+ const last6=sel.samples.slice(-6).reverse().map(x=>`<tr><td>${x.st==='ok'?fmtD(x.d):rsMon(x.d)}</td>${x.st==='ok'?`<td style="text-align:right">${x.bod}</td><td style="text-align:right">${x.do}</td><td style="text-align:right">${x.fc.toLocaleString('en-IN')}</td><td style="text-align:right">${x.tds.toLocaleString('en-IN')}</td><td>${rsBreach(x)?'<span class="rstag f">Fails</span>':'<span class="rstag m">Meets</span>'}</td>`:`<td colspan="5" class="small muted">${x.st==='noflow'?'No flow, not sampled':x.st==='due'?'Due this month':'<span style="color:var(--red)">Sample not collected</span>'}</td>`}</tr>`).join('');
+ $('#riverBody').innerHTML=`
+ <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><h1>River water quality</h1><p class="sub" style="margin-bottom:12px">From the Board's monthly river samples. Shows where each river stands, how it changes through the year, and where samples were missed.</p></div>
+ <span class="small muted" style="background:#fff;border:1px solid var(--line);border-radius:20px;padding:5px 12px">Sampling round: ${rsMonL(curMonth)} in progress · not live data</span></div>
+ <div class="grid g5">${kpiRow([['Stations monitored',all.length,`${Object.keys(RS_DATA).length} rivers, 3 basins`],
+  ['Samples in last 12 months',`${got} of ${planned}`,`${nof} no flow · ${miss} not collected`,miss?'var(--amber)':''],
+  ['Failing in latest sample',lastBreach.length,'bathing-water criteria (BOD, DO, coliform)','var(--red)'],
+  ['Worst stretch',worst.c?worst.c[1]:'—',`${RS_DATA[worst.s.rid].name} at ${esc(worst.s.name)}`,worst.c?worst.c[2]:''],
+  ['Samples still due',dueNow.length,`in the ${rsMonL(curMonth)} round`,dueNow.length?'var(--amber)':'']])}</div>
+ <div class="card mt"><div class="card-h"><h2>All monitoring stations</h2><span class="hint">Click a station to see its history</span></div>
+ <div style="overflow-x:auto"><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>River</th><th>Station</th><th>Last sample</th><th style="text-align:right">BOD mg/L</th><th style="text-align:right">DO mg/L</th><th>Class (12 months)</th><th style="text-align:right">Fails</th><th>Trend</th></tr></thead><tbody>${rows}</tbody></table></div>
+ <p class="small muted" style="margin:8px 0 0">Class follows the CPCB method: the highest BOD seen at the station in the last 12 months. Bathing-water criteria: BOD up to 3 mg/L, DO at least 5 mg/L, faecal coliform up to 2,500 MPN/100 ml. Trend compares the last six months with the same months a year earlier.</p></div>
+ <div class="grid g-6040 mt" id="rsDetail">
+  <div class="card"><div class="card-h"><h2>${rv.name} · ${esc(sel.name)}</h2><span class="hint">Monthly BOD, last 24 months</span></div>
+   <div style="display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 10px">${rv.stations.map(s=>`<button class="btn sm${s===sel?' primary':''}" onclick="rsPick('${rv.id}','${s.code}')">${esc(s.name)}</button>`).join('')}</div>
+   ${rsChart(sel)}</div>
+  <div class="card"><div class="card-h"><h2>What the samples show</h2></div><ul class="p2l">${ins.map(x=>`<li>${x}</li>`).join('')}</ul>
+   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">${rv.cetp?`<button class="btn sm" onclick="go('water',{cetp:'${rv.cetp}'})">${rv.cetp} performance</button>`:''}${cases.length?`<button class="btn sm" onclick="go('ngt',{case:'${cases[0].id}'})">${cases.length} NGT case${cases.length>1?'s':''} on this river</button>`:''}<button class="btn sm" onclick="go('map')">See on map</button></div></div>
+ </div>
+ <div class="grid g-6040 mt">
+  <div class="card"><div class="card-h"><h2>Recent samples</h2><span class="hint">${esc(sel.code)}</span></div><div style="overflow-x:auto"><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Sampled</th><th style="text-align:right">BOD</th><th style="text-align:right">DO</th><th style="text-align:right">Faecal coliform</th><th style="text-align:right">TDS</th><th>Bathing criteria</th></tr></thead><tbody>${last6}</tbody></table></div></div>
+  <div class="card" style="background:#f6f9f7"><div class="card-h"><h2>Later option: live river sensors</h2><span class="rstag" style="background:#eef1ef;color:#5d6b63">P4 · future</span></div>
+   <p class="small" style="margin:0 0 10px">Monthly samples show the trend but miss what happens between visits, such as night-time discharges. Sensors at a few critical stations, linked with CETP and STP outfalls, would show the river hour by hour.</p>
+   <button class="btn sm" onclick="rsLive()">View the live corridor concept ›</button></div>
+ </div>
+ <div class="rvcaution mt">Stations, sample values and dates are illustrative. At implementation they would come from the Board's NWMP sampling records and lab reports.</div>`;
+}
+
 /* ============ RIVER MONITOR ============ */
 // Schematic river corridors. Every asset, distance and reading is illustrative.
 const RIVERS2={
@@ -2575,7 +2688,8 @@ async function rvGo(r){if(rvBusy)return;rvBusy=true;try{
 function rvBack(){if(rvBusy)return;const r=RV.river;RV.view='state';renderRiver();const svg=document.getElementById('rvMap');const to=[0,0,MAPW,MAPH];const st=bboxOf(gpts(r),.35);svg.setAttribute('viewBox',st.join(' '));tween(800,e=>svg.setAttribute('viewBox',st.map((v,i)=>v+(to[i]-v)*e).join(' ')))}
 function rvView(v){RV.view=v;renderRiver()}
 function rvPick(r){if(RV.view==='state')rvGo(r);else{RV.river=r;RV.sel=null;RV._auto=false;RV.anim=true;renderRiver();setTimeout(()=>{RV.anim=false},2500)}}
-function renderRiver(keepScroll){
+function renderRiver(keepScroll){if(RV.mode!=='live')return renderRiverS();renderRiverLive(keepScroll);const b=document.getElementById('riverBody');if(b&&!document.getElementById('rvBackS'))b.insertAdjacentHTML('afterbegin',`<div id="rvBackS" class="card" style="margin-bottom:12px;background:#fff8e6;border-color:#f0dca8;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="small"><b>Future concept.</b> RSPCB samples rivers monthly today. This live view shows what sensors at critical stations could add later.</span><button class="btn sm" style="margin-left:auto" onclick="RV.mode='sampled';renderRiverS();window.scrollTo(0,0)">‹ Back to monthly samples</button></div>`)}
+function renderRiverLive(keepScroll){
  const rv=RIVERS2[RV.river];const t=RV.t;const st=rvState(rv,t,RV.live?RV.tick:0);const sm=rvSummary(rv,t);
  if(RV.view!=='state'&&!RV.sel){const f=rv.assets.find(a=>a.star)||rv.assets.find(a=>a.st==='night')||rv.assets.find(a=>a.st==='bypass');if(f&&!RV._auto){RV.sel=f.id;RV._auto=true}}
  const sel=rv.assets.find(a=>a.id===RV.sel);

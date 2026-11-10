@@ -1065,7 +1065,7 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
 </a>
 <a role="button" tabindex="0" class="nav-link" data-tab="river">
 <i class="fas fa-bridge-water nav-icon"></i>
-<span>River monitor</span>
+<span>River water quality</span>
 </a>
 <a role="button" tabindex="0" class="nav-link" data-tab="groundwater">
 <i class="fas fa-water nav-icon"></i>
@@ -3486,7 +3486,8 @@ const AREAS=[
   ['map',2,'GIS maps &amp; hotspots','Layers kept in separate maps','Priority zones combining industry, complaints and air data'],
   ['groundwater',3,'Groundwater','Readings in periodic reports','District trends and over-extraction alerts'],
   ['wastehub',3,'Waste management','ULB data arrives in monthly progress reports','One waste view by type and district, as reporting goes digital'],
-  ['river',4,'River water quality','Periodic lab samples only, no live data','Trends from periodic sampling first; live sensors as a later option'],
+  ['river',2,'River water quality','Monthly samples sit in lab registers and NWMP returns','Station trends, seasonal patterns and missed samples in one view'],
+  [null,4,'Live river sensors','No continuous river data today','Sensors at a few critical stations, as a later option'],
   [null,4,'Flame &amp; smoke detection','Not possible with today\'s camera quality','Added once better camera feeds are available']]}];
 window.EIP_AREAS=AREAS;
 function open(t){if(!t)return;const l=document.querySelector('.nav-link[data-tab="'+t+'"]');if(l)l.click();else if(window.switchTab)switchTab(t);window.scrollTo(0,0)}
