@@ -152,7 +152,7 @@ html.a11y-contrast.a11y-gray body{filter:grayscale(1) contrast(1.35)}
     <div class="askbox"><select id="scope" title="Search in"></select><input id="qin" placeholder="Ask about any Act or Rule…" autocomplete="off"><button id="go">Ask</button></div>
     <div class="under">
       <div class="chips" id="chips"></div>
-      <div class="tools"><span class="pill" id="mstat" title="Smart search understands the meaning of your question, not just the words."><i></i><span>Smart search: starting</span></span><span class="pill" id="aistat" style="display:none" title="Short AI summary written from the extracts found. The exact official text is always shown below it."><i></i><span>AI summary: checking</span></span><button class="tbtn" id="libBtn">Library · 626 documents</button><button class="tbtn" id="setBtn">Search settings</button><button class="tbtn clr" id="clrBtn" style="display:none"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v6M14 11v6"/></svg>Clear chat</button></div>
+      <div class="tools"><span class="pill" id="mstat" title="Smart search understands the meaning of your question, not just the words."><i></i><span>Smart search: starting</span></span><span class="pill" id="aistat" style="display:none" title="Short AI summary written from the extracts found. The exact official text is always shown below it."><i></i><span>AI summary: checking</span></span><button class="tbtn" id="libBtn">Library · 687 documents</button><button class="tbtn" id="setBtn">Search settings</button><button class="tbtn clr" id="clrBtn" style="display:none"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v6M14 11v6"/></svg>Clear chat</button></div>
     </div>
     <div class="panel" id="libPanel"><div class="s">Environment Protection, Water and Air Acts (amended to 2024) and the rules on solid, plastic, e-waste, battery, bio-medical, hazardous and C&amp;D waste, hazardous chemicals, noise, end-of-life vehicles and mining, plus Jal Jeevan Mission guidelines. Consolidated texts come from a compilation of the amended rules; check against the Gazette before relying on them · 9,873 sections indexed</div><div id="docs"></div></div>
     <div class="panel" id="setPanel">
@@ -533,5 +533,6 @@ async function ask(){
 $('#clrBtn').onclick=()=>{$('#thread').innerHTML='';$('#clrBtn').style.display='none';$('#qin').focus()};
 loadSem();
 </script>
+<script>try{const b=document.getElementById('libBtn');if(b&&typeof LIB_DOCS!=='undefined')b.textContent='Library · '+Object.keys(LIB_DOCS).length+' documents'}catch(e){}</script>
 </body>
 </html>
