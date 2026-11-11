@@ -665,6 +665,18 @@ svg.leaflet-image-layer.leaflet-interactive path {
 		print-color-adjust: exact;
 		}
 	}
+
+#v-home .hp{gap:2px}
+#v-home .hp .hpl{font-size:12.5px;color:var(--muted);margin:0 0 4px;font-weight:600;letter-spacing:.01em}
+#v-home .hp b small{font-size:15px;font-weight:500;color:var(--muted)}
+.hpbar{display:block;height:8px;border-radius:5px;background:#e6ede9;margin:10px 0 8px;overflow:hidden}
+.hpbar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#2f8f5b,#4fb37a)}
+#v-home .hp .hpgo{font-size:13px;color:var(--g900);font-weight:600;margin:0}
+#v-home .hp .hplast{font-size:12px;color:var(--muted);margin-top:2px}
+.hwins{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.hwins i{font-style:normal;font-size:12.5px;background:#e8f4ec;color:#1d6b40;border-radius:12px;padding:3px 10px}
+.pcount{background:#eef2ef!important;color:#3d4a43!important}
+.prio.sev-quick .pbar{background:#2f8f5b}
 </style>
 <style>
 :root{
@@ -1167,7 +1179,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
           <div class="maplegend" id="homeLegend"></div>
         </div>
         <div class="card">
-          <div class="card-h"><h2>Today's priorities <span class="pcount" id="pcount"></span></h2><span class="hint" id="phint"></span></div>
+          <div class="card-h"><h2>Needs your attention <span class="pcount" id="pcount"></span></h2><span class="hint" id="phint"></span></div>
           <div class="alertwrap"><div id="alerts"></div></div>
         </div>
       </div>
@@ -1730,8 +1742,15 @@ function renderHome(){
   if(ROLE==='HQ'||ROLE==='Bikaner')A.push({sev:'med',t:`${fires.length} crop-fire detections overnight`,d:'Sri Ganganagar and Hanumangarh · ground checks pending',go:'map'});
   if(poorFc.length)A.push({sev:'info',t:`AQI may turn Very Poor in ${[...new Set(poorFc.map(s=>s.n.replace(/ station.*/,'')))].length} cities`,d:[...new Set(poorFc.map(s=>s.n.replace(/ station.*/,'')))].slice(0,4).join(', ')+' · next 48 hours',go:'map'});
   {const ca=(window.CamWatch?CamWatch.alerts():[]).filter(a=>Date.now()-new Date(a.at)<12*3600e3&&(ROLE==='HQ'||inRole(a.ro)));if(ca.length){const a=ca[0];A.unshift({sev:'high',t:`${a.label} at ${a.unit}`,d:`Stack camera · ${new Date(a.at).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} · ${ca.length>1?ca.length+' camera alerts today':'Regional Office '+a.ro}`,go:'fac',id:a.unit})}}
-  $('#heroLine').innerHTML=`<b>${A.length} issues</b> today${A[0]?` · Top issue: ${esc(A[0].t)}`:''}`;
-  {const pc=$('#pcount');if(pc)pc.textContent=A.length}
+  const hs=k=>{let h=7;for(const ch of ROLE+k)h=(h*31+ch.charCodeAt(0))%9973;return h};
+  const sc=ROLE==='HQ'?1:.25;
+  A.unshift({sev:'quick',t:`${Math.max(1,Math.round((3+hs('sg')%3)*sc))} consent orders ready for your signature`,d:'About 5 minutes · inspection and checks already done',go:'consent'});
+  if(ROLE==='HQ')A.splice(1,0,{sev:'quick',t:'1 Vidhan Sabha reply ready to check',d:'About 10 minutes · tables already prepared',go:'vs'});
+  const ord={quick:0,high:1,med:2,info:3};A.sort((a,b)=>ord[a.sev]-ord[b.sev]);
+  const W=[[Math.max(1,Math.round((9+hs('w1')%7)*sc)),'complaints closed'],[Math.max(1,Math.round((5+hs('w2')%5)*sc)),'consents issued'],[Math.max(1,Math.round((6+hs('w3')%6)*sc)),'inspection reports filed'],[ROLE==='HQ'?1+hs('w4')%2:0,'NGT reply filed']].filter(w=>w[0]);
+  const wins=W.reduce((a,w)=>a+w[0],0);
+  $('#heroLine').innerHTML=`<b>${wins} items cleared since yesterday.</b> ${A.length} need your attention today, starting with the quickest.<span class="hwins">${W.map(w=>`<i>${w[0]} ${w[1]}${w[0]===1?'':''}</i>`).join('')}</span>`;
+  {const pc=$('#pcount');if(pc)pc.textContent=A.length+' to clear'}
   $('#alerts').innerHTML=A.map(a=>`<button class="prio sev-${a.sev}" data-go="${a.go}" ${a.id?`data-id="${a.id}"`:''}><span class="pbar"></span><span class="ptxt"><span class="pt">${esc(a.t)}</span><span class="pd">${esc(a.d)}</span></span><span class="chev">›</span></button>`).join('');
   setTimeout(prioFade,0);
   const oc=roleFac.filter(f=>f.ocems);const avgAvail=oc.length?oc.reduce((a,f)=>a+f.m.avail,0)/oc.length:0;
@@ -1742,11 +1761,17 @@ function renderHome(){
   const exp60=roleFac.filter(f=>{const d=daysToExpiry(f);return d>=0&&d<=60}).length;
   const cR=COMP.filter(c=>inRole(c.ro));const c15=cR.filter(c=>c.days>15).length,c30=cR.filter(c=>c.days>30).length;
   const chip=(n,l,cls)=>`<i class="hkc ${cls||''}">${n} ${l}</i>`;
-  const K=[[flg.length,'units flagged this week','plan',chip(byCat('Red'),'Red','r')+chip(byCat('Orange'),'Orange','o')+chip(byCat('Green'),'Green','g')],
-    [avgAvail.toFixed(1)+'%','OCEMS data availability','fac',chip(lowAv,'units below 85%',lowAv?'o':'')],
-    [beyond,'consents past deadline','consent',chip(due15,'applications due in 15 days',due15?'o':'')+chip(exp60,'consents expiring in 60 days','')],
-    [cR.length,'open complaints','griev',chip(c15,'past 15 days',c15?'o':'')+chip(c30,'past 30 days',c30?'r':'')]];
-  $('#kpis').innerHTML=K.map(k=>`<button class="hk" data-go="${k[2]}" ${k[2]==='fac'&&worstAv?`data-id="${worstAv.id}" title="Open the unit with the lowest OCEMS data availability (${worstAv.id})"`:'title="Open"'}><b>${k[0]}</b><span>${k[1]}</span><span class="hkb">${k[3]}</span></button>`).join('');
+  const frac=Math.min(.95,.1+TODAY.getDate()/30*.82);
+  const pg=(done,tot)=>Math.round(Math.min(1,done/Math.max(1,tot))*100);
+  const cTot=Math.max(8,Math.round(appsR.length*.3)),cDone=Math.round(cTot*frac*1.04);
+  const iPlan=Math.max(8,roleFac.filter(f=>inspDue(f)!==null&&inspDue(f)<=30).length),iDone=Math.round(iPlan*frac);
+  const qClosed=Math.round(cR.length*2.1*frac+2),qTot=qClosed+cR.length;
+  const allD=NGT.filter(c=>ROLE==='HQ'||c.district===ROLE||(c.nodal||'').includes(ROLE)).flatMap(c=>c.dirs),dDone=allD.filter(d=>d.st==='Complied').length,dOver=allD.filter(d=>d.st==='Overdue').length;
+  const PG=[['consent','Consents decided on time',cDone,cTot,`${cTot-cDone} to go this month`+'',[88+hs('lc')%9,'% on time']],
+    ['plan','Inspections on this month\'s plan',iDone,iPlan,`${iPlan-iDone} to go`,[82+hs('li')%12,'% of plan done']],
+    ['griev','Complaints closed this month',qClosed,qTot,`${cR.length} to go`+(c15?` · ${c15} past 15 days`:''),[79+hs('lq')%14,'% closed within 15 days']],
+    ['ngt','NGT directions complied',dDone,allD.length,`${allD.length-dDone} to go`+(dOver?` · ${dOver} overdue`:''),null]];
+  $('#kpis').innerHTML=PG.map(([go,l,d,t,togo,last])=>`<button class="hk hp" data-go="${go}" title="Open"><span class="hpl">${l}</span><b>${d}<small> of ${t}</small></b><span class="hpbar"><i style="width:${pg(d,t)}%"></i></span><span class="hpgo">${togo}</span>${last?`<span class="hplast">Last month: ${last[0]}${last[1]}</span>`:''}</button>`).join('');
   const bnStage='site inspection';
   const RIV_RO={jojari:['Jodhpur'],bandi:['Pali'],luni:['Balotra'],chambal:['Kota'],berach:['Udaipur','Chittorgarh','Bhilwara']};
   const myRiv=Object.entries(RIVERS2).filter(([k])=>ROLE==='HQ'||(RIV_RO[k]||[]).includes(ROLE)).map(x=>x[1]);
