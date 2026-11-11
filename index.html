@@ -1068,6 +1068,10 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
 <i class="fas fa-map-location-dot nav-icon"></i>
 <span>GIS maps &amp; hotspots</span>
 </a>
+<a role="button" tabindex="0" class="nav-link" data-tab="stack">
+<i class="fas fa-industry nav-icon"></i>
+<span>Stack data &amp; risk</span>
+</a>
 <a role="button" tabindex="0" class="nav-link" data-tab="river">
 <i class="fas fa-bridge-water nav-icon"></i>
 <span>River water quality</span>
@@ -1147,6 +1151,7 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
                 <div id="programme" class="tab-content"></div>
                 <div id="river" class="tab-content"></div>
                 <div id="eodb" class="tab-content"></div>
+                <div id="stack" class="tab-content"></div>
                 <div id="ngt" class="tab-content"></div>
                 <div id="lab" class="tab-content"></div>
                 <!-- Air Quality Dashboard -->
@@ -3400,6 +3405,7 @@ const EIP_SECTIONS={
   programme:[['Programme tracker','project-moniter.html','']],
   river:[['River monitor','platform.html?embed=1#river','new']],
   eodb:[['Ease of doing business','platform.html?embed=1#eodb','new']],
+  stack:[['Stack data &amp; risk','platform.html?embed=1#stack','new']],
   ngt:[['Case tracker','platform.html?embed=1#ngt','new']],
   lab:[['Laboratory &amp; samples','platform.html?embed=1#lab','new']],
   air:[['Overview','__own__',''],['AQI forecast','Predicted-air-quality.html','']],
@@ -3409,7 +3415,7 @@ const EIP_SECTIONS={
   grievance:[['Overview','__own__',''],['Analysis: register &amp; clusters','platform.html?embed=1#griev','new']],
   knowledge:[['Rules & regulations assistant','Regulatory_Assistant.html?embed=1','new']]
 };
-const VIEW2TAB={home:['home',0],eodb:['eodb',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
+const VIEW2TAB={home:['home',0],eodb:['eodb',0],stack:['stack',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
 function eipBuild(){
   // Grievance section is accidentally nested inside the Knowledge section (unclosed tags); move it back
   {const mc=document.querySelector('.main-content');document.querySelectorAll('.tab-content').forEach(t=>{if(t.parentElement!==mc)mc.appendChild(t)})}
@@ -3489,6 +3495,7 @@ const AREAS=[
   ['lab',2,'Laboratory &amp; samples','Sample registers partly digital','Sample-to-report tracking and turnaround time'],
   ['programme',2,'Programme tracker','Progress compiled for each review meeting','One live view of targets, spend and slippage']]},
  {ic:'fa-wind',t:'Environmental risk &amp; prediction',q:'Where is the environment getting worse, and what is coming next?',m:[
+  ['stack',1,'Stack data &amp; risk','OCEMS readings are stored but not checked for gaps, stuck analysers or trends','Data reliability per plant, days above the limit and an expected range for each stack'],
   ['air',1,'Air quality &amp; forecast','AQI is seen after the fact','A 3-day forecast by city, to act before bad days'],
   ['map',2,'GIS maps &amp; hotspots','Layers kept in separate maps','Priority zones combining industry, complaints and air data'],
   ['groundwater',3,'Groundwater','Readings in periodic reports','District trends and over-extraction alerts'],
