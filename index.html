@@ -890,7 +890,7 @@
 .kpi-card:hover{box-shadow:0 8px 20px rgba(11,60,35,.09)!important}
 .table thead th{background:#f3f7f5!important;color:var(--eip-muted)!important;font-size:12px!important;font-weight:600!important;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--eip-line)!important}
 .eip-frame{background:transparent!important}
-#knowledge .eip-frame{height:calc(100vh - 112px);min-height:520px}
+#knowledge .eip-frame{height:calc(100vh - 150px);min-height:520px}
 </style>
 <style id="eip-brand">.eip-sub{font-size:13px;opacity:.9;margin-top:2px}.navbar .time-display{white-space:nowrap;font-size:14px}.navbar .a11y-open{padding:8px 11px;font-size:1rem}.navbar .user-profile{white-space:nowrap}.navbar .header-controls{gap:10px;flex-wrap:nowrap}.navbar .navbar-brand{white-space:nowrap}.eip-name{font-weight:700;letter-spacing:.2px}.eip-demo{display:inline-block;font-size:11px;font-weight:600;background:#ffe600;color:#1c2a23;border-radius:10px;padding:2px 8px;vertical-align:3px;margin-left:6px}@media(max-width:768px){.navbar-brand .header-title{display:block!important}.eip-name{font-size:14px;line-height:1.2}.eip-demo{display:none}}</style>
 <style id="mobile-fix">
@@ -3543,7 +3543,21 @@ const q=()=>{if(!raf)raf=requestAnimationFrame(fit)};addEventListener('scroll',q
 #eip-crumb .sib{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
 #eip-crumb .sib button{border:1px solid #e1e8e3;background:#fff;color:#33413a;font-size:12.5px;border-radius:20px;padding:4px 11px;cursor:pointer}
 #eip-crumb .sib button.on{background:#0b6b3a;border-color:#0b6b3a;color:#fff}
-@media(max-width:700px){#eip-crumb .sib{margin-left:0}}
+#eip-crumb.on{flex-direction:column;align-items:stretch;gap:9px}
+#eip-crumb .r1{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#eip-crumb .areas{display:flex;gap:4px;flex-wrap:wrap;background:#e6efe9;border-radius:11px;padding:4px}
+#eip-crumb .atab{position:relative}
+#eip-crumb .atab>button{display:inline-flex;align-items:center;gap:7px;border:0;background:none;color:#33413a;font-size:13.5px;font-weight:500;border-radius:8px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+#eip-crumb .atab>button i{font-size:12.5px;color:#5d7a68}
+#eip-crumb .atab>button:hover{background:#f6faf7}
+#eip-crumb .atab.on>button{background:#fff;color:#0b6b3a;font-weight:650;box-shadow:0 1px 3px rgba(16,60,38,.12)}#eip-crumb .atab.on>button i{color:#0b6b3a}
+#eip-crumb .dd{display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:240px;background:#fff;border:1px solid #e1e8e3;border-radius:10px;box-shadow:0 10px 28px rgba(16,60,38,.14);padding:6px;z-index:80}
+#eip-crumb .atab:hover .dd,#eip-crumb .atab:focus-within .dd{display:block}
+#eip-crumb .dd button{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:7px;font-size:13.5px;color:#1c2a23;cursor:pointer}
+#eip-crumb .dd button:hover{background:#eef6f1}#eip-crumb .dd button.cur{color:#0b6b3a;font-weight:600}
+#eip-crumb .sib{margin-left:0}
+@media(max-width:900px){#eip-crumb .atab>button span{display:none}#eip-crumb .atab>button{padding:8px 11px}#eip-crumb .dd{left:auto;right:0}}
+@media(hover:none){#eip-crumb .atab:hover .dd{display:none}}
 </style>
 <script>
 (function(){
@@ -3556,10 +3570,13 @@ function render(){const cur=document.querySelector('.tab-content.active');const 
   if(t==='home'){bar.className='';bar.innerHTML='';return}
   const a=areaOf(t);const sib=a?[...new Map(a.m.filter(x=>x[0]).map(x=>[x[0],x])).values()]:[];
   bar.className='on';
-  bar.innerHTML=`<button class="bk" data-home><i class="fas fa-arrow-left"></i>Command centre</button><span class="ar">${a?a.t+' › ':''}<b>${NAME(t)}</b></span>`+
+  const AR=window.EIP_AREAS||[];const mods=ar=>[...new Map(ar.m.filter(x=>x[0]).map(x=>[x[0],x])).values()];
+  bar.innerHTML=`<div class="r1"><button class="bk" data-home><i class="fas fa-arrow-left"></i>Command centre</button>
+   <div class="areas" role="tablist">${AR.map(ar=>{const ms=mods(ar);return `<div class="atab ${ar===a?'on':''}"><button data-to="${ms[0]?ms[0][0]:''}" role="tab" aria-selected="${ar===a}" title="${ar.t}"><i class="fas ${ar.ic}"></i><span>${ar.t}</span></button>
+    <div class="dd">${ms.map(x=>`<button data-to="${x[0]}" class="${x[0]===t?'cur':''}">${NAME(x[0])}</button>`).join('')}</div></div>`}).join('')}</div></div>`+
    (sib.length>1?`<div class="sib">${sib.map(x=>`<button data-to="${x[0]}" class="${x[0]===t?'on':''}">${NAME(x[0])}</button>`).join('')}</div>`:'')}
 function go(t){const l=document.querySelector('.nav-link[data-tab="'+t+'"]');if(l)l.click();window.scrollTo(0,0)}
-bar.addEventListener('click',e=>{if(e.target.closest('[data-home]'))return go('home');const b=e.target.closest('[data-to]');if(b)go(b.dataset.to)});
+bar.addEventListener('click',e=>{if(e.target.closest('[data-home]'))return go('home');const b=e.target.closest('[data-to]');if(b&&b.dataset.to){document.activeElement&&document.activeElement.blur();go(b.dataset.to)}});
 const mo=new MutationObserver(ms=>{if(ms.some(m=>m.target.classList&&m.target.classList.contains('tab-content')))render()});mo.observe(mc,{subtree:true,attributes:true,attributeFilter:['class']});render();
 })();
 </script>
