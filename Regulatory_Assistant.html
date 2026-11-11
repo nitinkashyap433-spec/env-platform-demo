@@ -536,11 +536,11 @@ loadSem();
 <style id="ui2">
 /* ===== Regulations desk layout: left tools, main thread, right source panel ===== */
 .ui2 .top,.ui2 .eiphead,.ui2 .foot{display:none!important}
-.ui2 body{overflow:hidden}
+html.ui2,html.ui2 body{overflow:hidden;height:100%;overscroll-behavior:none}
 .ui2 .wrap{max-width:none;margin:0;padding:0}
 .app{display:grid;grid-template-columns:252px minmax(0,1fr);height:100vh;background:var(--bg)}
 .app.src-on{grid-template-columns:252px minmax(0,1fr) minmax(340px,34%)}
-.rail{background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.rail{background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#c9d6ce transparent}
 .rail .brand{display:flex;align-items:center;gap:9px;padding:16px 16px 12px;font-weight:700;color:var(--g900);font-size:15px}
 .rail .brand svg{width:26px;height:21px;color:var(--g700)}
 .rail .brand small{display:block;font-weight:500;color:var(--muted);font-size:11.5px}
@@ -555,20 +555,22 @@ loadSem();
 .role{margin:0 12px;display:flex;background:var(--grey);border-radius:9px;padding:3px}
 .role button{flex:1;border:0;background:none;border-radius:7px;padding:6px 4px;font-size:12.5px;color:var(--muted);cursor:pointer;font-weight:500}
 .role button.on{background:#fff;color:var(--g700);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
-.hist{flex:1;overflow-y:auto;padding:0 8px;min-height:60px}
+.hist{flex:1 1 auto;overflow-y:auto;padding:0 8px;min-height:44px}
 .hist button{display:block;width:100%;text-align:left;border:0;background:none;padding:7px 10px;border-radius:7px;font-size:13px;color:var(--ink);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hist button:hover{background:var(--g50)}
 .hist button small{color:var(--muted);font-size:11px;margin-right:6px;text-transform:uppercase;letter-spacing:.03em}
 .hist .empty{font-size:12.5px;color:var(--muted);padding:4px 10px}
 .railfoot{border-top:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
-.railfoot .pill{justify-content:flex-start}
+.railfoot .pill{justify-content:flex-start;font-size:12px;line-height:1.3}
 .railfoot .tbtn{text-align:left}
 .mainx{display:flex;flex-direction:column;min-width:0;min-height:0}
 .mhead{display:flex;align-items:center;gap:10px;padding:12px 22px;border-bottom:1px solid var(--line);background:#fff;min-height:54px}
 .mhead h2{margin:0;font-size:16px;font-weight:650;color:var(--g900)}
 .mhead .sub2{font-size:12.5px;color:var(--muted)}
 .mhead .menu{display:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 8px;cursor:pointer}
-.mscroll{flex:1;overflow-y:auto;padding:22px 22px 30px}
+.mscroll{flex:1;overflow-y:auto;padding:22px 22px 30px;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#c9d6ce transparent}
+.mscroll::-webkit-scrollbar,.hist::-webkit-scrollbar,.src .sb::-webkit-scrollbar{width:7px}.mscroll::-webkit-scrollbar-thumb,.hist::-webkit-scrollbar-thumb,.src .sb::-webkit-scrollbar-thumb{background:#c9d6ce;border-radius:4px}
+.hist,.src .sb{scrollbar-width:thin;scrollbar-color:#c9d6ce transparent;overscroll-behavior:contain}
 .inner{max-width:880px;margin:0 auto}
 .view{display:none}.view.on{display:block}
 .ui2 .thread{margin-top:0}
@@ -646,6 +648,7 @@ const SVG={
  chk:'<path d="M7 4h10v16H7zM10 9l1.5 1.5L14 8M10 14h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>',
  plus:'<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
  menu:'<path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'};
+const toTop=el=>{const m=document.getElementById('mscroll');if(!m||!el)return;const y=el.getBoundingClientRect().top-m.getBoundingClientRect().top+m.scrollTop-12;m.scrollTo({top:Math.max(0,y),behavior:'smooth'})};
 const ic=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${SVG[k]}</svg>`;
 const TOOLS=[['ask','Ask the rules','Answers with exact citations from the official text'],['draft','Draft a document','Notices, replies and office notes built from cited provisions'],['cmp','Compare orders','What changed between two orders, and which one is later'],['chk','Check an application','Documents, timelines and rules that apply to a case'],['lib','Library','Every Act, Rule, order and guideline in the assistant']];
 const UI={tool:'ask',role:'field',hist:[],lastQ:null,lastR:null};
@@ -696,12 +699,14 @@ $q('#newq').onclick=()=>{$q('#thread').innerHTML='';UI.lastQ=null;UI.lastR=null;
 // history (session only)
 function addHist(kind,label,target){UI.hist.unshift({kind,label,target});const h=$q('#hist');
  h.innerHTML=UI.hist.slice(0,40).map((x,i)=>`<button data-i="${i}" title="${esc(x.label)}"><small>${x.kind}</small>${esc(x.label)}</button>`).join('');
- h.querySelectorAll('button').forEach(b=>b.onclick=()=>{const x=UI.hist[+b.dataset.i];setTool(x.target.tool);if(x.target.el)setTimeout(()=>x.target.el.scrollIntoView({behavior:'smooth',block:'start'}),60)})}
+ h.querySelectorAll('button').forEach(b=>b.onclick=()=>{const x=UI.hist[+b.dataset.i];setTool(x.target.tool);if(x.target.el)setTimeout(()=>toTop(x.target.el),60)})}
 // relay: add answer style and task to every summary request
 const _aiFetch=aiFetch;window.aiFetch=aiFetch=async function(path,opt,ms){if(path==='/summarize'&&opt&&opt.body){try{const b=JSON.parse(opt.body);if(!b.task)b.task='ask';b.audience=UI.role;if(UI.ctx&&b.task==='ask'&&!b.context)b.context=UI.ctx;opt=Object.assign({},opt,{body:JSON.stringify(b)})}catch(e){}}return _aiFetch(path,opt,ms)};
 // follow-up questions
 const FU=/^(and|also|what about|how about|what if|in that case|then|is it|does it|do they|for|same for|what is the (fee|time|penalty)|kya|aur)\b|\b(it|this|that|they|them|same|above)\b/i;
-function isFollow(q){return UI.lastQ&&q.split(/\s+/).length<=9&&FU.test(q)}
+const STOPW=new Set('the a an of for to in on and or what about how is are be can it this that with by under from'.split(' '));
+const cw=t=>t.toLowerCase().replace(/[^a-z0-9\u0900-\u097f\s-]/g,' ').split(/\s+/).map(w=>w.replace(/s$/,'')).filter(w=>w.length>2&&!STOPW.has(w));
+function isFollow(q){if(!UI.lastQ||q.split(/\s+/).length>9||!FU.test(q))return false;if(/\b(it|this|that|they|them|same|above)\b/i.test(q))return true;const p=new Set(cw(UI.lastQ));return cw(q).some(w=>p.has(w))}
 function fuQuery(prev,q){const subj=q.replace(/[?.!]+$/,'').replace(/^(and|also|then|aur|kya)\s+/i,'').replace(/^(what|how)\s+about\s+|^same\s+for\s+|^for\s+|^in\s+(the\s+)?case\s+of\s+/i,'').trim();
  const w=subj.split(/\s+/);const last=w[w.length-1].toLowerCase().replace(/s$/,'');const pw=prev.replace(/[?.!]+$/,'').split(/\s+/);
  const k=pw.findIndex(x=>x.toLowerCase().replace(/[^a-zऀ-ॿ-]/g,'').replace(/s$/,'')===last);
@@ -714,7 +719,7 @@ window.ask=ask=async function(){
  const follow=isFollow(q0);const q=follow?fuQuery(UI.lastQ,q0):q0;UI.ctx=follow?UI.lastQ:null;
  const th=$q('#thread');const box=document.createElement('div');box.style.cssText='display:flex;flex-direction:column;gap:10px';
  box.innerHTML=`<div class="q">${esc(q0)}${follow?`<div style="font-size:11.5px;opacity:.8;margin-top:3px">follow-up to: ${esc(UI.lastQ.slice(0,70))}</div>`:''}</div><div class="ans"><span class="spin">Searching the library</span></div>`;th.appendChild(box);
- box.scrollIntoView({behavior:'smooth',block:'start'});addHist('Ask',q0,{tool:'ask',el:box});
+ toTop(box);addHist('Ask',q0,{tool:'ask',el:box});
  let html,R=null;
  if($q('#cmp').checked){const cs=await Promise.all(['kw','sem','hy'].map(async m=>{const r=await search(q,m);const l=LBL[m];return card(r,l[0]+(m!=='kw'&&!SEM.ready?' (smart search not ready)':''),l[1])}));html=`<div class="cols">${cs.join('')}</div>`}
  const AH=!$q('#cmp').checked&&amendHistory(q0);if(AH){box.lastElementChild.outerHTML=amendCard(AH);return}
@@ -747,10 +752,10 @@ async function gather(queries,per,max,scope){const seen=new Set(),out=[];for(con
 const exOf=cs=>cs.map(c=>{const d=DOCS[c.doc];return{id:c.id,source:(d.rspcb?d.short+' – ':'')+d.title+', '+c.cite+' · '+c.title,status:d.rspcb&&d.later&&d.later.length?'later order: '+d.later[0].title+' ('+d.later[0].date+')':'',text:tidy(c.text)}});
 async function runTask(task,q,ex,extra,slot,label,tag){slot.className='out';slot.innerHTML=`<div class="lab2">${label}${tag?`<span class="tag">${tag}</span>`:''}</div><div class="spin">Working from ${ex.length} cited provision${ex.length>1?'s':''}</div>`;
  if(!AI.on){slot.querySelector('.spin').outerHTML='<div class="warn2">This needs the AI service, which is not connected on this page.</div>';return}
- try{const j=await aiFetch('/summarize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({task,q,extracts:ex.map(({source,status,text})=>({source,status,text}))},extra||{}))},45000);
+ try{const j=await aiFetch('/summarize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({task,q,extracts:ex.map(({source,status,text})=>({source,status,text}))},extra||{}))},90000);
   if(!j.summary)throw new Error('empty');
   const old=task!=='ask'&&j.task!==task;
-  slot.innerHTML=`<div class="lab2">${label}${tag?`<span class="tag">${tag}</span>`:''}</div>${old?'<div class="warn2">The AI relay is an older version, so this came back as a short summary. Update the Worker with the new relay_worker.js to get full drafts.</div>':''}<div class="body">${render2(j.summary,ex)}</div>
+  slot.innerHTML=`<div class="lab2">${label}${tag?`<span class="tag">${tag}</span>`:''}</div>${old?'<div class="warn2">The AI relay is an older version, so this came back as a short summary. Update the Worker with the new relay_worker.js to get full drafts.</div>':''}<div class="body">${render2(j.summary,ex)}</div>${j.stop==='max_tokens'?'<div class="warn2">The text was cut short at the length limit. Use Copy text and finish the last paragraph, or run it again with fewer facts.</div>':''}
   <div class="used"><b style="color:var(--ink)">Provisions used</b>${ex.map((e,i)=>`<a onclick="openSrc(${e.id})">[${i+1}] ${esc(e.source)}</a>`).join('')}</div>
   <div style="display:flex;gap:8px;margin-top:12px"><button class="sbtn" data-copy>Copy text</button></div>`;
   slot.querySelector('[data-copy]').onclick=e=>{navigator.clipboard&&navigator.clipboard.writeText(j.summary.replace(/\*\*/g,''));e.target.textContent='Copied'};
@@ -815,6 +820,7 @@ function drawChk(){const v=$q('#v-chk');if(v.dataset.ok)return;v.dataset.ok=1;
   const qs=[['checklist of documents for '+A],['timeline for disposal of '+A+' application '+C+' category'],['consent fee '+C+' category capital investment'],['delegation of power to grant '+A+' '+C+' category regional officer'],[S+' guidelines pollution control conditions']];if(W==='Groundwater')qs.push(['NOC from CGWA groundwater for consent']);
   const cs=await gather(qs,2,10);addHist('Check',A+' · '+C+' · '+S.slice(0,20),{tool:'chk',el:slot});
   runTask('check',`${A} for a ${C} category ${S} unit, investment ₹${I} crore, water from ${W}, at ${L}`,exOf(cs),{},slot,'What applies','From the cited provisions')}}
+addEventListener('scroll',()=>{if(scrollY||scrollX)scrollTo(0,0)},{passive:true});document.addEventListener('scroll',e=>{const t=e.target;if(t&&t.nodeType===1&&t.closest&&!t.closest('.mscroll,.hist,.src .sb,#setPanel')&&t!==document.documentElement&&(t.scrollTop))t.scrollTop=0},true);
 setTool('ask');
 if(window.self!==window.top)document.documentElement.classList.add('in-frame');
 })();
