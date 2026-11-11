@@ -1047,6 +1047,10 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
 <i class="fas fa-robot nav-icon"></i>
 <span>Rules &amp; Regulations Assistant</span>
 </a>
+<a role="button" tabindex="0" class="nav-link" data-tab="vs">
+<i class="fas fa-landmark nav-icon"></i>
+<span>Vidhan Sabha desk</span>
+</a>
 <a role="button" tabindex="0" class="nav-link" data-tab="ngt">
 <i class="fas fa-scale-balanced nav-icon"></i>
 <span>NGT &amp; legal cases</span>
@@ -1152,6 +1156,7 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
                 <div id="river" class="tab-content"></div>
                 <div id="eodb" class="tab-content"></div>
                 <div id="stack" class="tab-content"></div>
+                <div id="vs" class="tab-content"></div>
                 <div id="ngt" class="tab-content"></div>
                 <div id="lab" class="tab-content"></div>
                 <!-- Air Quality Dashboard -->
@@ -3406,6 +3411,7 @@ const EIP_SECTIONS={
   river:[['River monitor','platform.html?embed=1#river','new']],
   eodb:[['Ease of doing business','platform.html?embed=1#eodb','new']],
   stack:[['Stack data &amp; risk','platform.html?embed=1#stack','new']],
+  vs:[['Vidhan Sabha question desk','platform.html?embed=1#vs','new']],
   ngt:[['Case tracker','platform.html?embed=1#ngt','new']],
   lab:[['Laboratory &amp; samples','platform.html?embed=1#lab','new']],
   air:[['Overview','__own__',''],['AQI forecast','Predicted-air-quality.html','']],
@@ -3415,7 +3421,7 @@ const EIP_SECTIONS={
   grievance:[['Overview','__own__',''],['Analysis: register &amp; clusters','platform.html?embed=1#griev','new']],
   knowledge:[['Rules & regulations assistant','Regulatory_Assistant.html?embed=1','new']]
 };
-const VIEW2TAB={home:['home',0],eodb:['eodb',0],stack:['stack',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
+const VIEW2TAB={home:['home',0],eodb:['eodb',0],stack:['stack',0],vs:['vs',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
 function eipBuild(){
   // Grievance section is accidentally nested inside the Knowledge section (unclosed tags); move it back
   {const mc=document.querySelector('.main-content');document.querySelectorAll('.tab-content').forEach(t=>{if(t.parentElement!==mc)mc.appendChild(t)})}
@@ -3491,6 +3497,7 @@ const AREAS=[
   ['eodb',1,'EODB &amp; industry feedback','Time taken and applicant experience are not measured','Stage-wise time from MIS-2 timestamps plus a one-click rating after each decision']]},
  {ic:'fa-gears',t:'Internal efficiency',q:'How much officer time goes into searching, tracking and chasing?',m:[
   ['knowledge',1,'Regulations assistant','Officers search PDFs and compendiums by hand','Answers with citations, and a warning when an order was changed later'],
+  ['vs',2,'Vidhan Sabha question desk','Replies compiled by hand from several sections, often within days','Standard reply tables for any area in one click, past replies and promises made in the House tracked'],
   ['ngt',2,'NGT &amp; legal cases','Case status lives in files and email','Hearing calendar, compliance deadlines and replies due'],
   ['lab',2,'Laboratory &amp; samples','Sample registers partly digital','Sample-to-report tracking and turnaround time'],
   ['programme',2,'Programme tracker','Progress compiled for each review meeting','One live view of targets, spend and slippage']]},
