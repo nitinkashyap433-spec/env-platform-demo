@@ -2507,20 +2507,20 @@ function renderEODB(){
  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><h1>Ease of doing business</h1><p class="sub" style="margin-bottom:12px">How long consents take, where they get stuck, and what industries say about the process. Built from MIS-2 timestamps plus a one-click rating after each decision.</p></div>
  <div style="display:flex;gap:8px;flex-wrap:wrap">${sel('type',[['','All application types'],...Object.entries(EO_TYPES).map(([k,v])=>[k,v[0]])])}${sel('cat',[['','All categories'],['Red','Red'],['Orange','Orange'],['Green','Green']])}</div></div>
  <div class="grid g5">${kpiRow([['Decided in last 12 months',D.length.toLocaleString('en-IN'),`${P.length} still pending`],
-  ['Decided within the notified time',pct(wi),'target 95%',wi<.8?'var(--amber)':''],
+  ['Decided within the notified time',pct(wi),'notified timeline applies to all',wi<.8?'var(--amber)':''],
   ['Pending close to the deadline',risk.length,'within 7 days of deemed approval or past it',risk.length?'var(--red)':''],
   ['Queries per application',qpa.toFixed(1),'each query restarts the applicant\'s clock'],
   ['Industry rating',avgR?avgR.toFixed(1)+' / 5':'—',`${R_.length} ratings · ${D.length?pct(R_.length/D.length):'0%'} responded`]])}</div>
  <div class="card mt"><div class="card-h"><h2>Benchmarks</h2><span class="hint">Today vs reference</span></div>
  <div style="overflow-x:auto"><table class="dt" style="width:100%;border-collapse:collapse;font-size:13.5px"><thead><tr style="text-align:left;color:var(--muted);font-size:12px"><th>Measure</th><th style="text-align:right">Today</th><th style="text-align:right">Benchmark</th><th>Reference</th></tr></thead><tbody>
- ${[['Decided within notified time',pct(wi),'95%','UK Environment Agency target (achieved 79% in 2024-25)',wi<.95],
+ ${[['Decided within notified time',pct(wi),'100%','Notified timelines under the consent guidelines; BRAP time-bound delivery reform',wi<1],
     ['Industries holding a valid CTO',pct(vc),'99%','Top band in CPCB\'s performance audit of SPCBs',vc<.99],
-    ['Applications sent back for queries',pct(qr),'25%','Share of UK permit applications found incomplete',qr>.25],
+    ['Applications sent back for queries',pct(qr),'Board to set','Target to be agreed with the Board',false],
     ['Public dashboard: received, completed, time, fee','This screen','Required','BRAP 2026, Central Inspection System (c)',false],
     ['Approvals granted by accredited third parties','—','> 30%','BRAP 2026, full marks for CTE/CTO (₹50 lakh–2 crore)',false],
     ['Applicant rating after each decision',R_.length?avgR.toFixed(1)+' / 5':'—','—','Not measured in the CPCB audit',false]].map(([m,t,b,r,bad])=>`<tr><td>${m}</td><td style="text-align:right;font-weight:600;color:${bad?'var(--amber)':'inherit'}">${t}</td><td style="text-align:right">${b}</td><td class="small muted">${r}</td></tr>`).join('')}
  </tbody></table></div>
- <div class="src">UK Environment Agency, "Improving our environmental permitting service" (Jul 2025): 79% of applications within target, aim 95%, about 25% lack sufficient information. CPCB, Performance audit of SPCBs/PCCs, report to NGT in O.A. 95 of 2018 (Sep 2020): consent scored on CTOs issued within the stipulated period and share of industries with valid CTO. DPIIT, BRAP 2026 Reform Mapping and Weightage Matrix. "Today" figures are illustrative.</div></div>
+ <div class="src">MoEFCC consent guidelines (2025, amended Jan 2026) set the notified timelines. CPCB, Performance audit of SPCBs/PCCs, report to NGT in O.A. 95 of 2018 (Sep 2020): consent scored on CTOs issued within the stipulated period and share of industries with valid CTO. DPIIT, BRAP 2026 Reform Mapping and Weightage Matrix. "Today" figures are illustrative.</div></div>
  <div class="grid g-6040 mt">
   <div class="card"><div class="card-h"><h2>Time by stage</h2><span class="hint">Median days</span></div>
    <div style="display:flex;height:34px;border-radius:8px;overflow:hidden;margin:4px 0 10px">${stMed.map(([k,l,m],i)=>m?`<div title="${l}: ${m.toFixed(0)} days" style="width:${m/tot*100}%;background:${COLS[i]};color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center">${m>=3?m.toFixed(0)+'d':''}</div>`:'').join('')}</div>
