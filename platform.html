@@ -696,6 +696,17 @@ svg.leaflet-image-layer.leaflet-interactive path {
 #wPop .weights label{grid-template-columns:150px 1fr 30px}
 .rkd{display:inline-block;margin-left:5px;font-size:11px;font-weight:700}.rkd.up{color:#1d6b40}.rkd.dn{color:#b42318}
 #ptable td:nth-child(7){width:44px;text-align:center}
+
+.pg{border-bottom:1px solid var(--line)}
+.pgh{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;padding:13px 4px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.pgh:hover{background:#f5f9f6}
+.pgd{width:10px;height:10px;border-radius:50%;flex:none}.pgd.q{background:#2f8f5b}.pgd.h{background:#c0392b}.pgd.m{background:#e0a03a}
+.pgt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.pgt b{font-size:14.5px}
+.pgs{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pgn{min-width:26px;text-align:center;font-size:12.5px;font-weight:700;background:#eef2ef;border-radius:12px;padding:2px 8px}
+.pgc{color:var(--muted);font-size:12px;width:12px}
+.pgb{padding:0 0 8px 18px}
+.pg.open .pgh{background:#f2f8f4}
 </style>
 <style>
 :root{
@@ -1785,7 +1796,13 @@ function renderHome(){
   const wins=W.reduce((a,w)=>a+w[0],0);
   $('#heroLine').innerHTML=`<b>${wins} items cleared since yesterday.</b> ${A.length} need your attention today, starting with the quickest.<span class="hwins">${W.map(w=>`<i>${w[0]} ${w[1]}${w[0]===1?'':''}</i>`).join('')}</span>`;
   {const pc=$('#pcount');if(pc)pc.textContent=A.length+' to clear'}
-  $('#alerts').innerHTML=A.map(a=>`<button class="prio sev-${a.sev}" data-go="${a.go}" ${a.id?`data-id="${a.id}"`:''}><span class="pbar"></span><span class="ptxt"><span class="pt">${esc(a.t)}</span><span class="pd">${esc(a.d)}</span></span><span class="chev">›</span></button>`).join('');
+  const GMAP={fac:'ind',plan:'ind',water:'ind',griev:'ind',cam:'ind',consent:'app',eodb:'app',vs:'eff',ngt:'eff',lab:'eff',map:'risk',river:'risk',stack:'risk',waste:'risk'};
+  const GRP=[['quick','Quick wins','Under 15 minutes each'],['ind','Existing industries','Units, inspections, CETPs'],['app','New applications & EODB','Consents and deadlines'],['eff','Internal efficiency','NGT, lab, Assembly'],['risk','Environmental risk','Air, rivers, fires']];
+  const gOf=a=>a.sev==='quick'?'quick':/expired consent/.test(a.t)?'ind':(GMAP[a.go]||'ind');
+  const item=a=>`<button class="prio sev-${a.sev}" data-go="${a.go}" ${a.id?`data-id="${a.id}"`:''}><span class="pbar"></span><span class="ptxt"><span class="pt">${esc(a.t)}</span><span class="pd">${esc(a.d)}</span></span><span class="chev">›</span></button>`;
+  if(window.PGOPEN===undefined)window.PGOPEN=null;
+  $('#alerts').innerHTML=GRP.map(([k,l,h])=>{const it=A.filter(a=>gOf(a)===k);if(!it.length)return '';const hi=it.filter(a=>a.sev==='high').length;const open=PGOPEN===k;
+    return `<div class="pg ${open?'open':''}"><button class="pgh" onclick="PGOPEN=PGOPEN==='${k}'?null:'${k}';renderHome()"><span class="pgd ${k==='quick'?'q':hi?'h':'m'}"></span><span class="pgt"><b>${l}</b><span class="pgs">${open?esc(h):esc(it[0].t)}</span></span><span class="pgn">${it.length}</span><span class="pgc">${open?'▴':'▾'}</span></button>${open?`<div class="pgb">${it.map(item).join('')}</div>`:''}</div>`}).join('');
   setTimeout(prioFade,0);
   const oc=roleFac.filter(f=>f.ocems);const avgAvail=oc.length?oc.reduce((a,f)=>a+f.m.avail,0)/oc.length:0;
   const beyond=appsR.filter(a=>a.age>SLA[a.cat]).length;
