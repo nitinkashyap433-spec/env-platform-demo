@@ -686,6 +686,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .fds{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
 .fds i{font-style:normal;font-size:11.5px;border-radius:10px;padding:1px 8px;background:#f1f3f2}
 .fds i.cat-Red{background:#fde8e8;color:#a3221b}.fds i.cat-Orange{background:#fdf0e1;color:#9a5a0f}.fds i.cat-Green{background:#e6f4ea;color:#1d6b40}
+
+.plan2{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:16px;align-items:start}
+.plan2side{position:sticky;top:12px}
+@media(max-width:1150px){.plan2{grid-template-columns:1fr}.plan2side{position:static}}
+.ptcard{position:relative}
+#wPop{display:none;position:absolute;top:58px;right:16px;width:380px;max-width:calc(100% - 32px);z-index:30;background:rgba(255,255,255,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(20,60,40,.14);border-radius:14px;box-shadow:0 12px 34px rgba(16,40,28,.18);padding:14px 16px}
+#wPop.on{display:block}
+#wPop .weights label{grid-template-columns:150px 1fr 30px}
+.rkd{display:inline-block;margin-left:5px;font-size:11px;font-weight:700}.rkd.up{color:#1d6b40}.rkd.dn{color:#b42318}
+#ptable td:nth-child(7){width:44px;text-align:center}
 </style>
 <style>
 :root{
@@ -1226,29 +1236,30 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <section class="view" id="v-plan">
       <h1>Inspection planner</h1>
       <p class="sub">Every unit gets a risk score from live and historical data. Inspect the riskiest first instead of following a fixed rotation.</p>
-      <div class="grid g-6040">
-        <div class="card">
+      <div class="plan2">
+        <div class="card ptcard">
           <div class="card-h"><h2>Risk-ranked units</h2>
-            <div class="flt"><select id="pRO"></select><select id="pCat"><option value="">All categories</option><option>Red</option><option>Orange</option><option>Green</option></select><select id="pSch"><option value="">All inspection status</option><option value="over">Overdue as per schedule</option><option value="due">Due in 30 days</option></select></div>
+            <div class="flt"><select id="pRO"></select><select id="pCat"><option value="">All categories</option><option>Red</option><option>Orange</option><option>Green</option></select><select id="pSch"><option value="">All inspection status</option><option value="over">Overdue as per schedule</option><option value="due">Due in 30 days</option></select><button class="btn sm" id="wBtn" title="Change how the score is weighted"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:5px"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Weights</button></div>
+          </div>
+          <div id="wPop" role="dialog" aria-label="Score weights">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><b style="font-size:14.5px">Score weights</b><button class="btn sm" id="wReset">Reset</button></div>
+            <div class="small muted" style="margin-bottom:8px">The ranking behind this panel updates as you move a slider. Arrows show how far each unit moved.</div>
+            <div class="weights" id="weights"></div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px"><button class="btn sm" id="wCancel">Cancel</button><button class="btn sm primary" id="wOk">OK</button></div>
           </div>
           <div class="legend" style="margin-bottom:8px" id="compLegend"></div>
           <div class="ptwrap"><table id="ptable"></table></div>
           <div class="src">Inputs: consent register · OCEMS feed (last 7 days) · complaints where the unit is a possible source (upwind or in the direction pointed, with sector or OCEMS match) · inspection and violation history</div>
         </div>
-        <div>
+        <div class="plan2side">
           <div class="card">
-            <div class="card-h"><h2>Score breakdown</h2><button class="btn sm" id="wReset">Reset</button></div>
-            <div class="small muted" style="margin-bottom:6px">Drag to reorder weights</div>
-            <div class="weights" id="weights"></div>
-          </div>
-          <div class="card mt" id="schCard"><div class="card-h"><h2>Inspection schedule compliance</h2><span class="hint">as per RSPCB order, 24.08.2023</span></div><div id="schBody"></div></div>
-          <div class="card mt">
             <div class="card-h"><h2>This week's plan</h2><span class="hint" id="planCount"></span></div>
             <div class="flt" style="margin-bottom:10px"><span class="small">Pick top</span><select id="topN"><option>10</option><option selected>20</option><option>30</option></select><button class="btn sm" id="autoPick">Select</button><button class="btn sm" id="clearPick">Clear</button></div>
             <div class="callout" id="coverage"></div>
             <div id="planByRO" class="mt small"></div>
             <div class="btn-row mt"><button class="btn primary" id="genOrders">Generate inspection orders</button></div>
           </div>
+          <div class="card mt" id="schCard"><div class="card-h"><h2>Inspection schedule compliance</h2><span class="hint">as per RSPCB order, 24.08.2023</span></div><div id="schBody"></div></div>
         </div>
       </div>
     </section>
@@ -1891,6 +1902,10 @@ function initPlan(){
   $('#weights').innerHTML=COMPS.map(c=>`<label><span>${c.label}</span><input type="range" min="0" max="40" value="${W[c.k]}" data-w="${c.k}"><b id="wv-${c.k}"></b></label>`).join('');showW();
   $$('#weights input').forEach(i=>i.addEventListener('input',()=>{W[i.dataset.w]=+i.value;showW();rescore();renderPlanTable();renderCoverage()}));
   $('#wReset').addEventListener('click',()=>{COMPS.forEach(c=>{W[c.k]=c.w;$(`#weights input[data-w=${c.k}]`).value=c.w;});showW();rescore();renderPlanTable();renderCoverage()});
+  $('#wBtn').addEventListener('click',e=>{e.stopPropagation();if(W_OPEN)return wClose(true);W_SAVE={...W};RANK0={};curList().forEach((f,i)=>RANK0[f.id]=i);W_OPEN=true;$('#wPop').classList.add('on');renderPlanTable()});
+  $('#wOk').addEventListener('click',()=>wClose(true));
+  $('#wCancel').addEventListener('click',()=>{Object.assign(W,W_SAVE);COMPS.forEach(c=>$(`#weights input[data-w=${c.k}]`).value=W[c.k]);showW();rescore();wClose(false);renderCoverage()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&W_OPEN)wClose(true)});
   $('#pRO').addEventListener('change',()=>{renderPlanTable();renderSched()});$('#pCat').addEventListener('change',renderPlanTable);$('#pSch').addEventListener('change',()=>{renderPlanTable();renderSched()});
   $('#autoPick').addEventListener('click',()=>autoPick(+$('#topN').value));
   $('#clearPick').addEventListener('click',()=>{PICK.clear();renderPlanTable();renderCoverage()});
@@ -1910,9 +1925,11 @@ function schToggle(){const s=$('#pSch');const on=s.value!=='over';s.value=on?'ov
   const t=$('#ptable');if(t)t.closest('.card').scrollIntoView({behavior:'smooth',block:'start'});
   toast(on?`Showing ${curList().length} units past their required inspection date`:'Showing all units')}
 function renderPlan(){if(ROLE!=='HQ')$('#pRO').value=ROLE;renderPlanTable();renderCoverage();renderSched()}
+let W_OPEN=false,W_SAVE={},RANK0={};
+function wClose(keep){W_OPEN=false;$('#wPop').classList.remove('on');renderPlanTable();if(keep)toast('Ranking updated with the new weights')}
 function renderPlanTable(){
   const L=curList();
-  $('#ptable').innerHTML=`<thead><tr><th></th><th>#</th><th>Unit</th><th>RO</th><th>Category</th><th>Inspection schedule</th><th>Why it is high</th><th class="num">Score</th></tr></thead><tbody>${L.map((f,i)=>`<tr><td><input type="checkbox" data-pk="${f.id}" ${PICK.has(f.id)?'checked':''}></td><td class="muted">${i+1}</td><td><a href="#" data-go="fac" data-id="${f.id}" style="font-weight:600;text-decoration:none">${f.id}</a><div class="small muted">${f.sector}</div></td><td class="small">${f.ro}</td><td>${catChip(f.cat)}</td><td>${schedChip(f)}</td><td>${f.reasons.slice(0,3).map(r=>`<span class="reason">${r}</span>`).join('')||'<span class="small muted">No current issues</span>'}</td><td class="num sc-cell"><span class="score">${f.score}</span>${sbar(f)}</td></tr>`).join('')}</tbody>`;
+  $('#ptable').innerHTML=`<thead><tr><th></th><th>#</th><th>Unit</th><th>RO</th><th>Category</th><th>Inspection schedule</th><th title="Why the score is high">Why</th><th class="num">Score</th></tr></thead><tbody>${L.map((f,i)=>`<tr><td><input type="checkbox" data-pk="${f.id}" ${PICK.has(f.id)?'checked':''}></td><td class="muted" style="white-space:nowrap">${i+1}${W_OPEN&&RANK0[f.id]!=null&&RANK0[f.id]!==i?`<span class="rkd ${RANK0[f.id]>i?'up':'dn'}">${RANK0[f.id]>i?'▲':'▼'}${Math.abs(RANK0[f.id]-i)}</span>`:''}</td><td><a href="#" data-go="fac" data-id="${f.id}" style="font-weight:600;text-decoration:none">${f.id}</a><div class="small muted">${f.sector}</div></td><td class="small">${f.ro}</td><td>${catChip(f.cat)}</td><td>${schedChip(f)}</td><td>${f.reasons.length?`<span class="qi" tabindex="0" data-tip="${esc(f.reasons.join(' · '))}">i</span>`:'<span class="small muted">—</span>'}</td><td class="num sc-cell"><span class="score">${f.score}</span>${sbar(f)}</td></tr>`).join('')}</tbody>`;
   $$('#ptable input[data-pk]').forEach(cb=>cb.addEventListener('change',()=>{cb.checked?PICK.add(cb.dataset.pk):PICK.delete(cb.dataset.pk);renderCoverage()}));
 }
 function renderCoverage(){
