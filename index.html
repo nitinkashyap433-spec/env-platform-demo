@@ -998,7 +998,7 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
 <div id="roHead" style="display:none">
                     <div class="rofresh"><span>MIS-2 synced 5:00 pm · OCEMS live</span><span id="roLabDate">Lab results up to 9 Nov</span></div>
                     <button type="button" class="rohbtn" id="roLangBtn">हिंदी</button>
-                    <button type="button" class="rohbtn" id="roExportBtn">Export today's note sheet (PDF)</button>
+                    <button type="button" class="rohbtn" id="roExportBtn" title="Export today's note sheet (PDF)">Export note sheet (PDF)</button>
                     <div class="rouser"><div class="user-avatar">RO</div><div><b>Regional Officer</b><span id="roHeadOffice"></span></div></div>
                 </div>
                 <div class="time-display">
@@ -3433,7 +3433,7 @@ const EIP_SECTIONS={
   grievance:[['Overview','__own__',''],['Analysis: register &amp; clusters','platform.html?embed=1#griev','new']],
   knowledge:[['Rules & regulations assistant','Regulatory_Assistant.html?embed=1','new']]
 };
-const VIEW2TAB={home:['home',0],eodb:['eodb',0],stack:['stack',0],vs:['vs',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],cam:['cam',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
+const VIEW2TAB={knowledge:['knowledge',0],programme:['programme',0],air:['air',0],eodb:['eodb',0],stack:['stack',0],vs:['vs',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],cam:['cam',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
 function eipBuild(){
   // Grievance section is accidentally nested inside the Knowledge section (unclosed tags); move it back
   {const mc=document.querySelector('.main-content');document.querySelectorAll('.tab-content').forEach(t=>{if(t.parentElement!==mc)mc.appendChild(t)})}
@@ -3457,6 +3457,7 @@ function eipShow(sec,i,hash,load=true){
 }
 window.addEventListener('message',e=>{const d=e.data;if(d&&d.eipH){document.querySelectorAll('iframe.eip-frame').forEach(f=>{if(f.contentWindow===e.source)f.style.height=d.eipH+'px'});return}
   if(!d||!d.eip)return;const m=VIEW2TAB[d.view];if(!m)return;
+  if(['knowledge','programme','air'].includes(d.view)){switchTab(d.view);window.scrollTo(0,0);return}
   const o=d.opts||{};let arg='';if((d.view==='fac'||d.view==='cam')&&o.id)arg=':'+o.id;if(d.view==='map'){if(o.zone)arg=':'+o.zone;else if(o.llStr)arg=':'+o.llStr}if(d.view==='river'&&o.river)arg=':'+o.river;if(d.view==='ngt'&&o.case)arg=':'+o.case;if(d.view==='lab'&&o.id)arg=':'+o.id;if(d.view==='water'&&o.cetp)arg=':'+o.cetp;
   if(d.view==='waste'&&window.WH){switchTab('wastehub');WH.open('bmw','tr','waste:bmw');window.scrollTo(0,0);return}
   switchTab(m[0]);eipShow(m[0],m[1],d.view+arg);window.scrollTo(0,0);});
@@ -3584,13 +3585,16 @@ const q=()=>{if(!raf)raf=requestAnimationFrame(fit)};addEventListener('scroll',q
 #eip-crumb .sib{margin-left:0}
 @media(max-width:900px){#eip-crumb .atab>button span{display:none}#eip-crumb .atab>button{padding:8px 11px}#eip-crumb .dd{left:auto;right:0}}
 @media(hover:none){#eip-crumb .atab:hover .dd{display:none}}
-#roHead{align-items:center;gap:12px;flex-wrap:wrap}
-#roHead .rofresh{display:flex;flex-direction:column;font-size:12.5px;color:#d7eadf;text-align:right;line-height:1.35}
-#roHead .rohbtn{font:inherit;font-size:13.5px;font-weight:600;min-height:40px;padding:0 14px;border-radius:10px;background:transparent;color:#fff;border:1px solid #8fbfa3;cursor:pointer}
+#roHead{align-items:center;gap:10px;flex-wrap:nowrap}
+body.ro-mode .navbar .container-fluid,body.ro-mode .navbar>div{flex-wrap:nowrap!important}
+body.ro-mode .navbar .header-controls{flex-wrap:nowrap!important;gap:10px}
+#roHead .rofresh{display:flex;flex-direction:column;font-size:11.5px;white-space:nowrap;color:#d7eadf;text-align:right;line-height:1.35}
+#roHead .rohbtn{font:inherit;font-size:13px;font-weight:600;min-height:36px;padding:0 12px;white-space:nowrap;border-radius:10px;background:transparent;color:#fff;border:1px solid #8fbfa3;cursor:pointer}
 #roHead .rohbtn:hover{background:rgba(255,255,255,.1)}
-#roHead .rouser{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.12);border-radius:12px;padding:6px 12px}
+#roHead .rouser{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border-radius:12px;padding:5px 12px 5px 6px;white-space:nowrap}
+#roHead .rouser .user-avatar{width:30px;height:30px;font-size:12px}
 #roHead .rouser b{display:block;font-size:13.5px;color:#fff}#roHead .rouser span{display:block;font-size:12px;color:#d7eadf}
-@media(max-width:900px){#roHead .rofresh{display:none}#roHead #roExportBtn{font-size:12px;padding:0 10px}}
+@media(max-width:1250px){#roHead .rofresh{display:none}}@media(max-width:900px){#roHead #roExportBtn{font-size:12px;padding:0 10px}}
 #eip-crumb .rosel{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:#5d6b63}
 #eip-crumb .rosel select{border:1px solid #cfe0d5;background:#fff;border-radius:9px;padding:6px 10px;font-size:13.5px;color:#1c2a23;font-weight:600}
 </style>
@@ -3612,7 +3616,7 @@ function render(){const cur=document.querySelector('.tab-content.active');const 
     <div class="dd">${ms.map(x=>`<button data-to="${x[0]}" class="${x[0]===t?'cur':''}">${NAME(x[0])}</button>`).join('')}</div></div>`}).join('')}</div>${roSel()}</div>`+
    (sib.length>1?`<div class="sib">${sib.map(x=>`<button data-to="${x[0]}" class="${x[0]===t?'on':''}">${NAME(x[0])}</button>`).join('')}</div>`:'')}
 let EIP_HOMEMODE='state';
-function roHeadSync(){const on=(window.EIP_TAB||'home')==='home'&&EIP_HOMEMODE==='ro'&&roGet()!=='HQ';const h=document.getElementById('roHead');if(!h)return;h.style.display=on?'flex':'none';
+function roHeadSync(){const on=(window.EIP_TAB||'home')==='home'&&EIP_HOMEMODE==='ro'&&roGet()!=='HQ';const h=document.getElementById('roHead');if(!h)return;h.style.display=on?'flex':'none';document.body.classList.toggle('ro-mode',on);const ar=document.getElementById('eip-areas');if(ar)ar.style.display=on?'none':'';
   document.querySelectorAll('.navbar .time-display,.navbar .header-controls>.user-profile').forEach(e=>e.style.display=on?'none':'');
   const o=document.getElementById('roHeadOffice');if(o)o.textContent=roGet();const lb=document.getElementById('roLangBtn');if(lb){let l='en';try{l=localStorage.getItem('eipRoLang')||'en'}catch(e){}lb.textContent=l==='hi'?'English':'हिंदी'}
   const ld=document.getElementById('roLabDate');if(ld){const d=new Date();d.setDate(d.getDate()-3);ld.textContent='Lab results up to '+d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}}
