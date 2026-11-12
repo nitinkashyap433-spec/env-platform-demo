@@ -3578,6 +3578,8 @@ const q=()=>{if(!raf)raf=requestAnimationFrame(fit)};addEventListener('scroll',q
 #eip-crumb .sib{margin-left:0}
 @media(max-width:900px){#eip-crumb .atab>button span{display:none}#eip-crumb .atab>button{padding:8px 11px}#eip-crumb .dd{left:auto;right:0}}
 @media(hover:none){#eip-crumb .atab:hover .dd{display:none}}
+#eip-crumb .rosel{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:#5d6b63}
+#eip-crumb .rosel select{border:1px solid #cfe0d5;background:#fff;border-radius:9px;padding:6px 10px;font-size:13.5px;color:#1c2a23;font-weight:600}
 </style>
 <script>
 (function(){
@@ -3593,8 +3595,14 @@ function render(){const cur=document.querySelector('.tab-content.active');const 
   const AR=window.EIP_AREAS||[];const mods=ar=>[...new Map(ar.m.filter(x=>x[0]).map(x=>[x[0],x])).values()];
   bar.innerHTML=`<div class="r1"><button class="bk" data-home><i class="fas fa-arrow-left"></i>Command centre</button>
    <div class="areas" role="tablist">${AR.map(ar=>{const ms=mods(ar);return `<div class="atab ${ar===a?'on':''}"><button data-to="${ms[0]?ms[0][0]:''}" role="tab" aria-selected="${ar===a}" title="${ar.t}"><i class="fas ${ar.ic}"></i><span>${ar.t}</span></button>
-    <div class="dd">${ms.map(x=>`<button data-to="${x[0]}" class="${x[0]===t?'cur':''}">${NAME(x[0])}</button>`).join('')}</div></div>`}).join('')}</div></div>`+
+    <div class="dd">${ms.map(x=>`<button data-to="${x[0]}" class="${x[0]===t?'cur':''}">${NAME(x[0])}</button>`).join('')}</div></div>`}).join('')}</div>${roSel()}</div>`+
    (sib.length>1?`<div class="sib">${sib.map(x=>`<button data-to="${x[0]}" class="${x[0]===t?'on':''}">${NAME(x[0])}</button>`).join('')}</div>`:'')}
+const EIP_ROS=['Ajmer','Alwar','Balotra','Bhilwara','Bhiwadi','Bikaner','Chittorgarh','Jaipur','Jodhpur','Kota','Pali','Udaipur'];
+const roGet=()=>{try{return localStorage.getItem('eipRO')||'HQ'}catch(e){return 'HQ'}};
+const roSel=()=>`<label class="rosel"><span>Viewing</span><select data-ro>${['HQ',...EIP_ROS].map(r=>`<option value="${r}" ${roGet()===r?'selected':''}>${r==='HQ'?'All regional offices (State)':'Regional Office: '+r}</option>`).join('')}</select></label>`;
+function roSet(r,from){try{localStorage.setItem('eipRO',r)}catch(e){}document.querySelectorAll('iframe.eip-frame').forEach(f=>{if(f.contentWindow&&f.contentWindow!==from)try{f.contentWindow.postMessage({eipRole:r},'*')}catch(e){}});const sl=bar.querySelector('[data-ro]');if(sl)sl.value=r}
+bar.addEventListener('change',e=>{if(e.target.matches('[data-ro]'))roSet(e.target.value,null)});
+window.addEventListener('message',e=>{if(e.data&&e.data.eipRole)roSet(e.data.eipRole,e.source)});
 function go(t){const l=document.querySelector('.nav-link[data-tab="'+t+'"]');if(l)l.click();window.scrollTo(0,0)}
 bar.addEventListener('click',e=>{if(e.target.closest('[data-home]'))return go('home');const b=e.target.closest('[data-to]');if(b&&b.dataset.to){document.activeElement&&document.activeElement.blur();go(b.dataset.to)}});
 const mo=new MutationObserver(ms=>{if(ms.some(m=>m.target.classList&&m.target.classList.contains('tab-content')))render()});mo.observe(mc,{subtree:true,attributes:true,attributeFilter:['class']});render();
