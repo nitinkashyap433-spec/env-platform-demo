@@ -995,6 +995,12 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
             </a>
             <div class="header-controls ms-auto">
                 <button class="a11y-open" title="Accessibility options" aria-label="Accessibility options"><i class="fa-solid fa-universal-access"></i></button>
+<div id="roHead" style="display:none">
+                    <div class="rofresh"><span>MIS-2 synced 5:00 pm · OCEMS live</span><span id="roLabDate">Lab results up to 9 Nov</span></div>
+                    <button type="button" class="rohbtn" id="roLangBtn">हिंदी</button>
+                    <button type="button" class="rohbtn" id="roExportBtn">Export today's note sheet (PDF)</button>
+                    <div class="rouser"><div class="user-avatar">RO</div><div><b>Regional Officer</b><span id="roHeadOffice"></span></div></div>
+                </div>
                 <div class="time-display">
                     <span id="current-time">Loading...</span>
                 </div>
@@ -3578,6 +3584,13 @@ const q=()=>{if(!raf)raf=requestAnimationFrame(fit)};addEventListener('scroll',q
 #eip-crumb .sib{margin-left:0}
 @media(max-width:900px){#eip-crumb .atab>button span{display:none}#eip-crumb .atab>button{padding:8px 11px}#eip-crumb .dd{left:auto;right:0}}
 @media(hover:none){#eip-crumb .atab:hover .dd{display:none}}
+#roHead{align-items:center;gap:12px;flex-wrap:wrap}
+#roHead .rofresh{display:flex;flex-direction:column;font-size:12.5px;color:#d7eadf;text-align:right;line-height:1.35}
+#roHead .rohbtn{font:inherit;font-size:13.5px;font-weight:600;min-height:40px;padding:0 14px;border-radius:10px;background:transparent;color:#fff;border:1px solid #8fbfa3;cursor:pointer}
+#roHead .rohbtn:hover{background:rgba(255,255,255,.1)}
+#roHead .rouser{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.12);border-radius:12px;padding:6px 12px}
+#roHead .rouser b{display:block;font-size:13.5px;color:#fff}#roHead .rouser span{display:block;font-size:12px;color:#d7eadf}
+@media(max-width:900px){#roHead .rofresh{display:none}#roHead #roExportBtn{font-size:12px;padding:0 10px}}
 #eip-crumb .rosel{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:#5d6b63}
 #eip-crumb .rosel select{border:1px solid #cfe0d5;background:#fff;border-radius:9px;padding:6px 10px;font-size:13.5px;color:#1c2a23;font-weight:600}
 </style>
@@ -3589,6 +3602,7 @@ const NAME=t=>{const l=document.querySelector('.nav-link[data-tab="'+t+'"] span'
 function areaOf(t){return (window.EIP_AREAS||[]).find(a=>a.m.some(x=>x[0]===t))}
 let last=null;
 function render(){const cur=document.querySelector('.tab-content.active');const t=cur?cur.id:'home';if(t===last)return;last=t;
+  window.EIP_TAB=t;roHeadSync();
   if(t==='home'){bar.className='';bar.innerHTML='';return}
   const a=areaOf(t);const sib=a?[...new Map(a.m.filter(x=>x[0]).map(x=>[x[0],x])).values()]:[];
   bar.className='on';
@@ -3597,10 +3611,19 @@ function render(){const cur=document.querySelector('.tab-content.active');const 
    <div class="areas" role="tablist">${AR.map(ar=>{const ms=mods(ar);return `<div class="atab ${ar===a?'on':''}"><button data-to="${ms[0]?ms[0][0]:''}" role="tab" aria-selected="${ar===a}" title="${ar.t}"><i class="fas ${ar.ic}"></i><span>${ar.t}</span></button>
     <div class="dd">${ms.map(x=>`<button data-to="${x[0]}" class="${x[0]===t?'cur':''}">${NAME(x[0])}</button>`).join('')}</div></div>`}).join('')}</div>${roSel()}</div>`+
    (sib.length>1?`<div class="sib">${sib.map(x=>`<button data-to="${x[0]}" class="${x[0]===t?'on':''}">${NAME(x[0])}</button>`).join('')}</div>`:'')}
+let EIP_HOMEMODE='state';
+function roHeadSync(){const on=(window.EIP_TAB||'home')==='home'&&EIP_HOMEMODE==='ro'&&roGet()!=='HQ';const h=document.getElementById('roHead');if(!h)return;h.style.display=on?'flex':'none';
+  document.querySelectorAll('.navbar .time-display,.navbar .header-controls>.user-profile').forEach(e=>e.style.display=on?'none':'');
+  const o=document.getElementById('roHeadOffice');if(o)o.textContent=roGet();const lb=document.getElementById('roLangBtn');if(lb){let l='en';try{l=localStorage.getItem('eipRoLang')||'en'}catch(e){}lb.textContent=l==='hi'?'English':'हिंदी'}
+  const ld=document.getElementById('roLabDate');if(ld){const d=new Date();d.setDate(d.getDate()-3);ld.textContent='Lab results up to '+d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}}
+const homeFrame=()=>[...document.querySelectorAll('iframe.eip-frame')].find(f=>/#home/.test(f.getAttribute('src')||f.src||''));
+document.getElementById('roLangBtn').addEventListener('click',()=>{let l='en';try{l=localStorage.getItem('eipRoLang')||'en'}catch(e){}const n=l==='hi'?'en':'hi';try{localStorage.setItem('eipRoLang',n)}catch(e){}const f=homeFrame();if(f)f.contentWindow.postMessage({roLang:n},'*');roHeadSync()});
+document.getElementById('roExportBtn').addEventListener('click',()=>{const f=homeFrame();if(f)f.contentWindow.postMessage({roExport:1},'*')});
+window.addEventListener('message',e=>{if(e.data&&e.data.eipHomeMode){EIP_HOMEMODE=e.data.eipHomeMode;roHeadSync()}});
 const EIP_ROS=['Ajmer','Alwar','Balotra','Bhilwara','Bhiwadi','Bikaner','Chittorgarh','Jaipur','Jodhpur','Kota','Pali','Udaipur'];
 const roGet=()=>{try{return localStorage.getItem('eipRO')||'HQ'}catch(e){return 'HQ'}};
 const roSel=()=>`<label class="rosel"><span>Viewing</span><select data-ro>${['HQ',...EIP_ROS].map(r=>`<option value="${r}" ${roGet()===r?'selected':''}>${r==='HQ'?'All regional offices (State)':'Regional Office: '+r}</option>`).join('')}</select></label>`;
-function roSet(r,from){try{localStorage.setItem('eipRO',r)}catch(e){}document.querySelectorAll('iframe.eip-frame').forEach(f=>{if(f.contentWindow&&f.contentWindow!==from)try{f.contentWindow.postMessage({eipRole:r},'*')}catch(e){}});const sl=bar.querySelector('[data-ro]');if(sl)sl.value=r}
+function roSet(r,from){try{localStorage.setItem('eipRO',r)}catch(e){}setTimeout(roHeadSync,0);document.querySelectorAll('iframe.eip-frame').forEach(f=>{if(f.contentWindow&&f.contentWindow!==from)try{f.contentWindow.postMessage({eipRole:r},'*')}catch(e){}});const sl=bar.querySelector('[data-ro]');if(sl)sl.value=r}
 bar.addEventListener('change',e=>{if(e.target.matches('[data-ro]'))roSet(e.target.value,null)});
 window.addEventListener('message',e=>{if(e.data&&e.data.eipRole)roSet(e.data.eipRole,e.source)});
 function go(t){const l=document.querySelector('.nav-link[data-tab="'+t+'"]');if(l)l.click();window.scrollTo(0,0)}
