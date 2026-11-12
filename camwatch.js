@@ -18,7 +18,7 @@
     mismatch: { label: 'Visible plume, OCEMS reads low', desc: 'A plume is visible above the stack while OCEMS reports low particulate levels.', icon: '≠', x: 1 },
     nodata: { label: 'Plume visible, OCEMS offline', desc: 'The plant appears to be running while OCEMS is sending no data.', icon: '∅', x: 1 },
   };
-  const CHECKS = [['covered', 'Lens view'], ['frozen', 'Live picture'], ['moved', 'Camera position'], ['flame', 'Flame or flaring'], ['mismatch', 'Camera vs OCEMS']];
+  const CHECKS = [['covered', 'Lens view'], ['frozen', 'Live picture'], ['moved', 'Camera position'], ['flame', 'Flame or flaring', 1], ['mismatch', 'Camera vs OCEMS', 1]];
   const LIM = 50; // illustrative PM limit, mg/Nm3
   const DEF = { hold: 5, detAbs: 2.5, detRel: 0.3, dark: 16, frozen: 0.12, moved: 0.75, flame: 0.0015, clear: 3, cooldown: 20, xStd: 5, xSat: 0.3, xGain: 1.5, xPlume: 25, xHold: 10, xLow: 0.6, xRef: 18 };
   const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v } catch (e) { return d } };
@@ -144,12 +144,13 @@
   /* ---------- controller (one live camera at a time) ---------- */
   const C = { el: null, unit: null, stream: null, peer: null, call: null, src: null, timer: null, osd: null, inc: [], st: {}, ref: null, prev: null, lastVT: -1, lastVTat: 0, learnT: 0, metrics: {}, email: null };
 
-  function build(unit) {
+  function build(unit, adv) {
+    C.adv = !!adv;
     injectCss();
     const el = document.createElement('div');
     el.className = 'card mt cw';
     el.innerHTML = `
-    <div class="card-h"><h2>Stack camera · live</h2><span class="hint">Stack 1 · final outlet · not recorded</span></div>
+    <div class="card-h"><h2>${adv ? 'Stack camera · flame and plume pilot' : 'Stack camera · live'}</h2><span class="hint">Stack 1 · final outlet · not recorded</span></div>
     <div class="cw-grid">
       <div>
         <div class="cw-vwrap">
@@ -183,7 +184,7 @@
       </div>
       <div class="cw-side">
         <h3>Automatic checks</h3>
-        <div class="cw-checks">${CHECKS.map(([k, l]) => `<div class="cw-chk" data-k="${k}"><i></i><span>${l}</span><small>Waiting for feed</small></div>`).join('')}</div>
+        <div class="cw-checks">${CHECKS.filter(c => adv || !c[2]).map(([k, l]) => `<div class="cw-chk" data-k="${k}"><i></i><span>${l}</span><small>Waiting for feed</small></div>`).join('')}</div>
         <h3 style="margin-top:14px">Alerts <span class="cw-mailst"></span></h3>
         <div class="cw-inc"><div class="cw-note" style="margin:0">No alerts yet · raised after ${T.hold} s</div></div>
         <div class="cw-note">Alerts go to the RO by email with a snapshot.</div>
@@ -320,7 +321,7 @@
   }
 
   function start(stream, label) {
-    C.stream = stream; C.src = label; xReset(); q('.cw-x').hidden = false;
+    C.stream = stream; C.src = label; xReset(); q('.cw-x').hidden = !C.adv;
     const v = q('video'); v.srcObject = stream; v.play().catch(() => {});
     q('.cw-vwrap').classList.add('on'); q('.cw-stop').disabled = false; q('.cw-reset').disabled = false;
     q('.cw-src').textContent = 'Source: ' + label;
@@ -396,17 +397,17 @@
       } else {
         let md = 0; if (C.ref.z.length === m.z.length) { for (let i = 0; i < m.z.length; i++) md += Math.abs(m.z[i] - C.ref.z[i]); md /= m.z.length }
         m.view = md;
-        cond.flame = !cond.covered && (m.flame - C.ref.flame) > T.flame;
+        cond.flame = C.adv && !cond.covered && (m.flame - C.ref.flame) > T.flame;
         // a hand holding a lighter changes the view too, so flame takes priority over "moved"
         cond.moved = !cond.covered && !cond.flame && !(C.st.flame && C.st.flame.since) && md > T.moved;
       }
     } else if (!m && !lost) { cond.frozen = stalled }
     C.metrics = m || {};
     const healthy = m && !lost && !cond.covered && !cond.frozen && !cond.moved;
-    const pl = healthy ? plumeStats(v) : null;
-    xUpdate(pl, now, healthy);
-    cond.mismatch = healthy && C.xs !== 'off' && C.pE >= T.xPlume && C.oc != null && C.oc < T.xLow * LIM;
-    cond.nodata = healthy && C.xs === 'off' && C.pE >= T.xPlume;
+    const pl = healthy && C.adv ? plumeStats(v) : null;
+    if (C.adv) xUpdate(pl, now, healthy);
+    cond.mismatch = C.adv && healthy && C.xs !== 'off' && C.pE >= T.xPlume && C.oc != null && C.oc < T.xLow * LIM;
+    cond.nodata = C.adv && healthy && C.xs === 'off' && C.pE >= T.xPlume;
     for (const k of Object.keys(TYPES)) step(k, cond[k], now);
     render(now, learning);
     if (C.tuneOpen) tuneValues();
@@ -630,10 +631,11 @@
 
   /* ---------- public API ---------- */
   window.CamWatch = {
-    attach(slot, unit) {
+    attach(slot, unit, opts) {
       if (!slot) return;
-      if (C.el && C.unit && unit && C.unit.id !== unit.id) { stop(false); C.inc = []; C.el = null }
-      if (!C.el) build(unit);
+      const adv = !!(opts && opts.advanced);
+      if (C.el && ((C.unit && unit && C.unit.id !== unit.id) || C.adv !== adv)) { stop(false); C.inc = []; C.el = null }
+      if (!C.el) build(unit, adv);
       C.unit = unit;
       slot.appendChild(C.el);
       const v = q('video'); if (v && v.srcObject) v.play().catch(() => {});

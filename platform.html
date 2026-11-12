@@ -677,6 +677,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
     <!-- FACILITY 360 -->
     <section class="view" id="v-cam"><div id="camBody"></div></section>
+    <section class="view" id="v-camx"><div id="camxBody"></div></section>
     <section class="view" id="v-fac">
       <div id="facBody"></div>
     </section>
@@ -1000,7 +1001,7 @@ let CUR='home';
 const EMBED=window.parent!==window||new URLSearchParams(location.search).has('embed');
 document.body.classList.add('embed');
 let OWNER=null;
-function parseHash(){const h=decodeURIComponent(location.hash.slice(1));if(!h)return null;const [v,arg]=h.split(':');const o={};if(arg){if(v==='fac'||v==='cam')o.id=arg;else if(v==='map'){if(arg.includes(','))o.ll=arg.split(',').map(Number);else o.zone=arg}else if(v==='water')o.cetp=arg;else if(v==='river')o.river=arg;else if(v==='ngt')o.case=arg;else if(v==='lab')o.id=arg;else if(v==='waste'&&/^(bmw|msw)$/.test(arg))window.WASTE_PICK=arg}return{v,o}}
+function parseHash(){const h=decodeURIComponent(location.hash.slice(1));if(!h)return null;const [v,arg]=h.split(':');const o={};if(arg){if(v==='fac'||v==='cam'||v==='camx')o.id=arg;else if(v==='map'){if(arg.includes(','))o.ll=arg.split(',').map(Number);else o.zone=arg}else if(v==='water')o.cetp=arg;else if(v==='river')o.river=arg;else if(v==='ngt')o.case=arg;else if(v==='lab')o.id=arg;else if(v==='waste'&&/^(bmw|msw)$/.test(arg))window.WASTE_PICK=arg}return{v,o}}
 function go(v,opts){
   if(EMBED&&OWNER&&v!==OWNER){if(opts&&opts.ll)opts={...opts,llStr:opts.ll.join(',')};try{parent.postMessage({eip:1,view:v,opts:opts||{}},'*')}catch(e){}return}
   goLocal(v,opts);
@@ -1014,6 +1015,7 @@ function goLocal(v,opts){
   if(v==='home')setTimeout(()=>miniMap&&miniMap.invalidateSize(),60);
   if(v==='fac'){if(opts&&opts.id)renderFac(opts.id);else renderFacDir()}
   if(v==='cam'){renderCam(opts&&opts.id)}
+  if(v==='camx'){renderCamX(opts&&opts.id)}
   if(v==='plan')renderPlan();
   if(v==='consent')renderConsent();
   if(v==='water')renderWater(opts&&opts.cetp);
@@ -1045,6 +1047,7 @@ function setRole(r,src){if(r!=='HQ'&&!ROS.includes(r))r='HQ';if(r===ROLE)return;
 function rerenderRole(){try{renderHome()}catch(_){}
   const v=CUR;if(v==='fac'){if(FACV==='prof'&&inRole((FAC.find(f=>f.id===curFac)||{}).ro))renderFac(curFac);else{FD.sec=null;renderFacDir()}}
   else if(v==='cam'){const f=FAC.find(x=>x.id===curCam);renderCam(f&&inRole(f.ro)?curCam:null)}
+  else if(v==='camx'){const f=FAC.find(x=>x.id===curCamX);renderCamX(f&&inRole(f.ro)?curCamX:null)}
   else if(v==='map'){if(window.bigMap){buildFacLayers();const cl=CLUSTERS.filter(c=>inRole(c.ro));if(ROLE!=='HQ'&&cl.length)bigMap.fitBounds(L.latLngBounds(cl.map(c=>c.c)).pad(.6),{maxZoom:10});else bigMap.setView([26.4,74.2],7)}}
   else{const R={air:renderAir,prog:renderProg,gw:renderGW,plan:renderPlan,consent:renderConsent,griev:renderGriev,ngt:()=>renderNGT(),eodb:renderEODB,lab:()=>renderLab(),stack:renderStack,vs:renderVS,water:()=>renderWater(),waste:renderWaste,river:renderRiverS};if(R[v])try{R[v]()}catch(e){console.warn(e)}}}
 window.addEventListener('message',e=>{const d=e.data;if(d&&d.eipRole)setRole(d.eipRole,'parent')});
@@ -2016,6 +2019,21 @@ function renderCam(id){
   <div class="grid g-6040 mt"><div class="card"><div class="card-h"><h2>Automatic data checks</h2></div>${checks(f)}</div>
    <div class="card"><div class="card-h"><h2>Camera alerts for this unit</h2></div>${al.length?al.slice(0,8).map(a=>`<div class="check"><span class="ic bad">!</span><div><div class="ct">${esc(a.label)}</div><div class="cd">${new Date(a.at).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div></div></div>`).join(''):'<p class="small muted">No camera alerts recorded in this session.</p>'}</div></div>`;
  if(window.CamWatch)CamWatch.attach($('#camSlot'),{id:f.id,name:f.name,ro:f.ro});
+ const cs=$('#camSlot');if(cs){const n=document.createElement('p');n.className='small muted';n.style.margin='8px 2px 0';n.innerHTML=`These checks only confirm the camera is working and pointed at the stack. Flame and plume detection, and the camera vs OCEMS cross-check, are a later pilot under <a href="#" onclick="go('camx',{id:'${f.id}'});return false">Environmental risk &amp; prediction</a>.`;cs.appendChild(n)}
+}
+/* ============ P4 PILOT: FLAME, SMOKE & CAMERA VS OCEMS ============ */
+let curCamX=null;
+function renderCamX(id){
+ const pool=FAC.filter(f=>f.ocems&&inRole(f.ro)).sort((a,b)=>b.score-a.score);
+ if(!pool.length){$('#camxBody').innerHTML='<h1>Flame, smoke &amp; camera vs OCEMS</h1><p class="sub">No units with OCEMS in this regional office.</p>';return}
+ const f=pool.find(x=>x.id===id)||pool[0];curCamX=f.id;
+ $('#camxBody').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><h1>Flame, smoke &amp; camera vs OCEMS</h1>
+  <p class="sub" style="margin-bottom:0">A later pilot. Reads the stack camera picture itself and compares a visible plume with what OCEMS reports.</p></div>
+  <label class="small muted">Unit for the demo <select class="btn" style="margin-left:6px" onchange="renderCamX(this.value)">${pool.slice(0,40).map(x=>`<option value="${x.id}"${x.id===f.id?' selected':''}>${esc(x.name)} · ${x.ro}</option>`).join('')}</select></label></div>
+  <div class="card mt" style="background:#f6f9f7"><div class="card-h"><h2>Why this is a later step</h2><span class="rstag" style="background:#eef1ef;color:#5d6b63">P4 · future</span></div>
+   <p class="small" style="margin:0;line-height:1.6">The camera tamper check (lens, live picture, position) works with today's feeds. Telling a flame or a dark plume apart reliably does not yet. It needs a model trained on real stack footage from Rajasthan units, cameras of steady quality, and testing across night, dust and rain. Until then this page shows the idea only. OCEMS values here are illustrative.</p></div>
+  <div id="camxSlot"></div>`;
+ if(window.CamWatch)CamWatch.attach($('#camxSlot'),{id:f.id,name:f.name,ro:f.ro},{advanced:true});
 }
 
 /* ============ STACK DATA & RISK (real OCEMS daily data, names hidden by default) ============ */
