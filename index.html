@@ -1021,6 +1021,10 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
 <i class="fas fa-industry nav-icon"></i>
 <span>Industry 360</span>
 </a>
+<a role="button" tabindex="0" class="nav-link" data-tab="cam">
+<i class="fas fa-video nav-icon"></i>
+<span>Stack camera check</span>
+</a>
 <a role="button" tabindex="0" class="nav-link" data-tab="plan">
 <i class="fas fa-clipboard-check nav-icon"></i>
 <span>Inspection planner</span>
@@ -1156,6 +1160,7 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
                 <div id="river" class="tab-content"></div>
                 <div id="eodb" class="tab-content"></div>
                 <div id="stack" class="tab-content"></div>
+                <div id="cam" class="tab-content"></div>
                 <div id="vs" class="tab-content"></div>
                 <div id="ngt" class="tab-content"></div>
                 <div id="lab" class="tab-content"></div>
@@ -3407,6 +3412,7 @@ const EIP_SECTIONS={
   plan:[['Inspection planner','platform.html?embed=1#plan','new']],
   consent:[['Overview','Consent-Management.html',''],['Pipeline &amp; renewals','platform.html?embed=1#consent','new']],
   fac:[['Industry 360','platform.html?embed=1#fac','new']],
+  cam:[['Stack camera check','platform.html?embed=1#cam','new']],
   programme:[['Programme tracker','project-moniter.html','']],
   river:[['River monitor','platform.html?embed=1#river','new']],
   eodb:[['Ease of doing business','platform.html?embed=1#eodb','new']],
@@ -3421,7 +3427,7 @@ const EIP_SECTIONS={
   grievance:[['Overview','__own__',''],['Analysis: register &amp; clusters','platform.html?embed=1#griev','new']],
   knowledge:[['Rules & regulations assistant','Regulatory_Assistant.html?embed=1','new']]
 };
-const VIEW2TAB={home:['home',0],eodb:['eodb',0],stack:['stack',0],vs:['vs',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
+const VIEW2TAB={home:['home',0],eodb:['eodb',0],stack:['stack',0],vs:['vs',0],map:['map',0],plan:['plan',0],consent:['consent',1],fac:['fac',0],cam:['cam',0],water:['water',1],waste:['waste',1],griev:['grievance',1],river:['river',0],ngt:['ngt',0],lab:['lab',0]};
 function eipBuild(){
   // Grievance section is accidentally nested inside the Knowledge section (unclosed tags); move it back
   {const mc=document.querySelector('.main-content');document.querySelectorAll('.tab-content').forEach(t=>{if(t.parentElement!==mc)mc.appendChild(t)})}
@@ -3445,7 +3451,7 @@ function eipShow(sec,i,hash,load=true){
 }
 window.addEventListener('message',e=>{const d=e.data;if(d&&d.eipH){document.querySelectorAll('iframe.eip-frame').forEach(f=>{if(f.contentWindow===e.source)f.style.height=d.eipH+'px'});return}
   if(!d||!d.eip)return;const m=VIEW2TAB[d.view];if(!m)return;
-  const o=d.opts||{};let arg='';if(d.view==='fac'&&o.id)arg=':'+o.id;if(d.view==='map'){if(o.zone)arg=':'+o.zone;else if(o.llStr)arg=':'+o.llStr}if(d.view==='river'&&o.river)arg=':'+o.river;if(d.view==='ngt'&&o.case)arg=':'+o.case;if(d.view==='lab'&&o.id)arg=':'+o.id;if(d.view==='water'&&o.cetp)arg=':'+o.cetp;
+  const o=d.opts||{};let arg='';if((d.view==='fac'||d.view==='cam')&&o.id)arg=':'+o.id;if(d.view==='map'){if(o.zone)arg=':'+o.zone;else if(o.llStr)arg=':'+o.llStr}if(d.view==='river'&&o.river)arg=':'+o.river;if(d.view==='ngt'&&o.case)arg=':'+o.case;if(d.view==='lab'&&o.id)arg=':'+o.id;if(d.view==='water'&&o.cetp)arg=':'+o.cetp;
   if(d.view==='waste'&&window.WH){switchTab('wastehub');WH.open('bmw','tr','waste:bmw');window.scrollTo(0,0);return}
   switchTab(m[0]);eipShow(m[0],m[1],d.view+arg);window.scrollTo(0,0);});
 {const ft=document.querySelector('footer.pfoot');if(ft)document.body.appendChild(ft)}
@@ -3490,7 +3496,7 @@ const AREAS=[
   ['fac',1,'Industry 360','One file per unit spread across MIS-2 screens','One page per unit with consent, OCEMS, lab results, inspections and complaints'],
   ['plan',1,'Inspection planner','Inspections chosen from lists and memory','A ranked list of units to inspect, with the reason for each'],
   ['water',1,'OCEMS vs lab check','OCEMS readings and lab results are never compared','Automatic flags where the sensor and the lab disagree'],
-  ['fac',2,'Stack camera tamper check','Camera feeds are watched only when someone opens them','Alerts when a camera is blocked, frozen or moved'],
+  ['cam',2,'Stack camera tamper check','Camera feeds are watched only when someone opens them','Alerts when a camera is blocked, frozen or moved'],
   ['grievance',1,'Grievance management','Complaints closed one by one','Repeat complaints grouped by unit and area, with time to close']]},
  {ic:'fa-file-signature',t:'New applications &amp; EODB',q:'How quickly and predictably does an industry get its consent?',m:[
   ['consent',1,'Consent pipeline','Applications sit in MIS-2 with no view of delays','Deadline alerts, deemed-approval risk and renewal reminders'],
