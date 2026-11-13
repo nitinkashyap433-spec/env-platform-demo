@@ -108,6 +108,7 @@ export function mount(el) {
    <button class="btn primary pl-go">Start live reading</button></div></div>`;
   const q = s => el.querySelector(s);
   q('.pl-go').onclick = () => load();
+  try { if (sessionStorage.getItem('plAutoStart') === '1') { sessionStorage.removeItem('plAutoStart'); setTimeout(load, 300); } } catch (e) { }
 
   async function load() {
     const fi = Math.floor(Math.random() * FACTS.length);
@@ -123,22 +124,43 @@ export function mount(el) {
       let a = 0, b = 0; for (const [l, t] of Object.values(files)) { a += l; b += t; }
       if (b > 1e6) { q('.pl-ldr .bar i').style.width = (100 * a / b).toFixed(1) + '%'; q('.pl-ldr .mb').textContent = `${(a / 1e6).toFixed(0)} of ${(b / 1e6).toFixed(0)} MB`; q('.pl-ldr .s').textContent = 'Downloading the vision model'; }
     };
+    let stage = 'loading the reading tools';
     try {
       const T = await import(/* webpackIgnore: true */ TJS);
-      const gpu = !!navigator.gpu;
-      let model;
-      // graphics chip: 4-bit/16-bit model (about 115 MB). Processor: 8-bit model (about 139 MB), which runs faster there.
-      try { if (!gpu) throw 0; model = await T.CLIPSegForImageSegmentation.from_pretrained(MODEL, { dtype: 'q4f16', device: 'webgpu', progress_callback: prog }); S.dev = 'graphics chip'; }
-      catch (e) { model = await T.CLIPSegForImageSegmentation.from_pretrained(MODEL, { dtype: 'q8', device: 'wasm', progress_callback: prog }); S.dev = 'processor'; }
+      // Pick one path before downloading. Mixing two attempts in one page can leave the runtime broken.
+      let dev = 'wasm', dtype = 'q8', forced = false;
+      try { forced = localStorage.getItem('plForceWasm') === '1'; } catch (e) { }
+      if (!forced && navigator.gpu) {
+        try {
+          const ad = await navigator.gpu.requestAdapter();
+          if (ad) { dev = 'webgpu'; dtype = ad.features.has('shader-f16') ? 'q4f16' : 'q4'; }
+        } catch (e) { }
+      }
+      stage = 'downloading the model';
+      const model = await T.CLIPSegForImageSegmentation.from_pretrained(MODEL, { dtype, device: dev, progress_callback: prog });
+      S.dev = dev === 'webgpu' ? 'graphics chip' : 'processor';
       q('.pl-ldr .s').textContent = 'Preparing'; q('.pl-ldr .bar i').style.width = '100%';
+      stage = 'loading the text tools';
       const tok = await T.AutoTokenizer.from_pretrained(MODEL), proc = await T.AutoProcessor.from_pretrained(MODEL);
       S.T = T; S.model = model; S.proc = proc; S.text = tok([CFG.prompt], { padding: true, truncation: true });
+      stage = 'a first test reading';                           // catches a model that loads but cannot run
+      const probe = new T.RawImage(new Uint8ClampedArray(64 * 64 * 3).fill(180), 64, 64, 3);
+      const out = await model({ ...S.text, ...(await proc(probe)) }); out.logits.dispose?.();
       clearInterval(rot); ui();
     } catch (e) {
-      clearInterval(rot); console.error(e);
+      clearInterval(rot); console.error('plume reader failed at', stage, e);
+      let forced = false; try { forced = localStorage.getItem('plForceWasm') === '1'; } catch (x) { }
       const er = q('.pl-ldr .err'); er.hidden = false;
-      er.innerHTML = `Couldn't load the vision model (${String(e.message || e).slice(0, 120)}). Check the internet connection. <button class="btn">Try again</button>`;
-      er.querySelector('button').onclick = load;
+      if (!forced && S.dev !== 'processor' && navigator.gpu) {
+        // the graphics chip path failed: restart the page cleanly on the processor path
+        try { localStorage.setItem('plForceWasm', '1'); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { }
+        er.textContent = "This computer's graphics chip could not run the model. Switching to the processor instead…";
+        setTimeout(() => location.reload(), 1500);
+        return;
+      }
+      const msg = typeof e === 'number' ? 'the model runtime stopped, code ' + e : String(e.message || e).slice(0, 120);
+      er.innerHTML = `Couldn't start the vision model while ${stage} (${msg}). <button class="btn">Try again</button>`;
+      er.querySelector('button').onclick = () => location.reload();
     }
   }
 
