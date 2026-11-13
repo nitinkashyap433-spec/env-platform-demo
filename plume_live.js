@@ -105,7 +105,7 @@ export function mount(el) {
   if (!document.getElementById('pl-css')) { const s = document.createElement('style'); s.id = 'pl-css'; s.textContent = CSS; document.head.appendChild(s); }
   const S = { model: null, running: false, box: null, hist: [], reads: 0, lastMs: 0, rate: 0, maskCv: null, maskA: 0, view: null, disp: { op: 0, area: 0 }, tgt: { op: 0, area: 0 }, last: null, stream: null };
   el.innerHTML = `<div class="card mt pl-card"><div class="card-h"><h2>Live reading</h2><span class="small muted pl-st">Runs on this computer. Nothing is uploaded.</span></div>
-   <div class="pl-body"><p class="small" style="margin:0 0 10px;line-height:1.6">Play a stack video, share a window, or point a camera at a stack. The page finds the plume and grades its darkness as the video plays. It needs a one-time download of about 115 to 140 MB. After that it opens quickly.</p>
+   <div class="pl-body"><p class="small" style="margin:0 0 10px;line-height:1.6">Play a stack video, share a window, or point a camera at a stack. The page finds the plume and grades its darkness as the video plays. It needs a one-time download of about 140 to 175 MB. After that it opens quickly.</p>
    <button class="btn primary pl-go">Start live reading</button></div></div>`;
   const q = s => el.querySelector(s);
   q('.pl-go').onclick = () => load();
@@ -128,14 +128,15 @@ export function mount(el) {
     let stage = 'loading the reading tools';
     try {
       const T = await import(/* webpackIgnore: true */ TJS);
+      try { T.env.backends.onnx.logLevel = 'error'; } catch (e) { }   // hide harmless size warnings
       if (self.crossOriginIsolated) T.env.backends.onnx.wasm.numThreads = Math.min(4, navigator.hardwareConcurrency || 2);
       // Pick one path before downloading. Mixing two attempts in one page can leave the runtime broken.
       let dev = 'wasm', dtype = 'q8', forced = false;
-      try { forced = localStorage.getItem('plForceWasm') === '1'; } catch (e) { }
+      try { forced = localStorage.getItem('plForceWasm2') === '1'; } catch (e) { }
       if (!forced && navigator.gpu) {
         try {
           const ad = await navigator.gpu.requestAdapter();
-          if (ad) { dev = 'webgpu'; dtype = ad.features.has('shader-f16') ? 'q4f16' : 'q4'; }
+          if (ad) { dev = 'webgpu'; dtype = 'q4'; }   // the 16-bit version (q4f16) crashes this runtime's graphics engine; 4-bit runs correctly
         } catch (e) { }
       }
       stage = 'downloading the model';
@@ -153,11 +154,11 @@ export function mount(el) {
       clearInterval(rot); ui();
     } catch (e) {
       clearInterval(rot); console.error('plume reader failed at', stage, e);
-      let forced = false; try { forced = localStorage.getItem('plForceWasm') === '1'; } catch (x) { }
+      let forced = false; try { forced = localStorage.getItem('plForceWasm2') === '1'; } catch (x) { }
       const er = q('.pl-ldr .err'); er.hidden = false;
       if (!forced && S.dev !== 'processor' && navigator.gpu) {
         // the graphics chip path failed: restart the page cleanly on the processor path
-        try { localStorage.setItem('plForceWasm', '1'); localStorage.setItem('plGpuErr', String(e && e.message || e).slice(0, 160)); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { }
+        try { localStorage.setItem('plForceWasm2', '1'); localStorage.setItem('plGpuErr', String(e && e.message || e).slice(0, 160)); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { }
         er.textContent = "This computer's graphics chip could not run the model. Switching to the processor instead…";
         setTimeout(() => location.reload(), 1500);
         return;
@@ -198,12 +199,12 @@ export function mount(el) {
     q('.pl-stop').onclick = stop;
     const sz = q('.pl-size'); sz.value = String(S.size);
     sz.onchange = () => { S.size = +sz.value; S.proc.image_processor.size = { height: S.size, width: S.size }; S.rate = 0; };
-    let forced = false; try { forced = localStorage.getItem('plForceWasm') === '1'; } catch (e) { }
+    let forced = false; try { forced = localStorage.getItem('plForceWasm2') === '1'; } catch (e) { }
     const g = q('.pl-gpu');
     if (forced && navigator.gpu) {
       g.hidden = false; let ge = ''; try { ge = localStorage.getItem('plGpuErr') || ''; } catch (e) { }
       if (ge) { const sp = document.createElement('div'); sp.className = 'small muted'; sp.style.cssText = 'width:100%;margin-top:4px;line-height:1.4'; sp.textContent = 'Graphics chip error last time: ' + ge; g.parentNode.appendChild(sp); }
-      g.onclick = e => { e.preventDefault(); try { localStorage.removeItem('plForceWasm'); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { } location.reload(); };
+      g.onclick = e => { e.preventDefault(); try { localStorage.removeItem('plForceWasm2'); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { } location.reload(); };
     }
     boxDrawing();
   }
