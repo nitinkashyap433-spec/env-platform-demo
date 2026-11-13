@@ -86,7 +86,7 @@ const CSS = `
 @media (max-width:900px){.pl-grid{grid-template-columns:1fr}}
 .pl-stage{position:relative;background:#0f1a14;border-radius:10px;overflow:hidden;min-height:220px;display:flex;align-items:center;justify-content:center}
 .pl-stage canvas{display:block;cursor:crosshair;touch-action:none;max-width:100%}
-.pl-stage .ph{color:#b9c9bf;font-size:13px;padding:30px 16px;text-align:center;line-height:1.6}
+.pl-stage .pl-ph{color:#b9c9bf;font-size:13px;padding:30px 16px;text-align:center;line-height:1.6}
 .pl-btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
 .pl-side{border:1px solid var(--line,#dfe7e2);border-radius:10px;padding:12px}
 .pl-type{display:inline-block;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px;background:#eef1ef;color:#3d4a42}
@@ -182,10 +182,10 @@ export function mount(el) {
   function ui() {
     const shades = ['#ffffff', '#d6d6d6', '#a8a8a8', '#7a7a7a', '#4a4a4a', '#1c1c1c'];
     q('.pl-body').innerHTML = `<div class="pl-grid"><div>
-      <div class="pl-stage"><div class="ph">Choose a source below. Then drag on the picture to draw a box around one stack, with open sky above it.</div><canvas hidden></canvas></div>
+      <div class="pl-stage"><div class="pl-ph">Choose a source below. Then drag on the picture to draw a box around one stack, with open sky above it.</div><canvas style="display:none"></canvas></div>
       <div class="pl-btns"><label class="btn">Play a video file<input type="file" accept="video/*" hidden class="pl-file"></label>
        <button class="btn pl-share">Share a window or tab</button><button class="btn pl-cam">This device's camera</button>
-       <button class="btn pl-pp" hidden>Pause</button><button class="btn pl-clr" hidden>Clear box</button><button class="btn pl-stop" hidden>Stop</button></div></div>
+       <button class="btn pl-pp" hidden>Pause</button><button class="btn pl-clr" hidden>Clear box</button><button class="btn pl-stop" hidden>Stop and reset</button></div></div>
      <div class="pl-side"><div class="small muted">Plume</div><div class="pl-type">Waiting</div>
       <div class="small muted" style="margin-top:12px">Ringelmann, dark smoke only</div>
       <div class="pl-rg">${shades.map(c => `<div style="background:${c};outline:1px solid var(--line,#dfe7e2)"></div>`).join('')}</div>
@@ -194,24 +194,17 @@ export function mount(el) {
       <div class="pl-ver"><span class="muted small">Last ${CFG.window} readings:</span> <b class="pl-vd">–</b></div>
       <canvas class="pl-chart"></canvas><div class="small muted" style="display:flex;gap:12px"><span><span style="color:#8a9a90">━</span> area</span><span><span style="color:#c0392b">━</span> opacity</span></div>
       <div class="pl-meta">–</div>
-      <div class="small" style="margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="muted">Detail</span>
-       <select class="btn pl-size" style="padding:3px 6px;font-size:12px"><option value="224">Fast</option><option value="288">Balanced</option><option value="352">Full (slowest)</option></select>
-       <a href="#" class="pl-gpu small" hidden>Try the graphics chip again</a></div></div></div>
+      <div class="small" style="margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><a href="#" class="pl-gpu small" hidden>Try the graphics chip again</a></div></div></div>
      <p class="small muted" style="margin:10px 0 0;line-height:1.55">Readings describe how the plume looks, not mg/Nm³. White plumes can be steam or dust. Frames that are too dark are skipped.</p>`;
     const video = document.createElement('video'); video.muted = true; video.playsInline = true; video.loop = true;
     video.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none'; q('.pl-stage').appendChild(video);
     S.video = video; S.cv = q('.pl-stage canvas'); S.ctx = S.cv.getContext('2d');
-    q('.pl-file').onchange = e => { const f = e.target.files[0]; if (!f) return; stopStream(); video.srcObject = null; video.src = URL.createObjectURL(f); start(); };
+    q('.pl-file').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; stopStream(); video.srcObject = null; video.src = URL.createObjectURL(f); start(); };
     q('.pl-share').onclick = async () => { try { const s = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }); useStream(s); } catch (e) { note('Screen sharing was cancelled or is not allowed here.'); } };
     q('.pl-cam').onclick = async () => { try { const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false }); useStream(s); } catch (e) { note('No camera available, or permission was refused.'); } };
     q('.pl-pp').onclick = () => { if (video.paused) video.play(); else video.pause(); };
     q('.pl-clr').onclick = () => { S.box = null; };
     q('.pl-stop').onclick = stop;
-    const sz = q('.pl-size'); sz.value = String(S.size);
-    if (S.dev === 'graphics chip') {   // larger sizes break the model on graphics chips, and can leave it unusable until a reload
-      [...sz.options].forEach(o => { if (o.value !== '224') { o.disabled = true; o.textContent += ' · processor only'; } });
-    }
-    sz.onchange = () => { S.size = +sz.value; S.proc.image_processor.size = { height: S.size, width: S.size }; S.rate = 0; };
     let forced = false; try { forced = localStorage.getItem('plForceWasm3') === '1'; } catch (e) { }
     const g = q('.pl-gpu');
     if (forced && navigator.gpu) {
@@ -224,18 +217,28 @@ export function mount(el) {
   function note(t) { q('.pl-meta').textContent = t; }
   function stopStream() { if (S.stream) { S.stream.getTracks().forEach(t => t.stop()); S.stream = null; } }
   function useStream(s) { stopStream(); S.stream = s; S.video.removeAttribute('src'); S.video.srcObject = s; s.getVideoTracks()[0].onended = stop; start(); }
+  function resetSide(label) {
+    S.hist = []; S.reads = 0; S.last = null; S.maskCv = null; S.prevMask = null; S.box = null; S.drag = null; S.rate = 0; S.fails = 0;
+    S.tgt = { op: 0, area: 0 }; S.disp = { op: 0, area: 0 };
+    q('.pl-type').textContent = label; q('.pl-type').style.cssText = '';
+    q('.pl-rg').querySelectorAll('div').forEach(d => d.classList.remove('on'));
+    q('.pl-op').textContent = '–'; q('.pl-ar').textContent = '–'; q('.pl-vd').textContent = '–'; q('.pl-meta').textContent = '–';
+    chart();
+  }
   function start() {
-    S.hist = []; S.reads = 0; S.last = null; S.maskCv = null; S.box = null;
+    S.gen = (S.gen || 0) + 1;             // any reading still in progress from an earlier source is discarded
+    resetSide('Reading the first frame…');
     S.video.play().catch(() => { });
-    q('.pl-stage .ph').hidden = true; S.cv.hidden = false;
+    q('.pl-stage .pl-ph').style.display = 'none'; S.cv.style.display = 'block';
     ['.pl-pp', '.pl-clr', '.pl-stop'].forEach(s => q(s).hidden = false);
-    q('.pl-type').textContent = 'Reading the first frame…'; q('.pl-type').style.cssText = '';
-    if (!S.running) { S.running = true; loop(); requestAnimationFrame(paint); }
+    S.running = true; loop(S.gen); requestAnimationFrame(() => paint(S.gen));
   }
   function stop() {
-    S.running = false; stopStream(); S.video.pause(); S.video.removeAttribute('src'); S.video.srcObject = null;
-    S.cv.hidden = true; q('.pl-stage .ph').hidden = false; ['.pl-pp', '.pl-clr', '.pl-stop'].forEach(s => q(s).hidden = true);
-    q('.pl-type').textContent = 'Waiting'; q('.pl-type').style.cssText = '';
+    S.gen = (S.gen || 0) + 1; S.running = false;
+    stopStream(); S.video.pause(); S.video.removeAttribute('src'); S.video.srcObject = null; S.video.load();
+    S.cv.style.display = 'none'; q('.pl-stage .pl-ph').style.display = '';
+    ['.pl-pp', '.pl-clr', '.pl-stop'].forEach(s => q(s).hidden = true);
+    resetSide('Waiting');
   }
   function boxDrawing() {
     let a = null;
@@ -250,9 +253,9 @@ export function mount(el) {
   }
 
   /* one reading at a time, as fast as the computer allows */
-  async function loop() {
+  async function loop(gen) {
     const wcv = document.createElement('canvas'), wctx = wcv.getContext('2d', { willReadFrequently: true });
-    while (S.running) {
+    while (S.running && gen === S.gen) {
       const v = S.video;
       if (v.readyState < 2 || v.paused || !v.videoWidth) { await new Promise(r => setTimeout(r, 200)); continue; }
       const t0 = performance.now();
@@ -297,6 +300,7 @@ export function mount(el) {
         }
       }
       S.fails = 0;
+      if (gen !== S.gen) return;          // source changed or stopped while this frame was being read
       reading = rules(lum, mask, w, h);
       const ms = performance.now() - t0;
       S.reads++; S.lastMs = ms; S.rate = S.rate ? 0.8 * S.rate + 0.2 * (1000 / ms) : 1000 / ms;
@@ -335,8 +339,8 @@ export function mount(el) {
   }
 
   /* drawing at screen rate, so the picture and numbers move smoothly between readings */
-  function paint() {
-    if (!S.running) return;
+  function paint(gen) {
+    if (!S.running || gen !== S.gen) return;
     const v = S.video, cv = S.cv, ctx = S.ctx;
     if (v.videoWidth) {
       const st = cv.parentNode, ar = v.videoWidth / v.videoHeight, mh = Math.max(220, window.innerHeight * 0.62);
@@ -363,7 +367,7 @@ export function mount(el) {
       q('.pl-ar').textContent = r && r.status === 'day' ? (100 * S.disp.area).toFixed(1) + '%' : '–';
       q('.pl-pp').textContent = v.paused ? 'Play' : 'Pause';
     }
-    requestAnimationFrame(paint);
+    requestAnimationFrame(() => paint(gen));
   }
   return { stop };
 }
