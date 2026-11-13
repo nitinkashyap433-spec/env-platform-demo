@@ -132,7 +132,7 @@ export function mount(el) {
       if (self.crossOriginIsolated) T.env.backends.onnx.wasm.numThreads = Math.min(4, navigator.hardwareConcurrency || 2);
       // Pick one path before downloading. Mixing two attempts in one page can leave the runtime broken.
       let dev = 'wasm', dtype = 'q8', forced = false;
-      try { forced = localStorage.getItem('plForceWasm2') === '1'; } catch (e) { }
+      try { forced = localStorage.getItem('plForceWasm3') === '1'; } catch (e) { }
       if (!forced && navigator.gpu) {
         try {
           const ad = await navigator.gpu.requestAdapter();
@@ -142,7 +142,7 @@ export function mount(el) {
       stage = 'downloading the model';
       const model = await T.CLIPSegForImageSegmentation.from_pretrained(MODEL, { dtype, device: dev, progress_callback: prog });
       S.dev = dev === 'webgpu' ? 'graphics chip' : 'processor';
-      S.size = dev === 'webgpu' ? 352 : 224;
+      S.size = 224;   // the model's own size: bigger pictures need a stretched position grid, which fails on some graphics chips
       q('.pl-ldr .s').textContent = 'Preparing'; q('.pl-ldr .bar i').style.width = '100%';
       stage = 'loading the text tools';
       const tok = await T.AutoTokenizer.from_pretrained(MODEL), proc = await T.AutoProcessor.from_pretrained(MODEL);
@@ -154,11 +154,11 @@ export function mount(el) {
       clearInterval(rot); ui();
     } catch (e) {
       clearInterval(rot); console.error('plume reader failed at', stage, e);
-      let forced = false; try { forced = localStorage.getItem('plForceWasm2') === '1'; } catch (x) { }
+      let forced = false; try { forced = localStorage.getItem('plForceWasm3') === '1'; } catch (x) { }
       const er = q('.pl-ldr .err'); er.hidden = false;
       if (!forced && S.dev !== 'processor' && navigator.gpu) {
         // the graphics chip path failed: restart the page cleanly on the processor path
-        try { localStorage.setItem('plForceWasm2', '1'); localStorage.setItem('plGpuErr', String(e && e.message || e).slice(0, 160)); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { }
+        try { localStorage.setItem('plForceWasm3', '1'); localStorage.setItem('plGpuErr', String(e && e.message || e).slice(0, 160)); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { }
         er.textContent = "This computer's graphics chip could not run the model. Switching to the processor instead…";
         setTimeout(() => location.reload(), 1500);
         return;
@@ -199,12 +199,12 @@ export function mount(el) {
     q('.pl-stop').onclick = stop;
     const sz = q('.pl-size'); sz.value = String(S.size);
     sz.onchange = () => { S.size = +sz.value; S.proc.image_processor.size = { height: S.size, width: S.size }; S.rate = 0; };
-    let forced = false; try { forced = localStorage.getItem('plForceWasm2') === '1'; } catch (e) { }
+    let forced = false; try { forced = localStorage.getItem('plForceWasm3') === '1'; } catch (e) { }
     const g = q('.pl-gpu');
     if (forced && navigator.gpu) {
       g.hidden = false; let ge = ''; try { ge = localStorage.getItem('plGpuErr') || ''; } catch (e) { }
       if (ge) { const sp = document.createElement('div'); sp.className = 'small muted'; sp.style.cssText = 'width:100%;margin-top:4px;line-height:1.4'; sp.textContent = 'Graphics chip error last time: ' + ge; g.parentNode.appendChild(sp); }
-      g.onclick = e => { e.preventDefault(); try { localStorage.removeItem('plForceWasm2'); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { } location.reload(); };
+      g.onclick = e => { e.preventDefault(); try { localStorage.removeItem('plForceWasm3'); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { } location.reload(); };
     }
     boxDrawing();
   }
@@ -267,7 +267,14 @@ export function mount(el) {
             }
           }
           L.dispose?.(); Object.values(inp).forEach(t => t.dispose?.());
-        } catch (e) { console.error(e); note('Reading failed: ' + String(e.message || e).slice(0, 80)); await new Promise(r => setTimeout(r, 1000)); continue; }
+        } catch (e) {
+          console.error(e);
+          if (S.size !== 224) {           // larger detail not supported here: go back to the size that works
+            S.size = 224; S.proc.image_processor.size = { height: 224, width: 224 }; const sz = q('.pl-size'); if (sz) sz.value = '224';
+            note("This computer's " + S.dev + " can't use higher detail. Back to Fast."); await new Promise(r => setTimeout(r, 1500)); continue;
+          }
+          note('Reading failed: ' + String(e.message || e).slice(0, 80)); await new Promise(r => setTimeout(r, 1000)); continue;
+        }
       }
       reading = rules(lum, mask, w, h);
       const ms = performance.now() - t0;
