@@ -8,6 +8,8 @@ const T_THREADS = () => Math.min(4, navigator.hardwareConcurrency || 2);
 export const CFG = { prompt: 'smoke', threshold: 0.4, minArea: 0.01, faint: 0.10, nightLevel: 60, work: 352, window: 20 };
 const TJS = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6/dist/transformers.min.js';
 const MODEL = 'Xenova/clipseg-rd64-refined';
+// model files come from our own storage (R2, through our relay); Hugging Face is the fallback
+const MODEL_HOSTS = [['https://rspcb-relay.pgpsm11023.workers.dev/models/', '{model}/'], ['https://huggingface.co/', '{model}/resolve/{revision}/']];
 const COLOURS = { 'dark smoke': [255, 40, 40], 'white plume': [40, 120, 255], mixed: [255, 170, 0], unclear: [255, 170, 0], 'faint plume': [150, 150, 150] };
 const FACTS = ["Rajasthan is India's largest state by area.", "The Thar is the world's most densely populated desert.", "The Aravallis are older than the Himalayas.", "Guru Shikhar is the Aravallis' highest peak.", "Sambhar is India's largest inland salt lake.", "The Chambal is home to most wild gharials.", "Keoladeo, Bharatpur, is a UNESCO bird sanctuary.", "Sariska was first to bring tigers back by relocation.", "The camel is Rajasthan's state animal.", "The godawan is Rajasthan's state bird.", "Khejri is Rajasthan's state tree.", "Jaipur was painted pink in 1876.", "Jaipur is a UNESCO World Heritage City.", "Jantar Mantar has the world's largest stone sundial.", "Kumbhalgarh has the world's second longest wall.", "People still live inside Jaisalmer Fort.", "The Taj Mahal's marble came from Makrana.", "Rajasthan leads India in solar power.", "Bhadla is among the world's largest solar parks.", "Rajasthan grows the most bajra in India.", "Rajasthan grows the most mustard in India.", "Mount Abu is Rajasthan's only hill station.", "Jodhpur is called the Sun City.", "Pushkar hosts one of the largest camel fairs.", "Noise counts as air pollution in Indian law."];
 
@@ -119,7 +121,9 @@ export function mount(el) {
     let k = fi + 1; const fe = q('.pl-ldr .f');
     const rot = setInterval(() => { fe.classList.add('fade'); setTimeout(() => { fe.innerHTML = '<b>Did you know?</b>' + FACTS[k++ % FACTS.length]; fe.classList.remove('fade'); }, 450); }, 3200);
     const files = {};
+    let gotOnnx = false;
     const prog = p => {
+      if (p.file && /\.onnx$/.test(p.file) && (p.status === 'done' || (p.status === 'progress' && p.loaded > 0))) gotOnnx = true;
       if (p.status === 'progress' && p.total) files[p.file] = [p.loaded, p.total];
       if (p.status === 'done' && files[p.file]) files[p.file][0] = files[p.file][1];
       let a = 0, b = 0; for (const [l, t] of Object.values(files)) { a += l; b += t; }
@@ -140,7 +144,13 @@ export function mount(el) {
         } catch (e) { }
       }
       stage = 'downloading the model';
-      const model = await T.CLIPSegForImageSegmentation.from_pretrained(MODEL, { dtype, device: dev, progress_callback: prog });
+      let model, lastErr;
+      for (const [host, tpl] of MODEL_HOSTS) {   // a failed download leaves the runtime untouched, so trying the next source is safe
+        T.env.remoteHost = host; T.env.remotePathTemplate = tpl;
+        try { model = await T.CLIPSegForImageSegmentation.from_pretrained(MODEL, { dtype, device: dev, progress_callback: prog }); S.src = host.includes('huggingface') ? 'Hugging Face' : 'our storage'; break; }
+        catch (e) { lastErr = e; if (gotOnnx) throw e; console.warn('model source failed, trying next:', host, e); }   // only switch source if the model file itself never arrived
+      }
+      if (!model) throw lastErr;
       S.dev = dev === 'webgpu' ? 'graphics chip' : 'processor';
       S.size = 224;   // the model's own size: bigger pictures need a stretched position grid, which fails on some graphics chips
       q('.pl-ldr .s').textContent = 'Preparing'; q('.pl-ldr .bar i').style.width = '100%';
@@ -198,6 +208,9 @@ export function mount(el) {
     q('.pl-clr').onclick = () => { S.box = null; };
     q('.pl-stop').onclick = stop;
     const sz = q('.pl-size'); sz.value = String(S.size);
+    if (S.dev === 'graphics chip') {   // larger sizes break the model on graphics chips, and can leave it unusable until a reload
+      [...sz.options].forEach(o => { if (o.value !== '224') { o.disabled = true; o.textContent += ' · processor only'; } });
+    }
     sz.onchange = () => { S.size = +sz.value; S.proc.image_processor.size = { height: S.size, width: S.size }; S.rate = 0; };
     let forced = false; try { forced = localStorage.getItem('plForceWasm3') === '1'; } catch (e) { }
     const g = q('.pl-gpu');
@@ -273,9 +286,17 @@ export function mount(el) {
             S.size = 224; S.proc.image_processor.size = { height: 224, width: 224 }; const sz = q('.pl-size'); if (sz) sz.value = '224';
             note("This computer's " + S.dev + " can't use higher detail. Back to Fast."); await new Promise(r => setTimeout(r, 1500)); continue;
           }
+          S.fails = (S.fails || 0) + 1;
+          if (S.fails >= 3) {               // the model is stuck: offer a clean restart
+            S.running = false;
+            q('.pl-meta').innerHTML = 'The vision model stopped responding. <a href="#" class="pl-rl">Reload to restart it</a>';
+            q('.pl-rl').onclick = ev => { ev.preventDefault(); try { sessionStorage.setItem('plAutoStart', '1'); } catch (x) { } location.reload(); };
+            return;
+          }
           note('Reading failed: ' + String(e.message || e).slice(0, 80)); await new Promise(r => setTimeout(r, 1000)); continue;
         }
       }
+      S.fails = 0;
       reading = rules(lum, mask, w, h);
       const ms = performance.now() - t0;
       S.reads++; S.lastMs = ms; S.rate = S.rate ? 0.8 * S.rate + 0.2 * (1000 / ms) : 1000 / ms;
