@@ -977,6 +977,10 @@ document.addEventListener('DOMContentLoaded',()=>{const sb=document.getElementBy
 <i class="fas fa-industry nav-icon"></i>
 <span>Stack data &amp; risk</span>
 </a>
+<a role="button" tabindex="0" class="nav-link" data-tab="camx">
+<i class="fas fa-fire nav-icon"></i>
+<span>Plume &amp; opacity pilot</span>
+</a>
 <a role="button" tabindex="0" class="nav-link" data-tab="river">
 <i class="fas fa-bridge-water nav-icon"></i>
 <span>River water quality</span>
@@ -1308,7 +1312,7 @@ const EIP_SECTIONS={
   consent:[['Pipeline &amp; renewals','platform.html?embed=1#consent','new']],
   fac:[['Industry 360','platform.html?embed=1#fac','new']],
   cam:[['Stack camera check','platform.html?embed=1#cam','new']],
-  camx:[['Flame &amp; plume pilot','platform.html?embed=1#camx','new']],
+  camx:[['Plume &amp; opacity pilot','platform.html?embed=1#camx','new']],
   programme:[['Programme tracker','platform.html?embed=1#prog','new']],
   groundwater:[['Groundwater','platform.html?embed=1#gw','new']],
   river:[['River monitor','platform.html?embed=1#river','new']],
@@ -1411,7 +1415,7 @@ const AREAS=[
   ['wastehub',3,'Waste management','ULB data arrives in monthly progress reports','One waste view by type and district, as reporting goes digital'],
   ['river',2,'River water quality','Monthly samples sit in lab registers and NWMP returns','Station trends, seasonal patterns and missed samples in one view'],
   [null,4,'Live river sensors','No continuous river data today','Sensors at a few critical stations, as a later option'],
-  ['camx',4,'Flame, smoke &amp; camera vs OCEMS','Not reliable with today\'s camera quality and no trained model','Concept pilot now; production once a model is trained on real stack feeds']]}];
+  ['camx',4,'Plume &amp; opacity reading','Smoke is judged by eye, only during visits','Finds the plume and grades its darkness on the Ringelmann scale; tested on sample footage']]}];
 window.EIP_AREAS=AREAS;
 function open(t){if(!t)return;const l=document.querySelector('.nav-link[data-tab="'+t+'"]');if(l)l.click();else if(window.switchTab)switchTab(t);window.scrollTo(0,0)}
 function build(){const home=document.getElementById('home');if(!home||document.getElementById('eip-areas'))return;

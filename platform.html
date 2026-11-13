@@ -2019,21 +2019,76 @@ function renderCam(id){
   <div class="grid g-6040 mt"><div class="card"><div class="card-h"><h2>Automatic data checks</h2></div>${checks(f)}</div>
    <div class="card"><div class="card-h"><h2>Camera alerts for this unit</h2></div>${al.length?al.slice(0,8).map(a=>`<div class="check"><span class="ic bad">!</span><div><div class="ct">${esc(a.label)}</div><div class="cd">${new Date(a.at).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div></div></div>`).join(''):'<p class="small muted">No camera alerts recorded in this session.</p>'}</div></div>`;
  if(window.CamWatch)CamWatch.attach($('#camSlot'),{id:f.id,name:f.name,ro:f.ro});
- const cs=$('#camSlot');if(cs){const n=document.createElement('p');n.className='small muted';n.style.margin='8px 2px 0';n.innerHTML=`These checks only confirm the camera is working and pointed at the stack. Flame and plume detection, and the camera vs OCEMS cross-check, are a later pilot under <a href="#" onclick="go('camx',{id:'${f.id}'});return false">Environmental risk &amp; prediction</a>.`;cs.appendChild(n)}
+ const cs=$('#camSlot');if(cs){const n=document.createElement('p');n.className='small muted';n.style.margin='8px 2px 0';n.innerHTML=`These checks only confirm the camera is working and pointed at the stack. Reading the plume itself, and how dark it is, is a later pilot under <a href="#" onclick="go('camx',{id:'${f.id}'});return false">Environmental risk &amp; prediction</a>.`;cs.appendChild(n)}
 }
-/* ============ P4 PILOT: FLAME, SMOKE & CAMERA VS OCEMS ============ */
+/* ============ P4 PILOT: PLUME AND OPACITY READING ============ */
 let curCamX=null;
-function renderCamX(id){
- const pool=FAC.filter(f=>f.ocems&&inRole(f.ro)).sort((a,b)=>b.score-a.score);
- if(!pool.length){$('#camxBody').innerHTML='<h1>Flame, smoke &amp; camera vs OCEMS</h1><p class="sub">No units with OCEMS in this regional office.</p>';return}
- const f=pool.find(x=>x.id===id)||pool[0];curCamX=f.id;
- $('#camxBody').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><div><h1>Flame, smoke &amp; camera vs OCEMS</h1>
-  <p class="sub" style="margin-bottom:0">A later pilot. Reads the stack camera picture itself and compares a visible plume with what OCEMS reports.</p></div>
-  <label class="small muted">Unit for the demo <select class="btn" style="margin-left:6px" onchange="renderCamX(this.value)">${pool.slice(0,40).map(x=>`<option value="${x.id}"${x.id===f.id?' selected':''}>${esc(x.name)} · ${x.ro}</option>`).join('')}</select></label></div>
-  <div class="card mt" style="background:#f6f9f7"><div class="card-h"><h2>Why this is a later step</h2><span class="rstag" style="background:#eef1ef;color:#5d6b63">P4 · future</span></div>
-   <p class="small" style="margin:0;line-height:1.6">The camera tamper check (lens, live picture, position) works with today's feeds. Telling a flame or a dark plume apart reliably does not yet. It needs a model trained on real stack footage from Rajasthan units, cameras of steady quality, and testing across night, dust and rain. Until then this page shows the idea only. OCEMS values here are illustrative.</p></div>
-  <div id="camxSlot"></div>`;
- if(window.CamWatch)CamWatch.attach($('#camxSlot'),{id:f.id,name:f.name,ro:f.ro},{advanced:true});
+const PX_TESTS=[
+ ['Steel plant, black plume, daylight','Dark smoke','Ringelmann 3 to 4','ok',''],
+ ['Power plant chimney, grey plume','Dark smoke','Ringelmann 1','ok','Steady reading across the clip'],
+ ['Steel works in rain, overcast sky','Dark smoke','Ringelmann 1','ok',''],
+ ['Cement plant from the air, white plumes','White plume','Darkness not graded','ok','Clouds left alone. Steam or dust, cannot tell'],
+ ['Chimney with a white plume','White plume','Darkness not graded','ok',''],
+ ['White plume, close up','White plume','Darkness not graded','ok',''],
+ ['Thin, barely visible smoke','Faint plume','Darkness not graded','ok','Faint once the verdict rule was fixed, worked out from the run\'s percentages'],
+ ['Chimney with nothing coming out, pale sky','No visible emission','1 stray reading in 33','ok','The one-in-five rule absorbed the stray reading'],
+ ['Wide view, small vent on a tank','No visible emission','Vent under 1% of the view','ok','Ignored by the size limit'],
+ ['Factory chimney at night','Too dark, skipped','Not assessed','ok','Night frames are not read'],
+ ['City chimney, camera zooming in and out','White or unclear','Plume found','part','The label changes as the zoom changes'],
+ ['Drone over green fields','White or unclear','Plume found','part','Fields behind the plume spoil the dark or white call'],
+ ['Cooling tower against cloud','White or unclear','Unstable','miss','Steam against cloud flips between labels'],
+ ['Edited video with several scenes','Faint plume','Mixed','na','Scenes change, so one verdict means little']];
+function renderCamX(){
+ curCamX=null;
+ const n=k=>PX_TESTS.filter(t=>t[3]===k).length;
+ const tag={ok:['Right','var(--g100)','var(--g700)'],part:['Partly','var(--amber-bg)','var(--amber)'],miss:['Wrong','var(--red-bg)','var(--red)'],na:['Not meaningful','var(--grey-bg)','var(--muted)']};
+ const shades=['#ffffff','#d6d6d6','#a8a8a8','#7a7a7a','#4a4a4a','#1c1c1c'];
+ const ring=shades.map((c,i)=>`<div style="flex:1;min-width:0;text-align:center"><div style="height:34px;border-radius:6px;background:${c};border:1px solid var(--line)"></div><div class="small" style="margin-top:4px;font-weight:600">${i}</div><div class="small muted">${i*20}%</div></div>`).join('');
+ const step=(k,t,d)=>`<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)"><div style="flex:0 0 26px;height:26px;border-radius:50%;background:var(--g100);color:var(--g700);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:13px">${k}</div><div><div style="font-weight:600">${t}</div><div class="small muted" style="line-height:1.55">${d}</div></div></div>`;
+ $('#camxBody').innerHTML=`<h1>Plume and opacity reading</h1>
+ <p class="sub">A later pilot. It finds a visible plume in a stack camera view and grades how dark it is on the Ringelmann scale, the same scale officers use when reading smoke by eye.</p>
+ <div class="card mt" style="background:#f6f9f7"><div class="card-h"><h2>Why this is a later step</h2><span class="rstag" style="background:#eef1ef;color:#5d6b63">P4 · future</span></div>
+  <p class="small" style="margin:0;line-height:1.6">Finding the plume already works on sample footage without any training. Telling steam from dust, reading plumes in front of fields or buildings, and working at night do not. It also has to be tested on Rajasthan stack cameras before anyone relies on it.</p></div>
+
+ <div class="card mt"><div class="card-h"><h2>What it reports for each reading</h2></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+   <div style="border:1px solid var(--line);border-radius:10px;padding:12px"><div class="small muted">Plume</div><div style="font-weight:600;margin:4px 0">Seen or not, and its size</div><div class="small muted">Share of the view it covers. Marks under 1% are ignored.</div></div>
+   <div style="border:1px solid var(--line);border-radius:10px;padding:12px"><div class="small muted">Type</div><div style="font-weight:600;margin:4px 0">Dark smoke · white plume · faint</div><div class="small muted">Compared with the sky just around the plume.</div></div>
+   <div style="border:1px solid var(--line);border-radius:10px;padding:12px"><div class="small muted">Darkness, dark smoke only</div><div style="font-weight:600;margin:4px 0">Opacity % and Ringelmann 0 to 5</div><div class="small muted">How much of the sky behind it the plume blocks.</div></div>
+  </div>
+  <div class="small muted" style="margin:14px 0 6px">Ringelmann scale and the matching opacity</div>
+  <div style="display:flex;gap:8px">${ring}</div></div>
+
+ <div class="card mt"><div class="card-h"><h2>How it reads one frame</h2></div>
+  ${step(1,'Skip frames that are too dark','If the upper half of the view is too dark, the frame is not read. This keeps night scenes and flares out.')}
+  ${step(2,'Find the plume','A general-purpose vision model marks the pixels that look like smoke. It was not trained on any stack footage. A box can be drawn around one stack so other stacks and clouds are left out.')}
+  ${step(3,'Dark, white or faint','The plume is compared with the background just around it. Mostly darker means dark smoke. Mostly brighter means a white plume, which could be steam or dust. Less than 10% different either way means faint.')}
+  ${step(4,'Grade the darkness','Opacity = 1 − plume brightness ÷ sky brightness. A plume half as bright as the sky scores 50%. Ringelmann = opacity × 5, rounded.')}
+  ${step(5,'One verdict per clip','A plume must show in at least one reading in five. The verdict then names the type seen most often. Single stray readings do not raise an alert.')}</div>
+
+ <div class="card mt"><div class="card-h"><h2>Tested so far</h2><span class="small muted">${PX_TESTS.length} sample clips</span></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+   <span class="rstag" style="background:var(--g100);color:var(--g700)">${n('ok')} right</span>
+   <span class="rstag" style="background:var(--amber-bg);color:var(--amber)">${n('part')} partly right</span>
+   <span class="rstag" style="background:var(--red-bg);color:var(--red)">${n('miss')} wrong</span>
+   <span class="rstag" style="background:var(--grey-bg);color:var(--muted)">${n('na')} not meaningful</span></div>
+  <div style="overflow-x:auto"><table class="dt" style="min-width:640px"><thead><tr><th>Scene</th><th>Verdict</th><th>Reading</th><th>Result</th><th>Note</th></tr></thead><tbody>
+   ${PX_TESTS.map(t=>`<tr><td>${t[0]}</td><td>${t[1]}</td><td>${t[2]}</td><td><span class="rstag" style="background:${tag[t[3]][1]};color:${tag[t[3]][2]}">${tag[t[3]][0]}</span></td><td class="small muted">${t[4]}</td></tr>`).join('')}
+  </tbody></table></div>
+  <p class="small muted" style="margin:10px 0 0;line-height:1.55">Short public sample clips, tested 13 Nov 2026. "Right" is judged by eye against the video, not against a measurement. Frames are not shown because the footage belongs to others. Only one clip had a clean stack, so a false-alarm rate cannot be quoted yet.</p></div>
+
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px" class="mt">
+  <div class="card" style="margin:0"><div class="card-h"><h2>Works today</h2></div><ul class="small" style="margin:0;padding-left:18px;line-height:1.8">
+   <li>Daylight, with a fixed camera</li><li>Open sky behind the stack exit</li><li>A plume big enough to cover 1% of the view</li><li>Rain and overcast skies, for finding the plume</li></ul></div>
+  <div class="card" style="margin:0"><div class="card-h"><h2>Not yet</h2></div><ul class="small" style="margin:0;padding-left:18px;line-height:1.8">
+   <li>Telling steam from dust. Both look white</li><li>Plumes in front of fields, buildings or cloud, or with the sun behind</li><li>Night, without a thermal camera</li><li>Haze, which lowers the darkness reading</li><li>Gases such as SO₂ and NOx, which a normal camera cannot see</li></ul></div></div>
+
+ <div class="card mt"><div class="card-h"><h2>Next steps</h2></div><ol class="small" style="margin:0;padding-left:18px;line-height:1.8">
+  <li>Our own footage: a generator stack with known run times, and a rooftop stack with open sky behind it.</li>
+  <li>Ten or more clips of stacks with nothing coming out, to measure how often it raises a false alarm.</li>
+  <li>Live reading of a camera or a shared screen, in the browser.</li>
+  <li>Testing on Rajasthan stack cameras, with a few hundred frames from each camera if needed.</li></ol>
+  <p class="small muted" style="margin:10px 0 0;line-height:1.55">Future scope: the reading describes how a plume looks, not mg/Nm³. Comparing it with OCEMS readings needs months of camera footage and sensor data from the same stack, so it is not shown here.</p></div>`;
 }
 
 /* ============ STACK DATA & RISK (real OCEMS daily data, names hidden by default) ============ */
