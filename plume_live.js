@@ -4,6 +4,7 @@
    too dark -> skip; marks under 1% -> no plume; compare plume with the background just around it;
    dark smoke gets opacity = 1 - plume/background and Ringelmann = opacity x 5. */
 
+const T_THREADS = () => Math.min(4, navigator.hardwareConcurrency || 2);
 export const CFG = { prompt: 'smoke', threshold: 0.4, minArea: 0.01, faint: 0.10, nightLevel: 60, work: 352, window: 20 };
 const TJS = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6/dist/transformers.min.js';
 const MODEL = 'Xenova/clipseg-rd64-refined';
@@ -127,6 +128,7 @@ export function mount(el) {
     let stage = 'loading the reading tools';
     try {
       const T = await import(/* webpackIgnore: true */ TJS);
+      if (self.crossOriginIsolated) T.env.backends.onnx.wasm.numThreads = Math.min(4, navigator.hardwareConcurrency || 2);
       // Pick one path before downloading. Mixing two attempts in one page can leave the runtime broken.
       let dev = 'wasm', dtype = 'q8', forced = false;
       try { forced = localStorage.getItem('plForceWasm') === '1'; } catch (e) { }
@@ -139,9 +141,11 @@ export function mount(el) {
       stage = 'downloading the model';
       const model = await T.CLIPSegForImageSegmentation.from_pretrained(MODEL, { dtype, device: dev, progress_callback: prog });
       S.dev = dev === 'webgpu' ? 'graphics chip' : 'processor';
+      S.size = dev === 'webgpu' ? 352 : 224;
       q('.pl-ldr .s').textContent = 'Preparing'; q('.pl-ldr .bar i').style.width = '100%';
       stage = 'loading the text tools';
       const tok = await T.AutoTokenizer.from_pretrained(MODEL), proc = await T.AutoProcessor.from_pretrained(MODEL);
+      proc.image_processor.size = { height: S.size, width: S.size };
       S.T = T; S.model = model; S.proc = proc; S.text = tok([CFG.prompt], { padding: true, truncation: true });
       stage = 'a first test reading';                           // catches a model that loads but cannot run
       const probe = new T.RawImage(new Uint8ClampedArray(64 * 64 * 3).fill(180), 64, 64, 3);
@@ -153,7 +157,7 @@ export function mount(el) {
       const er = q('.pl-ldr .err'); er.hidden = false;
       if (!forced && S.dev !== 'processor' && navigator.gpu) {
         // the graphics chip path failed: restart the page cleanly on the processor path
-        try { localStorage.setItem('plForceWasm', '1'); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { }
+        try { localStorage.setItem('plForceWasm', '1'); localStorage.setItem('plGpuErr', String(e && e.message || e).slice(0, 160)); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { }
         er.textContent = "This computer's graphics chip could not run the model. Switching to the processor instead…";
         setTimeout(() => location.reload(), 1500);
         return;
@@ -178,7 +182,10 @@ export function mount(el) {
       <div class="pl-num"><div><b class="pl-op">–</b><span>opacity</span></div><div><b class="pl-ar">–</b><span>plume area, share of view</span></div></div>
       <div class="pl-ver"><span class="muted small">Last ${CFG.window} readings:</span> <b class="pl-vd">–</b></div>
       <canvas class="pl-chart"></canvas><div class="small muted" style="display:flex;gap:12px"><span><span style="color:#8a9a90">━</span> area</span><span><span style="color:#c0392b">━</span> opacity</span></div>
-      <div class="pl-meta">–</div></div></div>
+      <div class="pl-meta">–</div>
+      <div class="small" style="margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="muted">Detail</span>
+       <select class="btn pl-size" style="padding:3px 6px;font-size:12px"><option value="224">Fast</option><option value="288">Balanced</option><option value="352">Full (slowest)</option></select>
+       <a href="#" class="pl-gpu small" hidden>Try the graphics chip again</a></div></div></div>
      <p class="small muted" style="margin:10px 0 0;line-height:1.55">Readings describe how the plume looks, not mg/Nm³. White plumes can be steam or dust. Frames that are too dark are skipped.</p>`;
     const video = document.createElement('video'); video.muted = true; video.playsInline = true; video.loop = true;
     video.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none'; q('.pl-stage').appendChild(video);
@@ -189,6 +196,15 @@ export function mount(el) {
     q('.pl-pp').onclick = () => { if (video.paused) video.play(); else video.pause(); };
     q('.pl-clr').onclick = () => { S.box = null; };
     q('.pl-stop').onclick = stop;
+    const sz = q('.pl-size'); sz.value = String(S.size);
+    sz.onchange = () => { S.size = +sz.value; S.proc.image_processor.size = { height: S.size, width: S.size }; S.rate = 0; };
+    let forced = false; try { forced = localStorage.getItem('plForceWasm') === '1'; } catch (e) { }
+    const g = q('.pl-gpu');
+    if (forced && navigator.gpu) {
+      g.hidden = false; let ge = ''; try { ge = localStorage.getItem('plGpuErr') || ''; } catch (e) { }
+      if (ge) { const sp = document.createElement('div'); sp.className = 'small muted'; sp.style.cssText = 'width:100%;margin-top:4px;line-height:1.4'; sp.textContent = 'Graphics chip error last time: ' + ge; g.parentNode.appendChild(sp); }
+      g.onclick = e => { e.preventDefault(); try { localStorage.removeItem('plForceWasm'); sessionStorage.setItem('plAutoStart', '1'); } catch (x) { } location.reload(); };
+    }
     boxDrawing();
   }
   function note(t) { q('.pl-meta').textContent = t; }
@@ -277,7 +293,7 @@ export function mount(el) {
     tp.textContent = lbl; tp.style.background = c ? `rgba(${c},.16)` : '#eef1ef'; tp.style.color = c ? `rgb(${c.map(x => Math.round(x * 0.7))})` : '#3d4a42';
     q('.pl-rg').querySelectorAll('div').forEach((d, i) => d.classList.toggle('on', r.plume === 'dark smoke' && i === r.ringelmann));
     q('.pl-vd').textContent = verdict(S.hist.slice(-CFG.window));
-    q('.pl-meta').textContent = `Reading ${S.reads} · ${S.rate.toFixed(1)} per second · ${Math.round(S.lastMs)} ms each · on this computer's ${S.dev}`;
+    q('.pl-meta').textContent = `Reading ${S.reads} · ${S.rate.toFixed(1)} per second · ${Math.round(S.lastMs)} ms each · on this computer's ${S.dev}${self.crossOriginIsolated ? ', ' + T_THREADS() + ' cores' : ''}`;
     chart();
   }
   function chart() {
