@@ -2049,6 +2049,7 @@ function renderCamX(){
  <p class="sub">A later pilot. It finds a visible plume in a stack camera view and grades how dark it is on the Ringelmann scale, the same scale officers use when reading smoke by eye.</p>
  <div class="card mt" style="background:#f6f9f7"><div class="card-h"><h2>Why this is a later step</h2><span class="rstag" style="background:#eef1ef;color:#5d6b63">P4 · future</span></div>
   <p class="small" style="margin:0;line-height:1.6">Finding the plume already works on sample footage without any training. Telling steam from dust, reading plumes in front of fields or buildings, and working at night do not. It also has to be tested on Rajasthan stack cameras before anyone relies on it.</p></div>
+ <div id="plLive"></div>
 
  <div class="card mt"><div class="card-h"><h2>What it reports for each reading</h2></div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
@@ -2089,6 +2090,8 @@ function renderCamX(){
   <li>Live reading of a camera or a shared screen, in the browser.</li>
   <li>Testing on Rajasthan stack cameras, with a few hundred frames from each camera if needed.</li></ol>
   <p class="small muted" style="margin:10px 0 0;line-height:1.55">Future scope: the reading describes how a plume looks, not mg/Nm³. Comparing it with OCEMS readings needs months of camera footage and sensor data from the same stack, so it is not shown here.</p></div>`;
+ try{window.__plLive&&window.__plLive.stop()}catch(e){}
+ import('./plume_live.js').then(m=>{window.__plLive=m.mount(document.getElementById('plLive'))}).catch(e=>{document.getElementById('plLive').innerHTML='<p class="small muted mt">Live reading could not be loaded here.</p>'});
 }
 
 /* ============ STACK DATA & RISK (real OCEMS daily data, names hidden by default) ============ */
